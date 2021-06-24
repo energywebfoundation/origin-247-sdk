@@ -30,6 +30,15 @@
         "allowWarningsInSuccessfulBuild": true
     },
     {
+        "commandKind": "bulk",
+        "name": "test:e2e",
+        "summary": "Run e2e tests",
+        "safeForSimultaneousRushProcesses": true,
+        "enableParallelism": true,
+        "ignoreMissingScript": true,
+        "allowWarningsInSuccessfulBuild": true
+    },
+    {
       "name": "prettier",
       "commandKind": "global",
       "summary": "Used by the pre-commit Git hook. This command invokes Prettier to reformat staged changes.",

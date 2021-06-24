@@ -1,0 +1,61 @@
+{
+    "name": "@energyweb/origin-247-certificate",
+    "version": "0.0.1",
+    "main": "./dist/js/src/index.js",
+    "types": "./dist/js/src/index.d.ts",
+    "scripts": {
+        "test:unit": "jest ",
+        "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8545 && yarn drop && yarn migrate && jest --testRegex '.e2e-spec.ts$'\"",
+        "build": "tsc -b tsconfig.json",
+        "migrate": "yarn typeorm:run:issuer",
+        "drop": "yarn typeorm:drop && yarn typeorm:drop:issuer",
+        "typeorm:drop:issuer": "node_modules/typeorm/cli.js schema:drop --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",
+        "typeorm:drop": "yarn typeorm:drop:issuer",
+        "typeorm:run:issuer": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",
+        "run:ganache": "ganache-cli -q -m 'govern long helmet alert stay supply kick knife boss until buzz unlock' -l 8000000 -e 1000000 -a 20"
+    },
+    "dependencies": {
+        "@energyweb/issuer": "3.2.1-alpha.1623138698.0",
+        "@energyweb/issuer-api": "0.2.1-alpha.1623138698.0",
+        "@nestjs/bull": "0.3.1",
+        "@nestjs/common": "7.6.18",
+        "@nestjs/core": "7.6.18",
+        "bull": "3.22.9",
+        "@nestjs/cqrs": "7.0.1",
+        "@energyweb/origin-backend-utils": "1.5.2-alpha.1623138698.0",
+        "@energyweb/utils-general": "11.0.3-alpha.1623138698.0",
+        "ethers": "5.3.0",
+        "@nestjs/typeorm": "7.1.5",
+        "typeorm": "0.2.34",
+        "pg": "8.6.0",
+        "passport": "0.4.1"
+    },
+    "devDependencies": {
+        "typescript": "4.3.4",
+        "jest": "27.0.5",
+        "@types/jest": "26.0.23",
+        "@types/node": "15.12.4",
+        "ts-jest": "27.0.3",
+        "@types/bull": "3.15.1",
+        "@nestjs/testing": "7.6.18",
+        "concurrently": "6.2.0",
+        "wait-on": "5.3.0",
+        "ganache-cli": "6.12.2",
+        "@nestjs/platform-express": "7.6.18",
+        "@nestjs/passport": "7.1.5"
+    },
+    "jest": {
+        "moduleFileExtensions": [
+            "js",
+            "json",
+            "ts"
+        ],
+        "rootDir": ".",
+        "transform": {
+            "^.+\\.(t|j)s$": "ts-jest"
+        },
+        "coverageDirectory": "../coverage",
+        "testEnvironment": "node",
+        "forceExit": true
+    }
+}
