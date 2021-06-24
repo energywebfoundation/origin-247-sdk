@@ -63,3 +63,9 @@ common/deploy/
 common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
+
+# JetBrains Idea
+.idea
+
+# VSCode configuration
+.vscode
