@@ -6,7 +6,7 @@ import { CertificateService } from '../src';
 jest.setTimeout(30 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
-const transactionTime = () => new Promise((resolve) => setTimeout(resolve, 5000));
+const transactionTime = () => new Promise((resolve) => setTimeout(resolve, 10000));
 
 describe('Certificate service', () => {
     let app: INestApplication;
