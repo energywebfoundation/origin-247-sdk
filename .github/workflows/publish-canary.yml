@@ -1,0 +1,46 @@
+name: Publish canary
+
+on:
+    # workflow_dispatch:
+    #     inputs:
+    #         package:
+    #             description: 'Package name'
+    #             required: true
+    pull_request:
+        branches:
+            - '*'
+
+jobs:
+    publish-canary:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  fetch-depth: 0
+
+            - uses: actions/setup-node@v2-beta
+              with:
+                  node-version: '14'
+
+            - name: 'Generate unique id'
+              id: generate_unique_id
+              uses: ./.github/actions/build_id
+
+            - name: Check dependency versions
+              run: node common/scripts/install-run-rush.js check
+
+            - name: Install application
+              run: |
+                  node common/scripts/install-run-rush.js update
+
+            - name: Build application
+              run: node common/scripts/install-run-rush.js rebuild --verbose
+
+            - name: Login NPM
+              run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+
+            - name: Release canary
+              run: node common/scripts/install-run-rush.js publish:canary --to origin-247-certificate
+              env:
+                  BUILD_ID: ${{steps.generate_unique_id.outputs.unique_id}}
+                  NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

@@ -12,13 +12,31 @@ Despite typical 24/7 SDK requirements and setup, you will need
 
 ## Installation
 
-For NestJS Bull please consult: https://docs.nestjs.com/techniques/queues and setup `BullModule.forRoot`. The rest is done by `origin-247-certificate`.
-
-Also for migrations, please add entry to your `package.json` scripts section:
+1. For NestJS Bull please consult: https://docs.nestjs.com/techniques/queues and setup `BullModule.forRoot`.
+2. For migrations, please add entry to your `package.json` scripts section:
 
 `"typeorm:run:issuer": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",`
 
 Which allows to run migration required by the module.
+
+3. Add TypeORM entities:
+
+```ts
+import { entities as IssuerEntities } from '@energyweb/issuer-api';
+
+const [Certificate] = IssuerEntities;
+
+[...]
+
+TypeOrmModule.forRoot({
+  ...
+  entities: [
+    ...,
+    Certificate,
+  ],
+  ...
+});
+```
 
 ## Usage
 

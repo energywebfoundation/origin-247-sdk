@@ -47,6 +47,15 @@
 
       // This will invoke common/autoinstallers/rush-prettier/node_modules/.bin/pretty-quick
       "shellCommand": "pretty-quick --staged"
+    },
+    {
+      "commandKind": "bulk",
+      "name": "publish:canary",
+      "summary": "Publishes canary build",
+      "safeForSimultaneousRushProcesses": false,
+      "enableParallelism": false,
+      "ignoreMissingScript": false,
+      "allowWarningsInSuccessfulBuild": true
     }
     // {
     //   /**
