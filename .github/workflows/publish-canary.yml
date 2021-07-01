@@ -1,14 +1,11 @@
 name: Publish canary
 
 on:
-    # workflow_dispatch:
-    #     inputs:
-    #         package:
-    #             description: 'Package name'
-    #             required: true
-    pull_request:
-        branches:
-            - '*'
+    workflow_dispatch:
+        inputs:
+            package:
+                description: 'Package name to publish'
+                required: true
 
 jobs:
     publish-canary:

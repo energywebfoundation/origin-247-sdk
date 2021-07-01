@@ -24,7 +24,7 @@ Which allows to run migration required by the module.
 ```ts
 import { entities as IssuerEntities } from '@energyweb/issuer-api';
 
-const [Certificate] = IssuerEntities;
+const [Certificate, , BlockchainProperties] = IssuerEntities;
 
 [...]
 
@@ -33,6 +33,7 @@ TypeOrmModule.forRoot({
   entities: [
     ...,
     Certificate,
+    BlockchainProperties,
   ],
   ...
 });
