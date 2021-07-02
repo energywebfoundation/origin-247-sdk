@@ -30,6 +30,15 @@
         "allowWarningsInSuccessfulBuild": true
     },
     {
+        "commandKind": "bulk",
+        "name": "test:e2e",
+        "summary": "Run e2e tests",
+        "safeForSimultaneousRushProcesses": true,
+        "enableParallelism": true,
+        "ignoreMissingScript": true,
+        "allowWarningsInSuccessfulBuild": true
+    },
+    {
       "name": "prettier",
       "commandKind": "global",
       "summary": "Used by the pre-commit Git hook. This command invokes Prettier to reformat staged changes.",
@@ -38,6 +47,15 @@
 
       // This will invoke common/autoinstallers/rush-prettier/node_modules/.bin/pretty-quick
       "shellCommand": "pretty-quick --staged"
+    },
+    {
+      "commandKind": "bulk",
+      "name": "publish:canary",
+      "summary": "Publishes canary build",
+      "safeForSimultaneousRushProcesses": false,
+      "enableParallelism": false,
+      "ignoreMissingScript": false,
+      "allowWarningsInSuccessfulBuild": true
     }
     // {
     //   /**

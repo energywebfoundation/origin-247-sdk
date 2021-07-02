@@ -69,3 +69,5 @@ common/autoinstallers/*/.npmrc
 
 # VSCode configuration
 .vscode
+
+dist
