@@ -1,1 +1,1 @@
-export const transferModule = true;
+export * from './transfer.module';
