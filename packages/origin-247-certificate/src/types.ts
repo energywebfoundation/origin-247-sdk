@@ -89,3 +89,5 @@ export type BlockchainAction =
     | IAction<BlockchainActionType.Issuance, IIssueCommand<any>>
     | IAction<BlockchainActionType.Transfer, ITransferCommand>
     | IAction<BlockchainActionType.Claim, IClaimCommand>;
+
+export const CERTIFICATE_SERVICE_TOKEN = Symbol.for('CERTIFICATE_SERVICE_TOKEN');

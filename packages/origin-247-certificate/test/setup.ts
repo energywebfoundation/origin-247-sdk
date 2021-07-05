@@ -6,7 +6,7 @@ import { BullModule } from '@nestjs/bull';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { CertificateModule, CertificateService } from '../src';
+import { CertificateModule, CertificateService, CERTIFICATE_SERVICE_TOKEN } from '../src';
 import { entities as IssuerEntities } from '@energyweb/issuer-api';
 import { PassportModule } from '@nestjs/passport';
 
@@ -71,7 +71,7 @@ export const bootstrapTestInstance: any = async () => {
 
     const app = moduleFixture.createNestApplication();
 
-    const certificateService = await app.resolve<CertificateService>(CertificateService);
+    const certificateService = await app.resolve<CertificateService>(CERTIFICATE_SERVICE_TOKEN);
     const databaseService = await app.resolve<DatabaseService>(DatabaseService);
     const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(
         BlockchainPropertiesService

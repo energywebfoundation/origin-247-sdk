@@ -55,7 +55,7 @@ export class SomeModule {}
 Use the service:
 
 ```ts
-import { CertificateService } from '@energyweb/origin-247-certificate';
+import { CertificateService, CERTIFICATE_SERVICE_TOKEN } from '@energyweb/origin-247-certificate';
 
 /**
  * Because certificate entity allows to store custom data called "metadata"
@@ -69,6 +69,7 @@ interface IMetadata {
 
 export class SomeService {
   constructor(
+    @Inject(CERTIFICATE_SERVICE_TOKEN)
     private certificateService: CertificateService<IMetadata>
   ) {}
 
