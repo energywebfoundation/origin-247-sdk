@@ -14,6 +14,7 @@ specifiers:
   '@nestjs/testing': 7.6.18
   '@nestjs/typeorm': 7.1.5
   '@rush-temp/origin-247-certificate': file:./projects/origin-247-certificate.tgz
+  '@rush-temp/origin-247-transfer': file:./projects/origin-247-transfer.tgz
   '@types/bull': 3.15.1
   '@types/jest': 26.0.23
   '@types/node': 15.12.4
@@ -43,6 +44,7 @@ dependencies:
   '@nestjs/testing': 7.6.18_9cd0f963ae6f35bf288217e4f1c45cb4
   '@nestjs/typeorm': 7.1.5_476bd709bf4288b37cfeb220ce38756a
   '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz
+  '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.4.1
   '@types/bull': 3.15.1
   '@types/jest': 26.0.23
   '@types/node': 15.12.4
@@ -6297,6 +6299,46 @@ packages:
       - rxjs
       - supports-color
       - swagger-ui-express
+      - ts-node
+      - utf-8-validate
+    dev: false
+
+  file:projects/origin-247-transfer.tgz_passport@0.4.1:
+    resolution: {integrity: sha512-YvyP61XPJrZ68KtBR9Bq3CBOC43MQBECYABNsNRfw99xkn7OrgOw7bAo0N0hEuYCtyRdPVD3tW6mGENvBqhDSQ==, tarball: file:projects/origin-247-transfer.tgz}
+    id: file:projects/origin-247-transfer.tgz
+    name: '@rush-temp/origin-247-transfer'
+    version: 0.0.0
+    dependencies:
+      '@nestjs/common': 7.6.18
+      '@nestjs/core': 7.6.18_e6f0514ea3d89219387f66417a78dd96
+      '@nestjs/cqrs': 7.0.1_2664420588e0901c7943acb4693cbaf4
+      '@nestjs/passport': 7.1.5_fd45a09fcff1f973814c588ad08d33e0
+      '@nestjs/platform-express': 7.6.18_2664420588e0901c7943acb4693cbaf4
+      '@nestjs/testing': 7.6.18_9cd0f963ae6f35bf288217e4f1c45cb4
+      '@nestjs/typeorm': 7.1.5_476bd709bf4288b37cfeb220ce38756a
+      '@types/jest': 26.0.23
+      '@types/node': 15.12.4
+      ethers: 5.3.0
+      jest: 27.0.5
+      pg: 8.6.0
+      ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
+      typeorm: 0.2.34
+      typescript: 4.3.4
+    transitivePeerDependencies:
+      - '@nestjs/microservices'
+      - '@nestjs/websockets'
+      - bufferutil
+      - cache-manager
+      - canvas
+      - class-transformer
+      - class-validator
+      - debug
+      - node-notifier
+      - passport
+      - pg-native
+      - reflect-metadata
+      - rxjs
+      - supports-color
       - ts-node
       - utf-8-validate
     dev: false
