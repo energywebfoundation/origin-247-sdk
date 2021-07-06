@@ -1,11 +1,11 @@
 import { BigNumber } from 'ethers';
 
 export interface GenerationReadingStoredPayload<T = null> {
-    deviceId: string;
+    generatorId: string;
     fromTime: Date;
     toTime: Date;
     ownerBlockchainAddress: string;
-    energyValue: BigNumber;
+    energyValue: string;
     metadata: T;
 }
 

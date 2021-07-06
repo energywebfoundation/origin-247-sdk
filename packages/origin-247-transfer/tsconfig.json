@@ -15,6 +15,7 @@
         "skipLibCheck": true,
         "types": ["jest", "node"],
         "strictNullChecks": true,
+        "allowJs": true,
         "resolveJsonModule": true,
         "preserveWatchOutput": true
     },

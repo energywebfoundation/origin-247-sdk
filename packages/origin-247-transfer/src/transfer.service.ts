@@ -5,6 +5,11 @@ import {
     ENERGY_TRANSFER_BLOCK_REPOSITORY
 } from './repositories/EnergyTransferBlock.repository';
 import { GenerationReadingStoredPayload } from './events/GenerationReadingStored.event';
+import { QueryBus } from '@nestjs/cqrs';
+import {
+    GetTransferSitesQuery,
+    IGetTransferSitesQueryResponse
+} from './queries/GetTransferSites.query';
 
 interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
 
@@ -14,12 +19,13 @@ export class TransferService {
         @Inject(CERTIFICATE_SERVICE_TOKEN)
         private certificateService: CertificateService<unknown>,
         @Inject(ENERGY_TRANSFER_BLOCK_REPOSITORY)
-        private energyTransferBlockRepository: EnergyTransferBlockRepository
+        private energyTransferBlockRepository: EnergyTransferBlockRepository,
+        private queryBus: QueryBus
     ) {}
 
     public async issue(command: IIssueCommand): Promise<void> {
         const {
-            deviceId,
+            generatorId,
             energyValue,
             fromTime,
             ownerBlockchainAddress,
@@ -27,9 +33,20 @@ export class TransferService {
             metadata
         } = command;
 
+        const sites: IGetTransferSitesQueryResponse = await this.queryBus.execute(
+            new GetTransferSitesQuery({ generatorId })
+        );
+
+        const block = await this.energyTransferBlockRepository.createNew({
+            buyerId: sites.buyerId,
+            sellerId: sites.sellerId,
+            volume: energyValue,
+            generatorId
+        });
+
         const certificate = await this.certificateService.issue({
-            deviceId,
-            energyValue: energyValue.toString(),
+            deviceId: generatorId,
+            energyValue: energyValue,
             fromTime,
             toTime,
             userId: ownerBlockchainAddress,
@@ -37,12 +54,9 @@ export class TransferService {
             metadata
         });
 
-        await this.energyTransferBlockRepository.createNew({
-            /** @TODO */
-            buyerId: '',
-            sellerId: '',
-            certificateId: certificate.id,
-            volume: energyValue.toString()
+        await this.energyTransferBlockRepository.updateWithCertificateId({
+            blockId: block.id,
+            certificateId: certificate.id
         });
     }
 }

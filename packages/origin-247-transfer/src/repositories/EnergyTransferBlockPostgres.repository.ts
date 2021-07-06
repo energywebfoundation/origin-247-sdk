@@ -9,7 +9,11 @@ import {
     Column
 } from 'typeorm';
 import { EnergyTransferBlock } from '../EnergyTransferBlock';
-import { ICreateNewCommand, EnergyTransferBlockRepository } from './EnergyTransferBlock.repository';
+import {
+    ICreateNewCommand,
+    EnergyTransferBlockRepository,
+    IUpdateWithCertificateIdCommand
+} from './EnergyTransferBlock.repository';
 
 @Entity()
 export class EnergyTransferBlockEntity implements EnergyTransferBlock {
@@ -29,10 +33,13 @@ export class EnergyTransferBlockEntity implements EnergyTransferBlock {
     buyerId: string;
 
     @Column({ type: 'text' })
+    generatorId: string;
+
+    @Column({ type: 'text' })
     volume: string;
 
-    @Column({ type: 'int4' })
-    certificateId: number;
+    @Column({ type: 'int4', nullable: true })
+    certificateId: number | null;
 
     @Column({ type: 'boolean' })
     isCertificatePersisted: boolean;
@@ -46,16 +53,24 @@ export class EnergyTransferBlockPostgresRepository implements EnergyTransferBloc
     ) {}
 
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferBlock> {
-        const { buyerId, sellerId, volume, certificateId } = command;
+        const { buyerId, sellerId, volume, generatorId } = command;
 
         const entity = await this.repository.create({
             buyerId,
             sellerId,
             volume,
-            certificateId,
+            generatorId,
+            certificateId: null,
             isCertificatePersisted: false
         });
 
         return await this.repository.save(entity);
+    }
+
+    public async updateWithCertificateId(command: IUpdateWithCertificateIdCommand): Promise<void> {
+        await this.repository.update(
+            { id: command.blockId },
+            { certificateId: command.certificateId }
+        );
     }
 }

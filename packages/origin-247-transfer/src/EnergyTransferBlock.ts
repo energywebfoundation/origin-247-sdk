@@ -2,9 +2,12 @@ export interface EnergyTransferBlock {
     id: number;
     createdAt: Date;
     updatedAt: Date;
+
+    generatorId: string;
     sellerId: string;
     buyerId: string;
     volume: string;
-    certificateId: number;
+
+    certificateId: number | null;
     isCertificatePersisted: boolean;
 }
