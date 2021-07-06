@@ -1,2 +1,2 @@
-export * from './IssueGenerationCertificate.handler';
-export * from './TransferCertificate.handler';
+export * from './GenerationReadingStoredEvent.handler';
+export * from './CertificatePersistedEvent.handler';

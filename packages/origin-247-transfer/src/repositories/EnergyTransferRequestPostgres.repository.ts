@@ -38,7 +38,7 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequest {
     @Column({ type: 'text' })
     volume: string;
 
-    @Column({ type: 'int4', nullable: true })
+    @Column({ type: 'int4', nullable: true, unique: true })
     certificateId: number | null;
 
     @Column({ type: 'boolean' })
@@ -72,5 +72,15 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
             { id: command.requestId },
             { certificateId: command.certificateId }
         );
+    }
+
+    public async updateWithPersistedCertificate(requestId: number): Promise<void> {
+        await this.repository.update({ id: requestId }, { isCertificatePersisted: true });
+    }
+
+    public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {
+        const request = await this.repository.findOne({ certificateId });
+
+        return request ?? null;
     }
 }

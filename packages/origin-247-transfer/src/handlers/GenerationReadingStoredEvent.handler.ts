@@ -3,7 +3,7 @@ import { GenerationReadingStoredEvent } from '../events/GenerationReadingStored.
 import { TransferService } from '../transfer.service';
 
 @EventsHandler(GenerationReadingStoredEvent)
-export class IssueGenerationCertificateHandler
+export class GenerationReadingStoredEventHandler
     implements IEventHandler<GenerationReadingStoredEvent> {
     constructor(private transferService: TransferService) {}
 

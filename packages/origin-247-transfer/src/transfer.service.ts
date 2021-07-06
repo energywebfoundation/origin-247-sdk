@@ -10,11 +10,14 @@ import {
     GetTransferSitesQuery,
     IGetTransferSitesQueryResponse
 } from './queries/GetTransferSites.query';
+import { Logger } from '@nestjs/common';
 
 interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
 
 @Injectable()
 export class TransferService {
+    private readonly logger = new Logger(TransferService.name);
+
     constructor(
         @Inject(CERTIFICATE_SERVICE_TOKEN)
         private certificateService: CertificateService<unknown>,
@@ -58,5 +61,37 @@ export class TransferService {
             requestId: request.id,
             certificateId: certificate.id
         });
+
+        // There is a risk of race condition between `issue` finish and `CertificatePersistedEvent`
+        // If certificate is already persisted (it can be found by service)
+        // Then we should proceed as we received the event
+
+        const isCertificatePersisted = Boolean(
+            await this.certificateService.getById(certificate.id)
+        );
+
+        if (isCertificatePersisted) {
+            await this.persistRequestCertificate(certificate.id);
+        }
+    }
+
+    public async persistRequestCertificate(certificateId: number) {
+        const request = await this.energyTransferRequestRepository.findByCertificateId(
+            certificateId
+        );
+
+        if (!request) {
+            this.logger.warn(`
+                No transfer request found for certificate: ${certificateId}.
+                This can mean, that there was a race condition, and CertificatePersisted event was received,
+                before we could save the certificate id on ETR.
+
+                This is not a problem since there is a fallback for that.
+            `);
+
+            return;
+        }
+
+        await this.energyTransferRequestRepository.updateWithPersistedCertificate(request.id);
     }
 }

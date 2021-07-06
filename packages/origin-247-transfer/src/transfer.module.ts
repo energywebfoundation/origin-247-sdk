@@ -9,16 +9,16 @@ import {
     EnergyTransferRequestEntity,
     EnergyTransferRequestPostgresRepository
 } from './repositories/EnergyTransferRequestPostgres.repository';
-import { IssueGenerationCertificateHandler } from './handlers/IssueGenerationCertificate.handler';
-import { TransferCertificateHandler } from './handlers/TransferCertificate.handler';
+import { GenerationReadingStoredEventHandler } from './handlers/GenerationReadingStoredEvent.handler';
+import { CertificatePersistedEventHandler } from './handlers/CertificatePersistedEvent.handler';
 import { EnergyTransferRequestInMemoryRepository } from './repositories/EnergyTransferRequestInMemory.repository';
 import { ENERGY_TRANSFER_REQUEST_REPOSITORY } from './repositories/EnergyTransferRequest.repository';
 import { TransferService } from './transfer.service';
 
 @Module({
     providers: [
-        IssueGenerationCertificateHandler,
-        TransferCertificateHandler,
+        GenerationReadingStoredEventHandler,
+        CertificatePersistedEventHandler,
         TransferService,
         {
             provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
@@ -35,8 +35,8 @@ export class TransferModule {}
 
 @Module({
     providers: [
-        IssueGenerationCertificateHandler,
-        TransferCertificateHandler,
+        GenerationReadingStoredEventHandler,
+        CertificatePersistedEventHandler,
         TransferService,
         {
             provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,

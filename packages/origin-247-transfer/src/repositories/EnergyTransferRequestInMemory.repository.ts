@@ -36,4 +36,16 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
 
         request.certificateId = command.certificateId;
     }
+
+    public async updateWithPersistedCertificate(requestId: number): Promise<void> {
+        const request = this.db.find((e) => e.id === requestId)!;
+
+        request.isCertificatePersisted = true;
+    }
+
+    public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {
+        const request = this.db.find((e) => e.certificateId === certificateId);
+
+        return request ?? null;
+    }
 }

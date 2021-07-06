@@ -3,8 +3,10 @@ import { CertificatePersistedEvent } from '@energyweb/origin-247-certificate';
 import { TransferService } from '../transfer.service';
 
 @EventsHandler(CertificatePersistedEvent)
-export class TransferCertificateHandler implements IEventHandler<CertificatePersistedEvent> {
+export class CertificatePersistedEventHandler implements IEventHandler<CertificatePersistedEvent> {
     constructor(public transferService: TransferService) {}
 
-    async handle({ certificateId }: CertificatePersistedEvent): Promise<void> {}
+    async handle({ certificateId }: CertificatePersistedEvent): Promise<void> {
+        await this.transferService.persistRequestCertificate(certificateId);
+    }
 }
