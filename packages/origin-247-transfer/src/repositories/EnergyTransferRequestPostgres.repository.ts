@@ -8,15 +8,15 @@ import {
     UpdateDateColumn,
     Column
 } from 'typeorm';
-import { EnergyTransferBlock } from '../EnergyTransferBlock';
+import { EnergyTransferRequest } from '../EnergyTransferRequest';
 import {
     ICreateNewCommand,
-    EnergyTransferBlockRepository,
+    EnergyTransferRequestRepository,
     IUpdateWithCertificateIdCommand
-} from './EnergyTransferBlock.repository';
+} from './EnergyTransferRequest.repository';
 
 @Entity()
-export class EnergyTransferBlockEntity implements EnergyTransferBlock {
+export class EnergyTransferRequestEntity implements EnergyTransferRequest {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -46,13 +46,13 @@ export class EnergyTransferBlockEntity implements EnergyTransferBlock {
 }
 
 @Injectable()
-export class EnergyTransferBlockPostgresRepository implements EnergyTransferBlockRepository {
+export class EnergyTransferRequestPostgresRepository implements EnergyTransferRequestRepository {
     constructor(
-        @InjectRepository(EnergyTransferBlockEntity)
-        private repository: Repository<EnergyTransferBlockEntity>
+        @InjectRepository(EnergyTransferRequestEntity)
+        private repository: Repository<EnergyTransferRequestEntity>
     ) {}
 
-    public async createNew(command: ICreateNewCommand): Promise<EnergyTransferBlock> {
+    public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
         const { buyerId, sellerId, volume, generatorId } = command;
 
         const entity = await this.repository.create({
@@ -69,7 +69,7 @@ export class EnergyTransferBlockPostgresRepository implements EnergyTransferBloc
 
     public async updateWithCertificateId(command: IUpdateWithCertificateIdCommand): Promise<void> {
         await this.repository.update(
-            { id: command.blockId },
+            { id: command.requestId },
             { certificateId: command.certificateId }
         );
     }

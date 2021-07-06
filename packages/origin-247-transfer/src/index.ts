@@ -1,6 +1,6 @@
 export * from './transfer.module';
 export * from './transfer.service';
-export * from './EnergyTransferBlock';
+export * from './EnergyTransferRequest';
 export * from './events';
 export * from './handlers';
 export * from './queries';

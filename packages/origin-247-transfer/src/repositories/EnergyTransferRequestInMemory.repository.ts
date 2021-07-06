@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { EnergyTransferBlock } from '../EnergyTransferBlock';
+import { EnergyTransferRequest } from '../EnergyTransferRequest';
 import {
-    EnergyTransferBlockRepository,
+    EnergyTransferRequestRepository,
     ICreateNewCommand,
     IUpdateWithCertificateIdCommand
-} from './EnergyTransferBlock.repository';
+} from './EnergyTransferRequest.repository';
 
 @Injectable()
-export class EnergyTransferBlockInMemoryRepository implements EnergyTransferBlockRepository {
+export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRequestRepository {
     private serial: number = 0;
-    private db: EnergyTransferBlock[] = [];
+    private db: EnergyTransferRequest[] = [];
 
-    public async createNew(command: ICreateNewCommand): Promise<EnergyTransferBlock> {
+    public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
         const { buyerId, sellerId, volume, generatorId } = command;
 
         const entity = {
@@ -24,7 +24,7 @@ export class EnergyTransferBlockInMemoryRepository implements EnergyTransferBloc
             generatorId,
             certificateId: null,
             isCertificatePersisted: false
-        } as EnergyTransferBlock;
+        } as EnergyTransferRequest;
 
         this.db.push(entity);
 
@@ -32,8 +32,8 @@ export class EnergyTransferBlockInMemoryRepository implements EnergyTransferBloc
     }
 
     public async updateWithCertificateId(command: IUpdateWithCertificateIdCommand): Promise<void> {
-        const block = this.db.find((e) => e.id === command.blockId)!;
+        const request = this.db.find((e) => e.id === command.requestId)!;
 
-        block.certificateId = command.certificateId;
+        request.certificateId = command.certificateId;
     }
 }

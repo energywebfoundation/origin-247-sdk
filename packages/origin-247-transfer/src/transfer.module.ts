@@ -6,13 +6,13 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-    EnergyTransferBlockEntity,
-    EnergyTransferBlockPostgresRepository
-} from './repositories/EnergyTransferBlockPostgres.repository';
+    EnergyTransferRequestEntity,
+    EnergyTransferRequestPostgresRepository
+} from './repositories/EnergyTransferRequestPostgres.repository';
 import { IssueGenerationCertificateHandler } from './handlers/IssueGenerationCertificate.handler';
 import { TransferCertificateHandler } from './handlers/TransferCertificate.handler';
-import { EnergyTransferBlockInMemoryRepository } from './repositories/EnergyTransferBlockInMemory.repository';
-import { ENERGY_TRANSFER_BLOCK_REPOSITORY } from './repositories/EnergyTransferBlock.repository';
+import { EnergyTransferRequestInMemoryRepository } from './repositories/EnergyTransferRequestInMemory.repository';
+import { ENERGY_TRANSFER_REQUEST_REPOSITORY } from './repositories/EnergyTransferRequest.repository';
 import { TransferService } from './transfer.service';
 
 @Module({
@@ -21,11 +21,15 @@ import { TransferService } from './transfer.service';
         TransferCertificateHandler,
         TransferService,
         {
-            provide: ENERGY_TRANSFER_BLOCK_REPOSITORY,
-            useClass: EnergyTransferBlockPostgresRepository
+            provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
+            useClass: EnergyTransferRequestPostgresRepository
         }
     ],
-    imports: [TypeOrmModule.forFeature([EnergyTransferBlockEntity]), CqrsModule, CertificateModule]
+    imports: [
+        TypeOrmModule.forFeature([EnergyTransferRequestEntity]),
+        CqrsModule,
+        CertificateModule
+    ]
 })
 export class TransferModule {}
 
@@ -35,8 +39,8 @@ export class TransferModule {}
         TransferCertificateHandler,
         TransferService,
         {
-            provide: ENERGY_TRANSFER_BLOCK_REPOSITORY,
-            useClass: EnergyTransferBlockInMemoryRepository
+            provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
+            useClass: EnergyTransferRequestInMemoryRepository
         }
     ],
     imports: [CqrsModule, CertificateForUnitTestsModule]

@@ -1,4 +1,4 @@
-export interface EnergyTransferBlock {
+export interface EnergyTransferRequest {
     id: number;
     createdAt: Date;
     updatedAt: Date;

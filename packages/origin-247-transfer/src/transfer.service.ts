@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CertificateService, CERTIFICATE_SERVICE_TOKEN } from '@energyweb/origin-247-certificate';
 import {
-    EnergyTransferBlockRepository,
-    ENERGY_TRANSFER_BLOCK_REPOSITORY
-} from './repositories/EnergyTransferBlock.repository';
+    EnergyTransferRequestRepository,
+    ENERGY_TRANSFER_REQUEST_REPOSITORY
+} from './repositories/EnergyTransferRequest.repository';
 import { GenerationReadingStoredPayload } from './events/GenerationReadingStored.event';
 import { QueryBus } from '@nestjs/cqrs';
 import {
@@ -18,8 +18,8 @@ export class TransferService {
     constructor(
         @Inject(CERTIFICATE_SERVICE_TOKEN)
         private certificateService: CertificateService<unknown>,
-        @Inject(ENERGY_TRANSFER_BLOCK_REPOSITORY)
-        private energyTransferBlockRepository: EnergyTransferBlockRepository,
+        @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
+        private energyTransferRequestRepository: EnergyTransferRequestRepository,
         private queryBus: QueryBus
     ) {}
 
@@ -37,7 +37,7 @@ export class TransferService {
             new GetTransferSitesQuery({ generatorId })
         );
 
-        const block = await this.energyTransferBlockRepository.createNew({
+        const request = await this.energyTransferRequestRepository.createNew({
             buyerId: sites.buyerId,
             sellerId: sites.sellerId,
             volume: energyValue,
@@ -54,8 +54,8 @@ export class TransferService {
             metadata
         });
 
-        await this.energyTransferBlockRepository.updateWithCertificateId({
-            blockId: block.id,
+        await this.energyTransferRequestRepository.updateWithCertificateId({
+            requestId: request.id,
             certificateId: certificate.id
         });
     }

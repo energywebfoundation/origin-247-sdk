@@ -1,3 +1,3 @@
-export * from './EnergyTransferBlock.repository';
-export * from './EnergyTransferBlockInMemory.repository';
-export * from './EnergyTransferBlockPostgres.repository';
+export * from './EnergyTransferRequest.repository';
+export * from './EnergyTransferRequestInMemory.repository';
+export * from './EnergyTransferRequestPostgres.repository';
