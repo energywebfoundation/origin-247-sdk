@@ -1,5 +1,6 @@
 import { CertificateService } from './certificate.service';
 import { EventBus } from '@nestjs/cqrs';
+import { BigNumber } from 'ethers';
 import {
     ICertificate,
     IClaimCommand,
@@ -37,7 +38,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
             creationBlockHash: '',
             creationTime: Math.floor(Date.now() / 1000),
             deviceId: params.deviceId,
-            generationStartTime: Math.floor(params.toTime.getTime() / 1000),
+            generationStartTime: Math.floor(params.fromTime.getTime() / 1000),
             generationEndTime: Math.floor(params.toTime.getTime() / 1000),
             id: this.serial,
             tokenId: this.serial,
@@ -81,9 +82,11 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
         certificate.claims.push({
             claimData: command.claimData,
             value:
-                Number(command.energyValue) ??
-                Object.values(certificate.owners).reduce((sum, v) => (sum += Number(v)), 0),
-            topic: 0,
+                command.energyValue ??
+                Object.values(certificate.owners)
+                    .reduce((sum, v) => sum.add(v), BigNumber.from(0))
+                    .toString(),
+            topic: '0',
             from: '',
             id: 0,
             to: ''
