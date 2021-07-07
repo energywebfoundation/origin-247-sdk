@@ -5,10 +5,16 @@ import { CertificateModule as IssuerCertificateModule } from '@energyweb/issuer-
 
 import { CertificateService } from './certificate.service';
 import { BlockchainActionsProcessor } from './blockchain-actions.processor';
+import { CERTIFICATE_SERVICE_TOKEN } from './types';
+
+const serviceProvider = {
+    provide: CERTIFICATE_SERVICE_TOKEN,
+    useClass: CertificateService
+};
 
 @Module({
-    providers: [CertificateService, BlockchainActionsProcessor],
-    exports: [CertificateService],
+    providers: [serviceProvider, BlockchainActionsProcessor],
+    exports: [serviceProvider],
     imports: [
         IssuerCertificateModule,
         CqrsModule,
