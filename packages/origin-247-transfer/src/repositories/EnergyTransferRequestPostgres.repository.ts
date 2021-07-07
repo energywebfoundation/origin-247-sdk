@@ -70,15 +70,14 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
         const { buyerId, sellerId, volume, generatorId } = command;
 
-        const entity = this.repository.create({
-            buyerId,
-            sellerId,
-            volume,
-            generatorId,
-            certificateId: null,
-            isCertificatePersisted: false,
-            validationStatus: {}
-        });
+        const entity = this.repository.create(
+            EnergyTransferRequest.newAttributes({
+                buyerId,
+                sellerId,
+                volume,
+                generatorId
+            })
+        );
 
         const savedEntity = await this.repository.save(entity);
 

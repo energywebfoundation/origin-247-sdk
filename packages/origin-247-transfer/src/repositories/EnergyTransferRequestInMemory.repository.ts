@@ -14,16 +14,13 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
         const { buyerId, sellerId, volume, generatorId } = command;
 
         const entity: EnergyTransferRequest = EnergyTransferRequest.fromAttrs({
-            id: this.serial++,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            buyerId,
-            sellerId,
-            volume,
-            generatorId,
-            certificateId: null,
-            isCertificatePersisted: false,
-            validationStatus: {}
+            ...EnergyTransferRequest.newAttributes({
+                buyerId,
+                sellerId,
+                volume,
+                generatorId
+            }),
+            id: this.serial++
         });
 
         this.db.push(entity);

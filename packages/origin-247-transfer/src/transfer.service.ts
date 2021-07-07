@@ -98,9 +98,9 @@ export class TransferService {
 
         if (!request) {
             this.logger.warn(`
-                No transfer request found for certificate: ${certificateId}.
-                This can mean, that there was a race condition, and CertificatePersisted event was received,
-                before we could save the certificate id on ETR.
+No transfer request found for certificate: ${certificateId}.
+This can mean, that there was a race condition, and CertificatePersisted event was received,
+before we could save the certificate id on ETR.
             `);
 
             return;
@@ -131,10 +131,9 @@ export class TransferService {
                     );
                 } catch (e) {
                     this.logger.error(`
-                    One of validation commands (${Command.name}) returned error: ${JSON.stringify(
-                        e
-                    )} for request: ${request.id}
-                `);
+One of validation commands (${Command.name}) returned error for request: ${request.id}:
+"${e.message}"
+                    `);
 
                     result = { validationResult: TransferValidationStatus.Error };
                 }

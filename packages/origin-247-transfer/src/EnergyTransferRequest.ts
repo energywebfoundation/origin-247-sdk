@@ -23,6 +23,13 @@ export interface EnergyTransferRequestAttrs {
     validationStatus: Record<string, TransferValidationStatus>;
 }
 
+interface NewAttributesParams {
+    buyerId: string;
+    sellerId: string;
+    volume: string;
+    generatorId: string;
+}
+
 export class EnergyTransferRequest {
     private constructor(private attrs: EnergyTransferRequestAttrs) {}
 
@@ -83,5 +90,18 @@ export class EnergyTransferRequest {
 
     public static fromAttrs(attrs: EnergyTransferRequestAttrs): EnergyTransferRequest {
         return new EnergyTransferRequest(attrs);
+    }
+
+    public static newAttributes(
+        params: NewAttributesParams
+    ): Omit<EnergyTransferRequestAttrs, 'id'> {
+        return {
+            ...params,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+            certificateId: null,
+            isCertificatePersisted: false,
+            validationStatus: {}
+        };
     }
 }

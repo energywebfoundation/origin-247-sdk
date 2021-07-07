@@ -11,5 +11,5 @@ export interface IValidateTransferCommandResponse {
     validationResult: TransferValidationStatus;
 }
 
-export interface IGetTransferSitesQueryHandler
+export interface IValidateTransferCommandHandler
     extends ICommandHandler<ICommand, IValidateTransferCommandResponse> {}

@@ -1,63 +1,165 @@
-import { Test } from '@nestjs/testing';
-import { QueryHandler, QueryBus, EventBus, CommandBus } from '@nestjs/cqrs';
-import {
-    GenerationReadingStoredEvent,
-    GetTransferSitesQuery,
-    IGetTransferSitesQueryHandler,
-    TransferModuleForUnitTest
-} from '../src';
+import { CommandHandler } from '@nestjs/cqrs';
+import { TransferValidationStatus } from '../src';
+import { IValidateTransferCommandHandler } from '../src/commands';
+import { publishStart, setup, waitForPersistance, waitForStart, waitForValidation } from './setup';
+
+/**
+ * @WARN - times in these tests are fine tuned to provide expected results
+ * Since many things are happening through CQRS module there is no other way.
+ */
 
 describe('Transfer module', () => {
-    it('should build', async () => {
-        const { app, queryBus, commandBus, eventBus } = await setup({
-            sites: { buyerId: 'buyer1', sellerId: 'seller1' }
+    it.concurrent('should create ETR with given sites and data', async () => {
+        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            commands: []
         });
 
         await app.init();
+        await publishStart(eventBus);
+        await waitForPersistance();
 
-        eventBus.publish(
-            new GenerationReadingStoredEvent({
-                energyValue: '60',
-                fromTime: new Date(),
+        const request = await repository.findByCertificateId(1);
+
+        expect(request?.toAttrs()).toEqual(
+            expect.objectContaining({
+                volume: '60',
                 generatorId: 'a1',
-                metadata: null,
-                ownerBlockchainAddress: 'c1',
-                toTime: new Date()
+                buyerId: 'buyer1',
+                sellerId: 'seller1'
             })
         );
 
-        await new Promise((resolve) => setTimeout(resolve, 3000));
+        await app.close();
+    });
 
-        expect(getSitesQuery).toBeCalledTimes(1);
+    it.concurrent('should mark ETR as persisted', async () => {
+        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            commands: []
+        });
+
+        await app.init();
+        await publishStart(eventBus);
+
+        const requestBefore = await repository.findByCertificateId(1);
+        expect(requestBefore?.toAttrs().isCertificatePersisted).toBe(false);
+
+        await waitForPersistance();
+
+        const requestAfter = await repository.findByCertificateId(1);
+        expect(requestAfter?.toAttrs().isCertificatePersisted).toBe(true);
+
+        await app.close();
+    });
+
+    it.concurrent('should save all validations as pending before starting validating', async () => {
+        class Command1 {}
+        class Command2 {}
+
+        @CommandHandler(Command1)
+        class Command1Handler implements IValidateTransferCommandHandler {
+            async execute() {
+                await waitForValidation();
+                return { validationResult: TransferValidationStatus.Valid };
+            }
+        }
+
+        @CommandHandler(Command2)
+        class Command2Handler implements IValidateTransferCommandHandler {
+            async execute() {
+                await waitForValidation();
+                return { validationResult: TransferValidationStatus.Valid };
+            }
+        }
+
+        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            commands: [Command1, Command2],
+            providers: [Command1Handler, Command2Handler]
+        });
+
+        await app.init();
+        await publishStart(eventBus);
+        await waitForPersistance();
+
+        const request = await repository.findByCertificateId(1);
+        expect(request?.toAttrs().validationStatus).toEqual({
+            Command1: TransferValidationStatus.Pending,
+            Command2: TransferValidationStatus.Pending
+        });
+
+        await app.close();
+    });
+
+    it.concurrent(
+        'should immediately save validation error if command handler is not defined',
+        async () => {
+            class Command1 {}
+            class Command2 {}
+
+            @CommandHandler(Command1)
+            class Command1Handler implements IValidateTransferCommandHandler {
+                async execute() {
+                    await waitForValidation();
+                    return { validationResult: TransferValidationStatus.Valid };
+                }
+            }
+
+            const { app, queryBus, commandBus, eventBus, repository } = await setup({
+                sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+                commands: [Command1, Command2],
+                providers: [Command1Handler]
+            });
+
+            await app.init();
+            await publishStart(eventBus);
+            await waitForPersistance();
+
+            const request = await repository.findByCertificateId(1);
+            expect(request?.toAttrs().validationStatus).toEqual({
+                Command1: TransferValidationStatus.Pending,
+                Command2: TransferValidationStatus.Error
+            });
+
+            await app.close();
+        }
+    );
+
+    it.concurrent.only('should save validation results', async () => {
+        class Command1 {}
+        class Command2 {}
+
+        @CommandHandler(Command1)
+        class Command1Handler implements IValidateTransferCommandHandler {
+            async execute() {
+                return { validationResult: TransferValidationStatus.Valid };
+            }
+        }
+
+        @CommandHandler(Command2)
+        class Command2Handler implements IValidateTransferCommandHandler {
+            async execute() {
+                return { validationResult: TransferValidationStatus.Invalid };
+            }
+        }
+
+        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            commands: [Command1, Command2],
+            providers: [Command1Handler, Command2Handler]
+        });
+
+        await app.init();
+        await publishStart(eventBus);
+        await waitForPersistance();
+
+        const request = await repository.findByCertificateId(1);
+        expect(request?.toAttrs().validationStatus).toEqual({
+            Command1: TransferValidationStatus.Valid,
+            Command2: TransferValidationStatus.Invalid
+        });
 
         await app.close();
     });
 });
-
-const setup = async (options: { sites: { buyerId: string; sellerId: string } }) => {
-    const getSitesQuery = jest.fn(() => options.sites);
-
-    @QueryHandler(GetTransferSitesQuery)
-    class SitesQueryHandler implements IGetTransferSitesQueryHandler {
-        async execute(query: GetTransferSitesQuery) {
-            return getSitesQuery();
-        }
-    }
-
-    const moduleFixture = await Test.createTestingModule({
-        imports: [TransferModuleForUnitTest.register({ validateCommands: [] })],
-        providers: [SitesQueryHandler]
-    }).compile();
-
-    const app = moduleFixture.createNestApplication();
-    const queryBus = await app.resolve<QueryBus>(QueryBus);
-    const commandBus = await app.resolve<CommandBus>(CommandBus);
-    const eventBus = await app.resolve<EventBus>(EventBus);
-
-    return {
-        app,
-        queryBus,
-        commandBus,
-        eventBus
-    };
-};
