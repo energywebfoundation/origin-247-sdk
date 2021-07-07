@@ -41,7 +41,6 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
             generationStartTime: Math.floor(params.fromTime.getTime() / 1000),
             generationEndTime: Math.floor(params.toTime.getTime() / 1000),
             id: this.serial,
-            tokenId: this.serial,
             issuedPrivately: false,
             metadata: params.metadata,
             owners: {

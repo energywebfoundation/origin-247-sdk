@@ -11,7 +11,6 @@ export interface ICertificate<T = null> {
     owners: Record<string, string>;
     claimers: Record<string, string> | null;
     claims: IClaim[];
-    tokenId: number;
     creationBlockHash: string;
     issuedPrivately: boolean;
     metadata: T;
@@ -19,7 +18,6 @@ export interface ICertificate<T = null> {
 
 export interface IIssuedCertificate<T = null> {
     id: number;
-    tokenId: number;
     deviceId: string;
     generationStartTime: number;
     generationEndTime: number;
