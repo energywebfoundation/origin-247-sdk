@@ -5,15 +5,27 @@ import {
     ENERGY_TRANSFER_REQUEST_REPOSITORY
 } from './repositories/EnergyTransferRequest.repository';
 import { GenerationReadingStoredPayload } from './events/GenerationReadingStored.event';
-import { QueryBus } from '@nestjs/cqrs';
+import { QueryBus, CommandBus, EventBus } from '@nestjs/cqrs';
 import {
     GetTransferSitesQuery,
     IGetTransferSitesQueryResponse
 } from './queries/GetTransferSites.query';
 import { Logger } from '@nestjs/common';
-import { ValidateTransferCommandCtor } from './commands/ValidateTransferCommand';
+import {
+    IValidateTransferCommandResponse,
+    ValidateTransferCommandCtor,
+    VALIDATE_TRANSFER_COMMANDS_TOKEN
+} from './commands/ValidateTransferCommand';
+import { EnergyTransferRequest, TransferValidationStatus } from './EnergyTransferRequest';
+import { ValidatedTransferRequestEvent } from './events';
 
 interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
+
+interface IUpdateValidationStatusCommand {
+    requestId: number;
+    status: TransferValidationStatus;
+    commandName: string;
+}
 
 @Injectable()
 export class TransferService {
@@ -25,6 +37,9 @@ export class TransferService {
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private energyTransferRequestRepository: EnergyTransferRequestRepository,
         private queryBus: QueryBus,
+        private commandBus: CommandBus,
+        private eventBus: EventBus,
+        @Inject(VALIDATE_TRANSFER_COMMANDS_TOKEN)
         private validateCommands: ValidateTransferCommandCtor[]
     ) {}
 
@@ -76,7 +91,7 @@ export class TransferService {
         }
     }
 
-    public async persistRequestCertificate(certificateId: number) {
+    public async persistRequestCertificate(certificateId: number): Promise<void> {
         const request = await this.energyTransferRequestRepository.findByCertificateId(
             certificateId
         );
@@ -86,8 +101,6 @@ export class TransferService {
                 No transfer request found for certificate: ${certificateId}.
                 This can mean, that there was a race condition, and CertificatePersisted event was received,
                 before we could save the certificate id on ETR.
-
-                This is not a problem since there is a fallback for that.
             `);
 
             return;
@@ -96,5 +109,58 @@ export class TransferService {
         request.markCertificatePersisted();
 
         await this.energyTransferRequestRepository.save(request);
+
+        await this.startValidation(request);
+    }
+
+    private async startValidation(request: EnergyTransferRequest): Promise<void> {
+        request.startValidation(this.validateCommands);
+
+        await this.energyTransferRequestRepository.save(request);
+
+        await Promise.all(
+            this.validateCommands.map(async (Command) => {
+                let result: IValidateTransferCommandResponse;
+
+                try {
+                    result = await this.commandBus.execute(
+                        new Command({
+                            ...request.sites,
+                            requestId: request.id
+                        })
+                    );
+                } catch (e) {
+                    this.logger.error(`
+                    One of validation commands (${Command.name}) returned error: ${JSON.stringify(
+                        e
+                    )} for request: ${request.id}
+                `);
+
+                    result = { validationResult: TransferValidationStatus.Error };
+                }
+
+                await this.updateValidationStatus({
+                    commandName: Command.name,
+                    requestId: request.id,
+                    status: result.validationResult
+                });
+            })
+        );
+    }
+
+    public async updateValidationStatus(command: IUpdateValidationStatusCommand): Promise<void> {
+        const { requestId, commandName, status } = command;
+
+        await this.energyTransferRequestRepository.updateWithLock(requestId, (request) => {
+            request.updateValidationStatus(commandName, status);
+
+            if (request.isValid()) {
+                this.eventBus.publish(
+                    new ValidatedTransferRequestEvent({
+                        requestId: request.id
+                    })
+                );
+            }
+        });
     }
 }

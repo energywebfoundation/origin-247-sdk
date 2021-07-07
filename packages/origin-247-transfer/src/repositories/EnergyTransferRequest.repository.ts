@@ -13,4 +13,5 @@ export interface EnergyTransferRequestRepository {
     createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest>;
     findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null>;
     save(entity: EnergyTransferRequest): Promise<void>;
+    updateWithLock(id: number, cb: (entity: EnergyTransferRequest) => void): Promise<void>;
 }

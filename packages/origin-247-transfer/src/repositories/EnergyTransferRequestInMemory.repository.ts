@@ -40,4 +40,17 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
 
         return request ?? null;
     }
+
+    public async updateWithLock(
+        id: number,
+        cb: (entity: EnergyTransferRequest) => void
+    ): Promise<void> {
+        const request = this.db.find((e) => e.id === id);
+
+        if (!request) {
+            return;
+        }
+
+        cb(request);
+    }
 }

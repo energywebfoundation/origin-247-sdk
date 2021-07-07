@@ -19,7 +19,7 @@ describe('Transfer module', () => {
         }
 
         const moduleFixture = await Test.createTestingModule({
-            imports: [TransferModuleForUnitTest.register()],
+            imports: [TransferModuleForUnitTest.register({ validateCommands: [] })],
             providers: [SitesQueryHandler]
         }).compile();
 
