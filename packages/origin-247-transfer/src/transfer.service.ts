@@ -11,6 +11,7 @@ import {
     IGetTransferSitesQueryResponse
 } from './queries/GetTransferSites.query';
 import { Logger } from '@nestjs/common';
+import { ValidateTransferCommandCtor } from './commands/ValidateTransferCommand';
 
 interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
 
@@ -23,7 +24,8 @@ export class TransferService {
         private certificateService: CertificateService<unknown>,
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private energyTransferRequestRepository: EnergyTransferRequestRepository,
-        private queryBus: QueryBus
+        private queryBus: QueryBus,
+        private validateCommands: ValidateTransferCommandCtor[]
     ) {}
 
     public async issue(command: IIssueCommand): Promise<void> {
@@ -57,10 +59,9 @@ export class TransferService {
             metadata
         });
 
-        await this.energyTransferRequestRepository.updateWithCertificateId({
-            requestId: request.id,
-            certificateId: certificate.id
-        });
+        request.updateCertificateId(certificate.id);
+
+        await this.energyTransferRequestRepository.save(request);
 
         // There is a risk of race condition between `issue` finish and `CertificatePersistedEvent`
         // If certificate is already persisted (it can be found by service)
@@ -92,6 +93,8 @@ export class TransferService {
             return;
         }
 
-        await this.energyTransferRequestRepository.updateWithPersistedCertificate(request.id);
+        request.markCertificatePersisted();
+
+        await this.energyTransferRequestRepository.save(request);
     }
 }

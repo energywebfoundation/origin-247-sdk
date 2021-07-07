@@ -2,7 +2,7 @@ import {
     CertificateModule,
     CertificateForUnitTestsModule
 } from '@energyweb/origin-247-certificate';
-import { Module } from '@nestjs/common';
+import { Module, DynamicModule } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
@@ -14,35 +14,61 @@ import { CertificatePersistedEventHandler } from './handlers/CertificatePersiste
 import { EnergyTransferRequestInMemoryRepository } from './repositories/EnergyTransferRequestInMemory.repository';
 import { ENERGY_TRANSFER_REQUEST_REPOSITORY } from './repositories/EnergyTransferRequest.repository';
 import { TransferService } from './transfer.service';
+import {
+    ValidateTransferCommandCtor,
+    VALIDATE_TRANSFER_COMMANDS_TOKEN
+} from './commands/ValidateTransferCommand';
 
-@Module({
-    providers: [
-        GenerationReadingStoredEventHandler,
-        CertificatePersistedEventHandler,
-        TransferService,
-        {
-            provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
-            useClass: EnergyTransferRequestPostgresRepository
-        }
-    ],
-    imports: [
-        TypeOrmModule.forFeature([EnergyTransferRequestEntity]),
-        CqrsModule,
-        CertificateModule
-    ]
-})
-export class TransferModule {}
+export interface ITransferModuleParams {
+    validateCommands: ValidateTransferCommandCtor[];
+}
 
-@Module({
-    providers: [
-        GenerationReadingStoredEventHandler,
-        CertificatePersistedEventHandler,
-        TransferService,
-        {
-            provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
-            useClass: EnergyTransferRequestInMemoryRepository
-        }
-    ],
-    imports: [CqrsModule, CertificateForUnitTestsModule]
-})
-export class TransferModuleForUnitTest {}
+@Module({})
+export class TransferModule {
+    static register(params: ITransferModuleParams): DynamicModule {
+        return {
+            module: TransferModule,
+            providers: [
+                GenerationReadingStoredEventHandler,
+                CertificatePersistedEventHandler,
+                TransferService,
+                {
+                    provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
+                    useClass: EnergyTransferRequestPostgresRepository
+                },
+                {
+                    provide: VALIDATE_TRANSFER_COMMANDS_TOKEN,
+                    useValue: params.validateCommands
+                }
+            ],
+            imports: [
+                TypeOrmModule.forFeature([EnergyTransferRequestEntity]),
+                CqrsModule,
+                CertificateModule
+            ]
+        };
+    }
+}
+
+@Module({})
+export class TransferModuleForUnitTest {
+    static register(params: ITransferModuleParams): DynamicModule {
+        return {
+            module: TransferModuleForUnitTest,
+            providers: [
+                GenerationReadingStoredEventHandler,
+                CertificatePersistedEventHandler,
+                TransferService,
+                {
+                    provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
+                    useClass: EnergyTransferRequestInMemoryRepository
+                },
+                {
+                    provide: VALIDATE_TRANSFER_COMMANDS_TOKEN,
+                    useValue: params.validateCommands
+                }
+            ],
+            imports: [CqrsModule, CertificateForUnitTestsModule]
+        };
+    }
+}

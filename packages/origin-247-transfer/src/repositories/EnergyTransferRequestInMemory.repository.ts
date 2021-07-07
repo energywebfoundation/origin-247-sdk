@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EnergyTransferRequest } from '../EnergyTransferRequest';
 import {
     EnergyTransferRequestRepository,
-    ICreateNewCommand,
-    IUpdateWithCertificateIdCommand
+    ICreateNewCommand
 } from './EnergyTransferRequest.repository';
 
 @Injectable()
@@ -14,7 +13,7 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
         const { buyerId, sellerId, volume, generatorId } = command;
 
-        const entity = {
+        const entity: EnergyTransferRequest = EnergyTransferRequest.fromAttrs({
             id: this.serial++,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -23,24 +22,17 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
             volume,
             generatorId,
             certificateId: null,
-            isCertificatePersisted: false
-        } as EnergyTransferRequest;
+            isCertificatePersisted: false,
+            validationStatus: {}
+        });
 
         this.db.push(entity);
 
         return entity;
     }
 
-    public async updateWithCertificateId(command: IUpdateWithCertificateIdCommand): Promise<void> {
-        const request = this.db.find((e) => e.id === command.requestId)!;
-
-        request.certificateId = command.certificateId;
-    }
-
-    public async updateWithPersistedCertificate(requestId: number): Promise<void> {
-        const request = this.db.find((e) => e.id === requestId)!;
-
-        request.isCertificatePersisted = true;
+    public async save(entity: EnergyTransferRequest): Promise<void> {
+        // changing entity changes original object in memory, so no point in saving
     }
 
     public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {

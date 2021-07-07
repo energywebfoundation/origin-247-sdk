@@ -8,15 +8,18 @@ import {
     UpdateDateColumn,
     Column
 } from 'typeorm';
-import { EnergyTransferRequest } from '../EnergyTransferRequest';
+import {
+    EnergyTransferRequest,
+    EnergyTransferRequestAttrs,
+    TransferValidationStatus
+} from '../EnergyTransferRequest';
 import {
     ICreateNewCommand,
-    EnergyTransferRequestRepository,
-    IUpdateWithCertificateIdCommand
+    EnergyTransferRequestRepository
 } from './EnergyTransferRequest.repository';
 
 @Entity()
-export class EnergyTransferRequestEntity implements EnergyTransferRequest {
+export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -43,6 +46,9 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequest {
 
     @Column({ type: 'boolean' })
     isCertificatePersisted: boolean;
+
+    @Column('simple-json')
+    validationStatus: Record<string, TransferValidationStatus>;
 }
 
 @Injectable()
@@ -52,35 +58,31 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
         private repository: Repository<EnergyTransferRequestEntity>
     ) {}
 
+    public async save(entity: EnergyTransferRequest): Promise<void> {
+        await this.repository.update({ id: entity.id }, entity.toAttrs());
+    }
+
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
         const { buyerId, sellerId, volume, generatorId } = command;
 
-        const entity = await this.repository.create({
+        const entity = this.repository.create({
             buyerId,
             sellerId,
             volume,
             generatorId,
             certificateId: null,
-            isCertificatePersisted: false
+            isCertificatePersisted: false,
+            validationStatus: {}
         });
 
-        return await this.repository.save(entity);
-    }
+        const savedEntity = await this.repository.save(entity);
 
-    public async updateWithCertificateId(command: IUpdateWithCertificateIdCommand): Promise<void> {
-        await this.repository.update(
-            { id: command.requestId },
-            { certificateId: command.certificateId }
-        );
-    }
-
-    public async updateWithPersistedCertificate(requestId: number): Promise<void> {
-        await this.repository.update({ id: requestId }, { isCertificatePersisted: true });
+        return EnergyTransferRequest.fromAttrs(savedEntity);
     }
 
     public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {
         const request = await this.repository.findOne({ certificateId });
 
-        return request ?? null;
+        return request ? EnergyTransferRequest.fromAttrs(request) : null;
     }
 }
