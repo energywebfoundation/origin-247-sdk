@@ -36,11 +36,11 @@ export class TransferService {
         private certificateService: CertificateService<unknown>,
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private energyTransferRequestRepository: EnergyTransferRequestRepository,
+        @Inject(VALIDATE_TRANSFER_COMMANDS_TOKEN)
+        private validateCommands: ValidateTransferCommandCtor[],
         private queryBus: QueryBus,
         private commandBus: CommandBus,
-        private eventBus: EventBus,
-        @Inject(VALIDATE_TRANSFER_COMMANDS_TOKEN)
-        private validateCommands: ValidateTransferCommandCtor[]
+        private eventBus: EventBus
     ) {}
 
     public async issue(command: IIssueCommand): Promise<void> {
@@ -53,13 +53,20 @@ export class TransferService {
             metadata
         } = command;
 
-        const sites: IGetTransferSitesQueryResponse = await this.queryBus.execute(
+        const sites: IGetTransferSitesQueryResponse | null = await this.queryBus.execute(
             new GetTransferSitesQuery({ generatorId })
         );
 
+        if (!sites) {
+            this.logger.log(`No sites queries for ${generatorId}`);
+            return;
+        }
+
         const request = await this.energyTransferRequestRepository.createNew({
             buyerId: sites.buyerId,
+            buyerAddress: sites.buyerAddress,
             sellerId: sites.sellerId,
+            sellerAddress: sites.sellerAddress,
             volume: energyValue,
             generatorId
         });
@@ -147,7 +154,37 @@ before we could save the certificate id on ETR.
         });
     }
 
-    public async transferCertificate(requestId: number): Promise<void> {}
+    public async transferCertificate(requestId: number): Promise<void> {
+        const request = await this.energyTransferRequestRepository.findById(requestId);
+
+        if (!request) {
+            this.logger.error(
+                `Received transfer request for request ${requestId}, but not such found`
+            );
+            return;
+        }
+
+        if (!request.certificateId) {
+            this.logger.error(
+                `Received transfer request for request ${requestId}, but this request has no certificate`
+            );
+            return;
+        }
+
+        if (!request.isValid()) {
+            this.logger.error(
+                `Received transfer request for request ${requestId}, but this request is not valid`
+            );
+            return;
+        }
+
+        await this.certificateService.transfer({
+            certificateId: request.certificateId,
+            fromAddress: request.sites.sellerId,
+            toAddress: request.sites.buyerId,
+            energyValue: request.volume
+        });
+    }
 
     private async executeCommand(
         Command: ValidateTransferCommandCtor,

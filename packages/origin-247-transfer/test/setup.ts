@@ -38,7 +38,7 @@ export const publishStart = async (eventBus: EventBus) => {
 };
 
 export const setup = async (options: {
-    sites: { buyerId: string; sellerId: string };
+    sites: { buyerId: string; sellerId: string; buyerAddress: string; sellerAddress: string };
     commands: ValidateTransferCommandCtor[];
     providers?: any[];
 }) => {

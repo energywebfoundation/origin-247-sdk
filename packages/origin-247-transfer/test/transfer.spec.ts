@@ -12,7 +12,12 @@ jest.setTimeout(10000);
 describe('Transfer module', () => {
     it.concurrent('should create ETR with given sites and data', async () => {
         const { app, queryBus, commandBus, eventBus, repository } = await setup({
-            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            sites: {
+                buyerId: 'buyer1',
+                sellerId: 'seller1',
+                sellerAddress: '1',
+                buyerAddress: '2'
+            },
             commands: []
         });
 
@@ -36,7 +41,12 @@ describe('Transfer module', () => {
 
     it.concurrent('should mark ETR as persisted', async () => {
         const { app, queryBus, commandBus, eventBus, repository } = await setup({
-            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            sites: {
+                buyerId: 'buyer1',
+                sellerId: 'seller1',
+                sellerAddress: '1',
+                buyerAddress: '2'
+            },
             commands: []
         });
 
@@ -75,7 +85,12 @@ describe('Transfer module', () => {
         }
 
         const { app, queryBus, commandBus, eventBus, repository } = await setup({
-            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            sites: {
+                buyerId: 'buyer1',
+                sellerId: 'seller1',
+                sellerAddress: '1',
+                buyerAddress: '2'
+            },
             commands: [Command1, Command2],
             providers: [Command1Handler, Command2Handler]
         });
@@ -108,7 +123,12 @@ describe('Transfer module', () => {
             }
 
             const { app, queryBus, commandBus, eventBus, repository } = await setup({
-                sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+                sites: {
+                    buyerId: 'buyer1',
+                    sellerId: 'seller1',
+                    sellerAddress: '1',
+                    buyerAddress: '2'
+                },
                 commands: [Command1, Command2],
                 providers: [Command1Handler]
             });
@@ -155,7 +175,12 @@ describe('Transfer module', () => {
                 repository,
                 validateEventHandler
             } = await setup({
-                sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+                sites: {
+                    buyerId: 'buyer1',
+                    sellerId: 'seller1',
+                    sellerAddress: '1',
+                    buyerAddress: '2'
+                },
                 commands: [Command1, Command2],
                 providers: [Command1Handler, Command2Handler]
             });
@@ -202,7 +227,12 @@ describe('Transfer module', () => {
             repository,
             validateEventHandler
         } = await setup({
-            sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+            sites: {
+                buyerId: 'buyer1',
+                sellerId: 'seller1',
+                sellerAddress: '1',
+                buyerAddress: '2'
+            },
             commands: [Command1, Command2],
             providers: [Command1Handler, Command2Handler]
         });

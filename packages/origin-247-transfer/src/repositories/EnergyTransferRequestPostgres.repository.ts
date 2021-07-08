@@ -36,7 +36,13 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     sellerId: string;
 
     @Column({ type: 'text' })
+    sellerAddress: string;
+
+    @Column({ type: 'text' })
     buyerId: string;
+
+    @Column({ type: 'text' })
+    buyerAddress: string;
 
     @Column({ type: 'text' })
     generatorId: string;
@@ -68,12 +74,14 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
     }
 
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
-        const { buyerId, sellerId, volume, generatorId } = command;
+        const { buyerId, sellerId, volume, generatorId, buyerAddress, sellerAddress } = command;
 
         const entity = this.repository.create(
             EnergyTransferRequest.newAttributes({
                 buyerId,
+                buyerAddress,
                 sellerId,
+                sellerAddress,
                 volume,
                 generatorId
             })
@@ -86,6 +94,12 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
 
     public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {
         const request = await this.repository.findOne({ certificateId });
+
+        return request ? EnergyTransferRequest.fromAttrs(request) : null;
+    }
+
+    public async findById(id: number): Promise<EnergyTransferRequest | null> {
+        const request = await this.repository.findOne(id);
 
         return request ? EnergyTransferRequest.fromAttrs(request) : null;
     }

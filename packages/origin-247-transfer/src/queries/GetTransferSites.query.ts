@@ -10,8 +10,10 @@ export class GetTransferSitesQuery implements IQuery {
 
 export interface IGetTransferSitesQueryResponse {
     buyerId: string;
+    buyerAddress: string;
     sellerId: string;
+    sellerAddress: string;
 }
 
 export interface IGetTransferSitesQueryHandler
-    extends IQueryHandler<GetTransferSitesQuery, IGetTransferSitesQueryResponse> {}
+    extends IQueryHandler<GetTransferSitesQuery, IGetTransferSitesQueryResponse | null> {}

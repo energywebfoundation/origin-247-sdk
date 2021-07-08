@@ -11,12 +11,14 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
     private db: EnergyTransferRequest[] = [];
 
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
-        const { buyerId, sellerId, volume, generatorId } = command;
+        const { buyerId, sellerId, volume, generatorId, sellerAddress, buyerAddress } = command;
 
         const entity: EnergyTransferRequest = EnergyTransferRequest.fromAttrs({
             ...EnergyTransferRequest.newAttributes({
                 buyerId,
+                buyerAddress,
                 sellerId,
+                sellerAddress,
                 volume,
                 generatorId
             }),
@@ -34,6 +36,12 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
 
     public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {
         const request = this.db.find((e) => e.certificateId === certificateId);
+
+        return request ?? null;
+    }
+
+    public async findById(id: number): Promise<EnergyTransferRequest | null> {
+        const request = this.db.find((e) => e.id === id);
 
         return request ?? null;
     }

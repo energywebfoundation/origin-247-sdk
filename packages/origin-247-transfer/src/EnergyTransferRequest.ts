@@ -14,7 +14,9 @@ export interface EnergyTransferRequestAttrs {
 
     generatorId: string;
     sellerId: string;
+    sellerAddress: string;
     buyerId: string;
+    buyerAddress: string;
     volume: string;
 
     certificateId: number | null;
@@ -25,7 +27,9 @@ export interface EnergyTransferRequestAttrs {
 
 interface NewAttributesParams {
     buyerId: string;
+    buyerAddress: string;
     sellerId: string;
+    sellerAddress: string;
     volume: string;
     generatorId: string;
 }
@@ -44,8 +48,14 @@ export class EnergyTransferRequest {
     public get sites() {
         return {
             buyerId: this.attrs.buyerId,
-            sellerId: this.attrs.sellerId
+            sellerId: this.attrs.sellerId,
+            buyerAddress: this.attrs.buyerAddress,
+            sellerAddress: this.attrs.sellerAddress
         };
+    }
+
+    public get volume() {
+        return this.attrs.volume;
     }
 
     public isValid(): boolean {
