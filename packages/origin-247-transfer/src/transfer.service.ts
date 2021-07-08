@@ -120,23 +120,7 @@ before we could save the certificate id on ETR.
 
         await Promise.all(
             this.validateCommands.map(async (Command) => {
-                let result: IValidateTransferCommandResponse;
-
-                try {
-                    result = await this.commandBus.execute(
-                        new Command({
-                            ...request.sites,
-                            requestId: request.id
-                        })
-                    );
-                } catch (e) {
-                    this.logger.error(`
-One of validation commands (${Command.name}) returned error for request: ${request.id}:
-"${e.message}"
-                    `);
-
-                    result = { validationResult: TransferValidationStatus.Error };
-                }
+                const result = await this.executeCommand(Command, request);
 
                 await this.updateValidationStatus({
                     commandName: Command.name,
@@ -161,5 +145,28 @@ One of validation commands (${Command.name}) returned error for request: ${reque
                 );
             }
         });
+    }
+
+    public async transferCertificate(requestId: number): Promise<void> {}
+
+    private async executeCommand(
+        Command: ValidateTransferCommandCtor,
+        request: EnergyTransferRequest
+    ) {
+        try {
+            return await this.commandBus.execute(
+                new Command({
+                    ...request.sites,
+                    requestId: request.id
+                })
+            );
+        } catch (e) {
+            this.logger.error(`
+One of validation commands (${Command.name}) returned error for request: ${request.id}:
+"${e.message}"
+            `);
+
+            return { validationResult: TransferValidationStatus.Error };
+        }
     }
 }

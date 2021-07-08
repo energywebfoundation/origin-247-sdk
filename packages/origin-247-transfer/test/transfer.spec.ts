@@ -1,7 +1,8 @@
 import { CommandHandler } from '@nestjs/cqrs';
-import { TransferValidationStatus } from '../src';
-import { IValidateTransferCommandHandler } from '../src/commands';
-import { publishStart, setup, waitForPersistance, waitForStart, waitForValidation } from './setup';
+import { TransferValidationStatus, IValidateTransferCommandHandler } from '../src';
+import { publishStart, setup, waitForPersistance, waitForEvent, waitForValidation } from './setup';
+
+jest.setTimeout(10000);
 
 /**
  * @WARN - times in these tests are fine tuned to provide expected results
@@ -126,7 +127,56 @@ describe('Transfer module', () => {
         }
     );
 
-    it.concurrent.only('should save validation results', async () => {
+    it.concurrent(
+        'should save validation results - and dont send event if not all is valid',
+        async () => {
+            class Command1 {}
+            class Command2 {}
+
+            @CommandHandler(Command1)
+            class Command1Handler implements IValidateTransferCommandHandler {
+                async execute() {
+                    return { validationResult: TransferValidationStatus.Valid };
+                }
+            }
+
+            @CommandHandler(Command2)
+            class Command2Handler implements IValidateTransferCommandHandler {
+                async execute() {
+                    return { validationResult: TransferValidationStatus.Invalid };
+                }
+            }
+
+            const {
+                app,
+                queryBus,
+                commandBus,
+                eventBus,
+                repository,
+                validateEventHandler
+            } = await setup({
+                sites: { buyerId: 'buyer1', sellerId: 'seller1' },
+                commands: [Command1, Command2],
+                providers: [Command1Handler, Command2Handler]
+            });
+
+            await app.init();
+            await publishStart(eventBus);
+            await waitForPersistance();
+
+            const request = await repository.findByCertificateId(1);
+            expect(request?.toAttrs().validationStatus).toEqual({
+                Command1: TransferValidationStatus.Valid,
+                Command2: TransferValidationStatus.Invalid
+            });
+
+            expect(validateEventHandler).not.toBeCalled();
+
+            await app.close();
+        }
+    );
+
+    it.concurrent('should send event if all is valid', async () => {
         class Command1 {}
         class Command2 {}
 
@@ -140,11 +190,18 @@ describe('Transfer module', () => {
         @CommandHandler(Command2)
         class Command2Handler implements IValidateTransferCommandHandler {
             async execute() {
-                return { validationResult: TransferValidationStatus.Invalid };
+                return { validationResult: TransferValidationStatus.Valid };
             }
         }
 
-        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+        const {
+            app,
+            queryBus,
+            commandBus,
+            eventBus,
+            repository,
+            validateEventHandler
+        } = await setup({
             sites: { buyerId: 'buyer1', sellerId: 'seller1' },
             commands: [Command1, Command2],
             providers: [Command1Handler, Command2Handler]
@@ -157,8 +214,16 @@ describe('Transfer module', () => {
         const request = await repository.findByCertificateId(1);
         expect(request?.toAttrs().validationStatus).toEqual({
             Command1: TransferValidationStatus.Valid,
-            Command2: TransferValidationStatus.Invalid
+            Command2: TransferValidationStatus.Valid
         });
+
+        expect(validateEventHandler).toBeCalledWith(
+            expect.objectContaining({
+                payload: expect.objectContaining({
+                    requestId: request?.id
+                })
+            })
+        );
 
         await app.close();
     });

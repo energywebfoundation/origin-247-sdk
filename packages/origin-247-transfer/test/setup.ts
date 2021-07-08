@@ -1,16 +1,24 @@
 import { Test } from '@nestjs/testing';
-import { QueryHandler, QueryBus, EventBus, CommandBus } from '@nestjs/cqrs';
+import {
+    QueryHandler,
+    QueryBus,
+    EventBus,
+    CommandBus,
+    EventsHandler,
+    IEventHandler
+} from '@nestjs/cqrs';
 import {
     EnergyTransferRequestRepository,
     ENERGY_TRANSFER_REQUEST_REPOSITORY,
     GenerationReadingStoredEvent,
     GetTransferSitesQuery,
     IGetTransferSitesQueryHandler,
-    TransferModuleForUnitTest
+    TransferModuleForUnitTest,
+    ValidatedTransferRequestEvent,
+    ValidateTransferCommandCtor
 } from '../src';
-import { ValidateTransferCommandCtor } from '../src/commands';
 
-export const waitForStart = () => new Promise((resolve) => setTimeout(resolve, 500));
+export const waitForEvent = () => new Promise((resolve) => setTimeout(resolve, 500));
 export const waitForPersistance = () => new Promise((resolve) => setTimeout(resolve, 3000));
 export const waitForValidation = () => new Promise((resolve) => setTimeout(resolve, 2000));
 
@@ -26,7 +34,7 @@ export const publishStart = async (eventBus: EventBus) => {
         })
     );
 
-    await waitForStart();
+    await waitForEvent();
 };
 
 export const setup = async (options: {
@@ -34,18 +42,26 @@ export const setup = async (options: {
     commands: ValidateTransferCommandCtor[];
     providers?: any[];
 }) => {
-    const getSitesQuery = jest.fn(() => options.sites);
+    const getSitesQuery = jest.fn((_) => options.sites);
+    const validateEventHandler = jest.fn((_) => {});
 
     @QueryHandler(GetTransferSitesQuery)
     class SitesQueryHandler implements IGetTransferSitesQueryHandler {
         async execute(query: GetTransferSitesQuery) {
-            return getSitesQuery();
+            return getSitesQuery(query);
+        }
+    }
+
+    @EventsHandler(ValidatedTransferRequestEvent)
+    class ValidatedEventHandler implements IEventHandler {
+        async handle(event) {
+            return validateEventHandler(event);
         }
     }
 
     const moduleFixture = await Test.createTestingModule({
         imports: [TransferModuleForUnitTest.register({ validateCommands: options.commands })],
-        providers: [SitesQueryHandler, ...(options.providers ?? [])]
+        providers: [SitesQueryHandler, ValidatedEventHandler, ...(options.providers ?? [])]
     }).compile();
 
     const app = moduleFixture.createNestApplication();
@@ -61,6 +77,7 @@ export const setup = async (options: {
         queryBus,
         commandBus,
         eventBus,
-        repository
+        repository,
+        validateEventHandler
     };
 };
