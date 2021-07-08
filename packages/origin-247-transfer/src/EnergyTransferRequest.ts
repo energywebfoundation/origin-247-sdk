@@ -13,22 +13,24 @@ export interface EnergyTransferRequestAttrs {
     updatedAt: Date;
 
     generatorId: string;
-    sellerId: string;
     sellerAddress: string;
-    buyerId: string;
     buyerAddress: string;
     volume: string;
 
     certificateId: number | null;
     isCertificatePersisted: boolean;
 
-    validationStatus: Record<string, TransferValidationStatus>;
+    validationStatusRecord: Record<string, TransferValidationStatus>;
+
+    /**
+     * This property is computed on `validationStatusRecord` update
+     * It can be used for queries
+     */
+    computedValidationStatus: TransferValidationStatus;
 }
 
 interface NewAttributesParams {
-    buyerId: string;
     buyerAddress: string;
-    sellerId: string;
     sellerAddress: string;
     volume: string;
     generatorId: string;
@@ -47,8 +49,6 @@ export class EnergyTransferRequest {
 
     public get sites() {
         return {
-            buyerId: this.attrs.buyerId,
-            sellerId: this.attrs.sellerId,
             buyerAddress: this.attrs.buyerAddress,
             sellerAddress: this.attrs.sellerAddress
         };
@@ -59,7 +59,7 @@ export class EnergyTransferRequest {
     }
 
     public isValid(): boolean {
-        return Object.values(this.attrs.validationStatus).every(
+        return Object.values(this.attrs.validationStatusRecord).every(
             (status) => status === TransferValidationStatus.Valid
         );
     }
@@ -73,17 +73,23 @@ export class EnergyTransferRequest {
     }
 
     public startValidation(validationCommands: ValidateTransferCommandCtor[]): void {
-        this.attrs.validationStatus = validationCommands.reduce(
+        this.attrs.validationStatusRecord = validationCommands.reduce(
             (status, command) => ({
                 ...status,
                 [command.name]: TransferValidationStatus.Pending
             }),
-            {} as EnergyTransferRequestAttrs['validationStatus']
+            {} as EnergyTransferRequestAttrs['validationStatusRecord']
         );
     }
 
     public updateValidationStatus(commandName: string, status: TransferValidationStatus): void {
-        const currentStatus = this.attrs.validationStatus[commandName];
+        const currentStatus = this.attrs.validationStatusRecord[commandName];
+
+        if (!currentStatus) {
+            throw new Error(
+                `Cannot update status of transfer request: ${this.attrs.id}, because validator "${commandName}" is not present`
+            );
+        }
 
         if (currentStatus !== TransferValidationStatus.Pending) {
             throw new Error(
@@ -91,7 +97,19 @@ export class EnergyTransferRequest {
             );
         }
 
-        this.attrs.validationStatus[commandName] = status;
+        this.attrs.validationStatusRecord[commandName] = status;
+
+        const statuses = Object.values(this.attrs.validationStatusRecord);
+
+        if (statuses.some((s) => s === TransferValidationStatus.Error)) {
+            this.attrs.computedValidationStatus = TransferValidationStatus.Error;
+        } else if (statuses.some((s) => s === TransferValidationStatus.Invalid)) {
+            this.attrs.computedValidationStatus = TransferValidationStatus.Invalid;
+        } else if (statuses.some((s) => s === TransferValidationStatus.Pending)) {
+            this.attrs.computedValidationStatus = TransferValidationStatus.Pending;
+        } else if (statuses.every((s) => s === TransferValidationStatus.Valid)) {
+            this.attrs.computedValidationStatus = TransferValidationStatus.Valid;
+        }
     }
 
     public toAttrs(): EnergyTransferRequestAttrs {
@@ -111,7 +129,8 @@ export class EnergyTransferRequest {
             updatedAt: new Date(),
             certificateId: null,
             isCertificatePersisted: false,
-            validationStatus: {}
+            validationStatusRecord: {},
+            computedValidationStatus: TransferValidationStatus.Pending
         };
     }
 }

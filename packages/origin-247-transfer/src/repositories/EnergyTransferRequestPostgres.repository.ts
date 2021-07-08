@@ -33,13 +33,7 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     updatedAt: Date;
 
     @Column({ type: 'text' })
-    sellerId: string;
-
-    @Column({ type: 'text' })
     sellerAddress: string;
-
-    @Column({ type: 'text' })
-    buyerId: string;
 
     @Column({ type: 'text' })
     buyerAddress: string;
@@ -57,7 +51,10 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     isCertificatePersisted: boolean;
 
     @Column('simple-json')
-    validationStatus: Record<string, TransferValidationStatus>;
+    validationStatusRecord: Record<string, TransferValidationStatus>;
+
+    @Column({ type: 'text' })
+    computedValidationStatus: TransferValidationStatus;
 }
 
 @Injectable()
@@ -74,13 +71,11 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
     }
 
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
-        const { buyerId, sellerId, volume, generatorId, buyerAddress, sellerAddress } = command;
+        const { volume, generatorId, buyerAddress, sellerAddress } = command;
 
         const entity = this.repository.create(
             EnergyTransferRequest.newAttributes({
-                buyerId,
                 buyerAddress,
-                sellerId,
                 sellerAddress,
                 volume,
                 generatorId
@@ -133,7 +128,7 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
 
             const request = EnergyTransferRequest.fromAttrs({
                 ...rawRequest,
-                validationStatus: JSON.parse(rawRequest.validationStatus)
+                validationStatusRecord: JSON.parse(rawRequest.validationStatus)
             });
 
             cb(request);

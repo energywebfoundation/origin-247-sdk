@@ -9,9 +9,7 @@ export class GetTransferSitesQuery implements IQuery {
 }
 
 export interface IGetTransferSitesQueryResponse {
-    buyerId: string;
     buyerAddress: string;
-    sellerId: string;
     sellerAddress: string;
 }
 

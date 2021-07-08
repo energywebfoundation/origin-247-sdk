@@ -21,10 +21,10 @@ import { ValidatedTransferRequestEvent } from './events';
 
 interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
 
-interface IUpdateValidationStatusCommand {
+export interface IUpdateValidationStatusCommand {
     requestId: number;
     status: TransferValidationStatus;
-    commandName: string;
+    validatorName: string;
 }
 
 @Injectable()
@@ -63,9 +63,7 @@ export class TransferService {
         }
 
         const request = await this.energyTransferRequestRepository.createNew({
-            buyerId: sites.buyerId,
             buyerAddress: sites.buyerAddress,
-            sellerId: sites.sellerId,
             sellerAddress: sites.sellerAddress,
             volume: energyValue,
             generatorId
@@ -130,7 +128,7 @@ before we could save the certificate id on ETR.
                 const result = await this.executeCommand(Command, request);
 
                 await this.updateValidationStatus({
-                    commandName: Command.name,
+                    validatorName: Command.name,
                     requestId: request.id,
                     status: result.validationResult
                 });
@@ -139,7 +137,7 @@ before we could save the certificate id on ETR.
     }
 
     public async updateValidationStatus(command: IUpdateValidationStatusCommand): Promise<void> {
-        const { requestId, commandName, status } = command;
+        const { requestId, validatorName: commandName, status } = command;
 
         await this.energyTransferRequestRepository.updateWithLock(requestId, (request) => {
             request.updateValidationStatus(commandName, status);
@@ -180,8 +178,8 @@ before we could save the certificate id on ETR.
 
         await this.certificateService.transfer({
             certificateId: request.certificateId,
-            fromAddress: request.sites.sellerId,
-            toAddress: request.sites.buyerId,
+            fromAddress: request.sites.sellerAddress,
+            toAddress: request.sites.buyerAddress,
             energyValue: request.volume
         });
     }

@@ -19,6 +19,7 @@ import {
     VALIDATE_TRANSFER_COMMANDS_TOKEN
 } from './commands/ValidateTransferCommand';
 import { ValidatedTransferRequestEventHandler } from './handlers';
+import { UpdateTransferValidationCommandHandler } from './handlers/UpdateTransferValidationCommand.handler';
 
 export interface ITransferModuleParams {
     validateCommands: ValidateTransferCommandCtor[];
@@ -34,6 +35,7 @@ export class TransferModule {
                 CertificatePersistedEventHandler,
                 TransferService,
                 ValidatedTransferRequestEventHandler,
+                UpdateTransferValidationCommandHandler,
                 {
                     provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
                     useClass: EnergyTransferRequestPostgresRepository
@@ -62,6 +64,7 @@ export class TransferModuleForUnitTest {
                 CertificatePersistedEventHandler,
                 TransferService,
                 ValidatedTransferRequestEventHandler,
+                UpdateTransferValidationCommandHandler,
                 {
                     provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
                     useClass: EnergyTransferRequestInMemoryRepository

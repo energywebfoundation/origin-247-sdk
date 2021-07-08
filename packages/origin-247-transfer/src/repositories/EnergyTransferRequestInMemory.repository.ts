@@ -11,13 +11,11 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
     private db: EnergyTransferRequest[] = [];
 
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
-        const { buyerId, sellerId, volume, generatorId, sellerAddress, buyerAddress } = command;
+        const { volume, generatorId, sellerAddress, buyerAddress } = command;
 
         const entity: EnergyTransferRequest = EnergyTransferRequest.fromAttrs({
             ...EnergyTransferRequest.newAttributes({
-                buyerId,
                 buyerAddress,
-                sellerId,
                 sellerAddress,
                 volume,
                 generatorId

@@ -13,10 +13,8 @@ describe('Transfer module', () => {
     it.concurrent('should create ETR with given sites and data', async () => {
         const { app, queryBus, commandBus, eventBus, repository } = await setup({
             sites: {
-                buyerId: 'buyer1',
-                sellerId: 'seller1',
-                sellerAddress: '1',
-                buyerAddress: '2'
+                buyerAddress: '0x111',
+                sellerAddress: '0x222'
             },
             commands: []
         });
@@ -31,8 +29,8 @@ describe('Transfer module', () => {
             expect.objectContaining({
                 volume: '60',
                 generatorId: 'a1',
-                buyerId: 'buyer1',
-                sellerId: 'seller1'
+                buyerAddress: '0x111',
+                sellerAddress: '0x222'
             })
         );
 
@@ -40,12 +38,10 @@ describe('Transfer module', () => {
     });
 
     it.concurrent('should mark ETR as persisted', async () => {
-        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+        const { app, eventBus, repository } = await setup({
             sites: {
-                buyerId: 'buyer1',
-                sellerId: 'seller1',
-                sellerAddress: '1',
-                buyerAddress: '2'
+                sellerAddress: '0x111',
+                buyerAddress: '0x222'
             },
             commands: []
         });
@@ -86,10 +82,8 @@ describe('Transfer module', () => {
 
         const { app, queryBus, commandBus, eventBus, repository } = await setup({
             sites: {
-                buyerId: 'buyer1',
-                sellerId: 'seller1',
-                sellerAddress: '1',
-                buyerAddress: '2'
+                sellerAddress: '0x111',
+                buyerAddress: '0x222'
             },
             commands: [Command1, Command2],
             providers: [Command1Handler, Command2Handler]
@@ -100,7 +94,7 @@ describe('Transfer module', () => {
         await waitForPersistance();
 
         const request = await repository.findByCertificateId(1);
-        expect(request?.toAttrs().validationStatus).toEqual({
+        expect(request?.toAttrs().validationStatusRecord).toEqual({
             Command1: TransferValidationStatus.Pending,
             Command2: TransferValidationStatus.Pending
         });
@@ -122,12 +116,10 @@ describe('Transfer module', () => {
                 }
             }
 
-            const { app, queryBus, commandBus, eventBus, repository } = await setup({
+            const { app, eventBus, repository } = await setup({
                 sites: {
-                    buyerId: 'buyer1',
-                    sellerId: 'seller1',
-                    sellerAddress: '1',
-                    buyerAddress: '2'
+                    sellerAddress: '0x111',
+                    buyerAddress: '0x222'
                 },
                 commands: [Command1, Command2],
                 providers: [Command1Handler]
@@ -138,7 +130,7 @@ describe('Transfer module', () => {
             await waitForPersistance();
 
             const request = await repository.findByCertificateId(1);
-            expect(request?.toAttrs().validationStatus).toEqual({
+            expect(request?.toAttrs().validationStatusRecord).toEqual({
                 Command1: TransferValidationStatus.Pending,
                 Command2: TransferValidationStatus.Error
             });
@@ -167,19 +159,10 @@ describe('Transfer module', () => {
                 }
             }
 
-            const {
-                app,
-                queryBus,
-                commandBus,
-                eventBus,
-                repository,
-                validateEventHandler
-            } = await setup({
+            const { app, eventBus, repository, validateEventHandler } = await setup({
                 sites: {
-                    buyerId: 'buyer1',
-                    sellerId: 'seller1',
-                    sellerAddress: '1',
-                    buyerAddress: '2'
+                    sellerAddress: '0x111',
+                    buyerAddress: '0x222'
                 },
                 commands: [Command1, Command2],
                 providers: [Command1Handler, Command2Handler]
@@ -190,7 +173,7 @@ describe('Transfer module', () => {
             await waitForPersistance();
 
             const request = await repository.findByCertificateId(1);
-            expect(request?.toAttrs().validationStatus).toEqual({
+            expect(request?.toAttrs().validationStatusRecord).toEqual({
                 Command1: TransferValidationStatus.Valid,
                 Command2: TransferValidationStatus.Invalid
             });
@@ -219,19 +202,10 @@ describe('Transfer module', () => {
             }
         }
 
-        const {
-            app,
-            queryBus,
-            commandBus,
-            eventBus,
-            repository,
-            validateEventHandler
-        } = await setup({
+        const { app, eventBus, repository, validateEventHandler } = await setup({
             sites: {
-                buyerId: 'buyer1',
-                sellerId: 'seller1',
-                sellerAddress: '1',
-                buyerAddress: '2'
+                sellerAddress: '0x111',
+                buyerAddress: '0x222'
             },
             commands: [Command1, Command2],
             providers: [Command1Handler, Command2Handler]
@@ -242,7 +216,7 @@ describe('Transfer module', () => {
         await waitForPersistance();
 
         const request = await repository.findByCertificateId(1);
-        expect(request?.toAttrs().validationStatus).toEqual({
+        expect(request?.toAttrs().validationStatusRecord).toEqual({
             Command1: TransferValidationStatus.Valid,
             Command2: TransferValidationStatus.Valid
         });
