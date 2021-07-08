@@ -32,6 +32,9 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     @UpdateDateColumn()
     updatedAt: Date;
 
+    @Column({ type: 'date' })
+    transferDate: Date;
+
     @Column({ type: 'text' })
     sellerAddress: string;
 
@@ -71,16 +74,7 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
     }
 
     public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
-        const { volume, generatorId, buyerAddress, sellerAddress } = command;
-
-        const entity = this.repository.create(
-            EnergyTransferRequest.newAttributes({
-                buyerAddress,
-                sellerAddress,
-                volume,
-                generatorId
-            })
-        );
+        const entity = this.repository.create(EnergyTransferRequest.newAttributes(command));
 
         const savedEntity = await this.repository.save(entity);
 

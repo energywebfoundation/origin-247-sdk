@@ -7,15 +7,18 @@ export enum TransferValidationStatus {
     Error = 'error'
 }
 
-export interface EnergyTransferRequestAttrs {
+export interface EnergyTransferRequestPublicAttrs {
     id: number;
-    createdAt: Date;
-    updatedAt: Date;
-
     generatorId: string;
     sellerAddress: string;
     buyerAddress: string;
     volume: string;
+    transferDate: Date;
+}
+
+export interface EnergyTransferRequestAttrs extends EnergyTransferRequestPublicAttrs {
+    createdAt: Date;
+    updatedAt: Date;
 
     certificateId: number | null;
     isCertificatePersisted: boolean;
@@ -34,6 +37,7 @@ interface NewAttributesParams {
     sellerAddress: string;
     volume: string;
     generatorId: string;
+    transferDate: Date;
 }
 
 export class EnergyTransferRequest {
@@ -114,6 +118,17 @@ export class EnergyTransferRequest {
 
     public toAttrs(): EnergyTransferRequestAttrs {
         return this.attrs;
+    }
+
+    public toPublicAttrs(): EnergyTransferRequestPublicAttrs {
+        return {
+            buyerAddress: this.attrs.buyerAddress,
+            sellerAddress: this.attrs.sellerAddress,
+            generatorId: this.attrs.generatorId,
+            id: this.attrs.id,
+            transferDate: this.attrs.transferDate,
+            volume: this.attrs.volume
+        };
     }
 
     public static fromAttrs(attrs: EnergyTransferRequestAttrs): EnergyTransferRequest {

@@ -1,6 +1,7 @@
 import { EnergyTransferRequest } from '../EnergyTransferRequest';
 
 export interface ICreateNewCommand {
+    transferDate: Date;
     buyerAddress: string;
     sellerAddress: string;
     volume: string;

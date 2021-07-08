@@ -12,7 +12,6 @@ import {
 } from './queries/GetTransferSites.query';
 import { Logger } from '@nestjs/common';
 import {
-    IValidateTransferCommandResponse,
     ValidateTransferCommandCtor,
     VALIDATE_TRANSFER_COMMANDS_TOKEN
 } from './commands/ValidateTransferCommand';
@@ -44,14 +43,7 @@ export class TransferService {
     ) {}
 
     public async issue(command: IIssueCommand): Promise<void> {
-        const {
-            generatorId,
-            energyValue,
-            fromTime,
-            ownerBlockchainAddress,
-            toTime,
-            metadata
-        } = command;
+        const { generatorId, energyValue, transferDate, fromTime, toTime, metadata } = command;
 
         const sites: IGetTransferSitesQueryResponse | null = await this.queryBus.execute(
             new GetTransferSitesQuery({ generatorId })
@@ -66,7 +58,8 @@ export class TransferService {
             buyerAddress: sites.buyerAddress,
             sellerAddress: sites.sellerAddress,
             volume: energyValue,
-            generatorId
+            generatorId,
+            transferDate
         });
 
         const certificate = await this.certificateService.issue({
@@ -74,8 +67,8 @@ export class TransferService {
             energyValue: energyValue,
             fromTime,
             toTime,
-            userId: ownerBlockchainAddress,
-            toAddress: ownerBlockchainAddress,
+            userId: sites.sellerAddress,
+            toAddress: sites.sellerAddress,
             metadata
         });
 
@@ -103,9 +96,9 @@ export class TransferService {
 
         if (!request) {
             this.logger.warn(`
-No transfer request found for certificate: ${certificateId}.
-This can mean, that there was a race condition, and CertificatePersisted event was received,
-before we could save the certificate id on ETR.
+                No transfer request found for certificate: ${certificateId}.
+                This can mean, that there was a race condition, and CertificatePersisted event was received,
+                before we could save the certificate id on ETR.
             `);
 
             return;
@@ -189,16 +182,13 @@ before we could save the certificate id on ETR.
         request: EnergyTransferRequest
     ) {
         try {
-            return await this.commandBus.execute(
-                new Command({
-                    ...request.sites,
-                    requestId: request.id
-                })
-            );
+            const command = new Command(request.toPublicAttrs());
+
+            return await this.commandBus.execute(command);
         } catch (e) {
             this.logger.error(`
-One of validation commands (${Command.name}) returned error for request: ${request.id}:
-"${e.message}"
+                One of validation commands (${Command.name}) returned error for request: ${request.id}:
+                "${e.message}"
             `);
 
             return { validationResult: TransferValidationStatus.Error };

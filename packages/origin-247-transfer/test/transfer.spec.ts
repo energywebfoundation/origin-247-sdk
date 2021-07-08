@@ -37,6 +37,23 @@ describe('Transfer module', () => {
         await app.close();
     });
 
+    it.concurrent('should not create ETR if no sites are returned', async () => {
+        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+            sites: null,
+            commands: []
+        });
+
+        await app.init();
+        await publishStart(eventBus);
+        await waitForPersistance();
+
+        const request = await repository.findByCertificateId(1);
+
+        expect(request).toBeNull();
+
+        await app.close();
+    });
+
     it.concurrent('should mark ETR as persisted', async () => {
         const { app, eventBus, repository } = await setup({
             sites: {

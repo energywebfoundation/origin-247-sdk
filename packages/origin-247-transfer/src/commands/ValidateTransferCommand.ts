@@ -1,8 +1,11 @@
 import { ICommand, ICommandHandler } from '@nestjs/cqrs';
-import { TransferValidationStatus } from '../EnergyTransferRequest';
+import {
+    EnergyTransferRequestPublicAttrs,
+    TransferValidationStatus
+} from '../EnergyTransferRequest';
 
 export interface ValidateTransferCommandCtor {
-    new (payload: { requestId: number; sellerAddress: string; buyerAddress: string }): ICommand;
+    new (payload: EnergyTransferRequestPublicAttrs): ICommand;
 }
 
 export const VALIDATE_TRANSFER_COMMANDS_TOKEN = Symbol.for('VALIDATE_TRANSFER_COMMANDS_TOKEN');

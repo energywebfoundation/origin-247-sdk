@@ -1,10 +1,8 @@
-import { BigNumber } from 'ethers';
-
 export interface GenerationReadingStoredPayload<T = null> {
     generatorId: string;
     fromTime: Date;
     toTime: Date;
-    ownerBlockchainAddress: string;
+    transferDate: Date;
     energyValue: string;
     metadata: T;
 }

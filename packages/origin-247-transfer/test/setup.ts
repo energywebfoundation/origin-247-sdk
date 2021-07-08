@@ -29,8 +29,8 @@ export const publishStart = async (eventBus: EventBus) => {
             fromTime: new Date(),
             generatorId: 'a1',
             metadata: null,
-            ownerBlockchainAddress: 'c1',
-            toTime: new Date()
+            toTime: new Date(),
+            transferDate: new Date()
         })
     );
 
@@ -38,7 +38,7 @@ export const publishStart = async (eventBus: EventBus) => {
 };
 
 export const setup = async (options: {
-    sites: { buyerAddress: string; sellerAddress: string };
+    sites: { buyerAddress: string; sellerAddress: string } | null;
     commands: ValidateTransferCommandCtor[];
     providers?: any[];
 }) => {
