@@ -5,14 +5,14 @@ import {
 import { Module, DynamicModule } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import {
-    EnergyTransferRequestEntity,
-    EnergyTransferRequestPostgresRepository
-} from './repositories/EnergyTransferRequestPostgres.repository';
 import { GenerationReadingStoredEventHandler } from './handlers/GenerationReadingStoredEvent.handler';
 import { CertificatePersistedEventHandler } from './handlers/CertificatePersistedEvent.handler';
-import { EnergyTransferRequestInMemoryRepository } from './repositories/EnergyTransferRequestInMemory.repository';
-import { ENERGY_TRANSFER_REQUEST_REPOSITORY } from './repositories/EnergyTransferRequest.repository';
+import {
+    EnergyTransferRequestInMemoryRepository,
+    EnergyTransferRequestEntity,
+    EnergyTransferRequestPostgresRepository,
+    ENERGY_TRANSFER_REQUEST_REPOSITORY
+} from './repositories';
 import { TransferService } from './transfer.service';
 import {
     ValidateTransferCommandCtor,

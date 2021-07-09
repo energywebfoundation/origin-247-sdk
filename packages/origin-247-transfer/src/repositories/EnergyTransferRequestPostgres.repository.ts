@@ -1,64 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
-import {
-    CreateDateColumn,
-    Entity,
-    PrimaryGeneratedColumn,
-    Repository,
-    UpdateDateColumn,
-    Column,
-    Connection
-} from 'typeorm';
-import {
-    EnergyTransferRequest,
-    EnergyTransferRequestAttrs,
-    TransferValidationStatus
-} from '../EnergyTransferRequest';
+import { Repository, Connection } from 'typeorm';
+import { EnergyTransferRequest } from '../EnergyTransferRequest';
+import { EnergyTransferRequestEntity, tableName } from './EnergyTransferRequest.entity';
 import {
     ICreateNewCommand,
     EnergyTransferRequestRepository
 } from './EnergyTransferRequest.repository';
-
-const tableName = 'energy_transfer_request';
-
-@Entity(tableName)
-export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @CreateDateColumn()
-    createdAt: Date;
-
-    @UpdateDateColumn()
-    updatedAt: Date;
-
-    @Column({ type: 'date' })
-    transferDate: Date;
-
-    @Column({ type: 'text' })
-    sellerAddress: string;
-
-    @Column({ type: 'text' })
-    buyerAddress: string;
-
-    @Column({ type: 'text' })
-    generatorId: string;
-
-    @Column({ type: 'text' })
-    volume: string;
-
-    @Column({ type: 'int4', nullable: true, unique: true })
-    certificateId: number | null;
-
-    @Column({ type: 'boolean' })
-    isCertificatePersisted: boolean;
-
-    @Column('simple-json')
-    validationStatusRecord: Record<string, TransferValidationStatus>;
-
-    @Column({ type: 'text' })
-    computedValidationStatus: TransferValidationStatus;
-}
 
 @Injectable()
 export class EnergyTransferRequestPostgresRepository implements EnergyTransferRequestRepository {
@@ -110,8 +58,9 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
         try {
             const [rawRequest] = await queryRunner.query(
                 `
-                SELECT * FROM ${tableName} FOR UPDATE
+                SELECT * FROM ${tableName}
                 WHERE id = $1
+                FOR UPDATE
             `,
                 [id]
             );
@@ -122,7 +71,7 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
 
             const request = EnergyTransferRequest.fromAttrs({
                 ...rawRequest,
-                validationStatusRecord: JSON.parse(rawRequest.validationStatus)
+                validationStatusRecord: JSON.parse(rawRequest.validationStatusRecord)
             });
 
             cb(request);

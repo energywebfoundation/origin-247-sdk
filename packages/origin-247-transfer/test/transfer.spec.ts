@@ -10,7 +10,7 @@ jest.setTimeout(10000);
  */
 
 describe('Transfer module', () => {
-    it.concurrent('should create ETR with given sites and data', async () => {
+    it.concurrent('creates ETR with given sites and data', async () => {
         const { app, queryBus, commandBus, eventBus, repository } = await setup({
             sites: {
                 buyerAddress: '0x111',
@@ -37,7 +37,7 @@ describe('Transfer module', () => {
         await app.close();
     });
 
-    it.concurrent('should not create ETR if no sites are returned', async () => {
+    it.concurrent('does not create ETR if no sites are returned', async () => {
         const { app, queryBus, commandBus, eventBus, repository } = await setup({
             sites: null,
             commands: []
@@ -54,7 +54,7 @@ describe('Transfer module', () => {
         await app.close();
     });
 
-    it.concurrent('should mark ETR as persisted', async () => {
+    it.concurrent('marks ETR as persisted', async () => {
         const { app, eventBus, repository } = await setup({
             sites: {
                 sellerAddress: '0x111',
@@ -77,7 +77,7 @@ describe('Transfer module', () => {
         await app.close();
     });
 
-    it.concurrent('should save all validations as pending before starting validating', async () => {
+    it.concurrent('saves all validations as pending before starting validating', async () => {
         class Command1 {}
         class Command2 {}
 
@@ -120,7 +120,7 @@ describe('Transfer module', () => {
     });
 
     it.concurrent(
-        'should immediately save validation error if command handler is not defined',
+        'immediately saves validation error if command handler is not defined',
         async () => {
             class Command1 {}
             class Command2 {}
@@ -157,7 +157,7 @@ describe('Transfer module', () => {
     );
 
     it.concurrent(
-        'should save validation results - and dont send event if not all is valid',
+        'saves validation results - and dont send event if not all is valid',
         async () => {
             class Command1 {}
             class Command2 {}
@@ -201,7 +201,7 @@ describe('Transfer module', () => {
         }
     );
 
-    it.concurrent('should send event if all is valid', async () => {
+    it.concurrent('sends event if all is valid', async () => {
         class Command1 {}
         class Command2 {}
 

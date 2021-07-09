@@ -112,7 +112,7 @@ export class TransferService {
     }
 
     private async startValidation(request: EnergyTransferRequest): Promise<void> {
-        request.startValidation(this.validateCommands);
+        request.startValidation(this.validateCommands.map((c) => c.name));
 
         await this.energyTransferRequestRepository.save(request);
 
@@ -134,15 +134,18 @@ export class TransferService {
 
         await this.energyTransferRequestRepository.updateWithLock(requestId, (request) => {
             request.updateValidationStatus(commandName, status);
-
-            if (request.isValid()) {
-                this.eventBus.publish(
-                    new ValidatedTransferRequestEvent({
-                        requestId: request.id
-                    })
-                );
-            }
         });
+
+        // This has to be run/checked after the transaction above finishes
+        const request = await this.energyTransferRequestRepository.findById(requestId);
+
+        if (request && request.isValid()) {
+            this.eventBus.publish(
+                new ValidatedTransferRequestEvent({
+                    requestId: request.id
+                })
+            );
+        }
     }
 
     public async transferCertificate(requestId: number): Promise<void> {

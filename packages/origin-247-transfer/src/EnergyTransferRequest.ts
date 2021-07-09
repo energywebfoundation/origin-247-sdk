@@ -76,22 +76,22 @@ export class EnergyTransferRequest {
         this.attrs.isCertificatePersisted = true;
     }
 
-    public startValidation(validationCommands: ValidateTransferCommandCtor[]): void {
-        this.attrs.validationStatusRecord = validationCommands.reduce(
+    public startValidation(validatorNames: string[]): void {
+        this.attrs.validationStatusRecord = validatorNames.reduce(
             (status, command) => ({
                 ...status,
-                [command.name]: TransferValidationStatus.Pending
+                [command]: TransferValidationStatus.Pending
             }),
             {} as EnergyTransferRequestAttrs['validationStatusRecord']
         );
     }
 
-    public updateValidationStatus(commandName: string, status: TransferValidationStatus): void {
-        const currentStatus = this.attrs.validationStatusRecord[commandName];
+    public updateValidationStatus(validatorName: string, status: TransferValidationStatus): void {
+        const currentStatus = this.attrs.validationStatusRecord[validatorName];
 
         if (!currentStatus) {
             throw new Error(
-                `Cannot update status of transfer request: ${this.attrs.id}, because validator "${commandName}" is not present`
+                `Cannot update status of transfer request: ${this.attrs.id}, because validator "${validatorName}" is not present`
             );
         }
 
@@ -101,7 +101,7 @@ export class EnergyTransferRequest {
             );
         }
 
-        this.attrs.validationStatusRecord[commandName] = status;
+        this.attrs.validationStatusRecord[validatorName] = status;
 
         const statuses = Object.values(this.attrs.validationStatusRecord);
 

@@ -17,6 +17,7 @@ specifiers:
   '@rush-temp/origin-247-transfer': file:./projects/origin-247-transfer.tgz
   '@types/bull': 3.15.1
   '@types/jest': 26.0.23
+  '@types/lodash': 4.14.171
   '@types/node': 15.12.4
   bull: 3.22.9
   concurrently: 6.2.0
@@ -27,6 +28,8 @@ specifiers:
   passport: 0.4.1
   pg: 8.6.0
   ts-jest: 27.0.3
+  ts-node: 9.1.1
+  tsconfig-paths: 3.10.1
   typeorm: 0.2.34
   typescript: 4.3.4
   wait-on: 5.3.0
@@ -44,20 +47,23 @@ dependencies:
   '@nestjs/platform-express': 7.6.18_2664420588e0901c7943acb4693cbaf4
   '@nestjs/testing': 7.6.18_9cd0f963ae6f35bf288217e4f1c45cb4
   '@nestjs/typeorm': 7.1.5_476bd709bf4288b37cfeb220ce38756a
-  '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz
+  '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_ts-node@9.1.1
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.4.1
   '@types/bull': 3.15.1
   '@types/jest': 26.0.23
+  '@types/lodash': 4.14.171
   '@types/node': 15.12.4
   bull: 3.22.9
   concurrently: 6.2.0
   ethers: 5.3.0
   ganache-cli: 6.12.2
-  jest: 27.0.5
+  jest: 27.0.5_ts-node@9.1.1
   lodash: 4.17.21
   passport: 0.4.1
   pg: 8.6.0
   ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
+  ts-node: 9.1.1_typescript@4.3.4
+  tsconfig-paths: 3.10.1
   typeorm: 0.2.34
   typescript: 4.3.4
   wait-on: 5.3.0
@@ -1237,7 +1243,7 @@ packages:
       slash: 3.0.0
     dev: false
 
-  /@jest/core/27.0.5:
+  /@jest/core/27.0.5_ts-node@9.1.1:
     resolution: {integrity: sha512-g73//jF0VwsOIrWUC9Cqg03lU3QoAMFxVjsm6n6yNmwZcQPN/o8w+gLWODw5VfKNFZT38otXHWxc6b8eGDUpEA==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     peerDependencies:
@@ -1258,7 +1264,7 @@ packages:
       exit: 0.1.2
       graceful-fs: 4.2.6
       jest-changed-files: 27.0.2
-      jest-config: 27.0.5
+      jest-config: 27.0.5_ts-node@9.1.1
       jest-haste-map: 27.0.5
       jest-message-util: 27.0.2
       jest-regex-util: 27.0.1
@@ -2036,6 +2042,10 @@ packages:
     resolution: {integrity: sha1-HjRA6RXwsSA9I3SOeO3XubW0PlY=}
     dev: false
 
+  /arg/4.1.3:
+    resolution: {integrity: sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==}
+    dev: false
+
   /argparse/1.0.10:
     resolution: {integrity: sha512-o5Roy6tNG4SL/FOkCAN6RzjiakZS25RLYFrcMttJqbdd8BWrnA+fGz57iN5Pb06pvBGvl5gQ0B48dJlslXvoTg==}
     dependencies:
@@ -2633,6 +2643,10 @@ packages:
       sha.js: 2.4.11
     dev: false
 
+  /create-require/1.1.1:
+    resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
+    dev: false
+
   /cron-parser/2.18.0:
     resolution: {integrity: sha512-s4odpheTyydAbTBQepsqd2rNWGa2iV3cyo8g7zbI2QQYGLVsfbhmwukayS1XHppe02Oy1fg7mg6xoaraVJeEcg==}
     engines: {node: '>=0.8'}
@@ -2802,6 +2816,11 @@ packages:
   /diff-sequences/27.0.1:
     resolution: {integrity: sha512-XPLijkfJUh/PIBnfkcSHgvD6tlYixmcMAn3osTk6jt+H0v/mgURto1XUiD9DKuGX5NDoVS6dSlA23gd9FUaCFg==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
+    dev: false
+
+  /diff/4.0.2:
+    resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
+    engines: {node: '>=0.3.1'}
     dev: false
 
   /dom-walk/0.1.2:
@@ -3853,7 +3872,7 @@ packages:
       - supports-color
     dev: false
 
-  /jest-cli/27.0.5:
+  /jest-cli/27.0.5_ts-node@9.1.1:
     resolution: {integrity: sha512-kZqY020QFOFQKVE2knFHirTBElw3/Q0kUbDc3nMfy/x+RQ7zUY89SUuzpHHJoSX1kX7Lq569ncvjNqU3Td/FCA==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     hasBin: true
@@ -3863,14 +3882,14 @@ packages:
       node-notifier:
         optional: true
     dependencies:
-      '@jest/core': 27.0.5
+      '@jest/core': 27.0.5_ts-node@9.1.1
       '@jest/test-result': 27.0.2
       '@jest/types': 27.0.2
       chalk: 4.1.1
       exit: 0.1.2
       graceful-fs: 4.2.6
       import-local: 3.0.2
-      jest-config: 27.0.5
+      jest-config: 27.0.5_ts-node@9.1.1
       jest-util: 27.0.2
       jest-validate: 27.0.2
       prompts: 2.4.1
@@ -3883,7 +3902,7 @@ packages:
       - utf-8-validate
     dev: false
 
-  /jest-config/27.0.5:
+  /jest-config/27.0.5_ts-node@9.1.1:
     resolution: {integrity: sha512-zCUIXag7QIXKEVN4kUKbDBDi9Q53dV5o3eNhGqe+5zAbt1vLs4VE3ceWaYrOub0L4Y7E9pGfM84TX/0ARcE+Qw==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     peerDependencies:
@@ -3913,6 +3932,7 @@ packages:
       jest-validate: 27.0.2
       micromatch: 4.0.4
       pretty-format: 27.0.2
+      ts-node: 9.1.1_typescript@4.3.4
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -4281,7 +4301,7 @@ packages:
       supports-color: 8.1.1
     dev: false
 
-  /jest/27.0.5:
+  /jest/27.0.5_ts-node@9.1.1:
     resolution: {integrity: sha512-4NlVMS29gE+JOZvgmSAsz3eOjkSsHqjTajlIsah/4MVSmKvf3zFP/TvgcLoWe2UVHiE9KF741sReqhF0p4mqbQ==}
     engines: {node: ^10.13.0 || ^12.13.0 || ^14.15.0 || >=15.0.0}
     hasBin: true
@@ -4291,9 +4311,9 @@ packages:
       node-notifier:
         optional: true
     dependencies:
-      '@jest/core': 27.0.5
+      '@jest/core': 27.0.5_ts-node@9.1.1
       import-local: 3.0.2
-      jest-cli: 27.0.5
+      jest-cli: 27.0.5_ts-node@9.1.1
     transitivePeerDependencies:
       - bufferutil
       - canvas
@@ -5613,6 +5633,11 @@ packages:
       ansi-regex: 5.0.0
     dev: false
 
+  /strip-bom/3.0.0:
+    resolution: {integrity: sha1-IzTBjpx1n3vdVv3vfprj1YjmjtM=}
+    engines: {node: '>=4'}
+    dev: false
+
   /strip-bom/4.0.0:
     resolution: {integrity: sha512-3xurFv5tEgii33Zi8Jtp55wEIILR9eh34FAW00PZf+JnSsTmV/ioewSgQl97JHvgjoRGwPShsWm+IdrxB35d0w==}
     engines: {node: '>=8'}
@@ -5791,7 +5816,7 @@ packages:
       bs-logger: 0.2.6
       buffer-from: 1.1.1
       fast-json-stable-stringify: 2.1.0
-      jest: 27.0.5
+      jest: 27.0.5_ts-node@9.1.1
       jest-util: 27.0.2
       json5: 2.2.0
       lodash: 4.17.21
@@ -5800,6 +5825,30 @@ packages:
       semver: 7.3.5
       typescript: 4.3.4
       yargs-parser: 20.2.9
+    dev: false
+
+  /ts-node/9.1.1_typescript@4.3.4:
+    resolution: {integrity: sha512-hPlt7ZACERQGf03M253ytLY3dHbGNGrAq9qIHWUY9XHYl1z7wYngSr3OQ5xmui8o2AaxsONxIzjafLUiWBo1Fg==}
+    engines: {node: '>=10.0.0'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=2.7'
+    dependencies:
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      source-map-support: 0.5.19
+      typescript: 4.3.4
+      yn: 3.1.1
+    dev: false
+
+  /tsconfig-paths/3.10.1:
+    resolution: {integrity: sha512-rETidPDgCpltxF7MjBZlAFPUHv5aHH2MymyPvh+vEyWAED4Eb/WeMbsnD/JDr4OKPOA1TssDHgIcpTN5Kh0p6Q==}
+    dependencies:
+      json5: 2.2.0
+      minimist: 1.2.5
+      strip-bom: 3.0.0
     dev: false
 
   /tslib/1.14.1:
@@ -6243,6 +6292,11 @@ packages:
       yargs-parser: 20.2.9
     dev: false
 
+  /yn/3.1.1:
+    resolution: {integrity: sha512-Ux4ygGWsu2c7isFWe8Yu1YluJmqVhxqK2cLXNQA5AcC3QfbGNpM7fu0Y8b/z16pXLnFxZYvWhd3fhBY9DLmC6Q==}
+    engines: {node: '>=6'}
+    dev: false
+
   /zen-observable-ts/1.0.0:
     resolution: {integrity: sha512-KmWcbz+9kKUeAQ8btY8m1SsEFgBcp7h/Uf3V5quhan7ZWdjGsf0JcGLULQiwOZibbFWnHkYq8Nn2AZbJabovQg==}
     dependencies:
@@ -6254,8 +6308,9 @@ packages:
     resolution: {integrity: sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==}
     dev: false
 
-  file:projects/origin-247-certificate.tgz:
+  file:projects/origin-247-certificate.tgz_ts-node@9.1.1:
     resolution: {integrity: sha512-8qq1NafbElrMhhjG2ejHzALNIxe/pUN5adlBynckBFl/HZNQNyESkbj5i7dhv2a87HzZ1OSjjMWez+kpvfCGvA==, tarball: file:projects/origin-247-certificate.tgz}
+    id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
     dependencies:
@@ -6278,7 +6333,7 @@ packages:
       concurrently: 6.2.0
       ethers: 5.3.0
       ganache-cli: 6.12.2
-      jest: 27.0.5
+      jest: 27.0.5_ts-node@9.1.1
       passport: 0.4.1
       pg: 8.6.0
       ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
@@ -6307,11 +6362,16 @@ packages:
     dev: false
 
   file:projects/origin-247-transfer.tgz_passport@0.4.1:
-    resolution: {integrity: sha512-lZd8/sRg1e8F7j75bhTWYqbjFE02NVc7DJ6RVdo8HY5L/oRhWstKKxM7iuNo7hYC4WGFtU24Di5ylGJ8YrR22w==, tarball: file:projects/origin-247-transfer.tgz}
+    resolution: {integrity: sha512-mP7Bx10jlNGAslKo2sLgd12M/v3ayr9NkXtFtDVbfTqtvswATJmPCc79hFS7kSGm7/QSbqB4VRWP+4osHa6G2g==, tarball: file:projects/origin-247-transfer.tgz}
     id: file:projects/origin-247-transfer.tgz
     name: '@rush-temp/origin-247-transfer'
     version: 0.0.0
     dependencies:
+      '@energyweb/issuer': 3.2.1-alpha.1625573089.0
+      '@energyweb/issuer-api': 0.2.1-alpha.1625573089.0_84d2e8496da2b35f72ec1aae830fb752
+      '@energyweb/origin-backend-utils': 1.5.2-alpha.1625573089.0_@nestjs+platform-express@7.6.18
+      '@energyweb/utils-general': 11.0.3-alpha.1625573089.0
+      '@nestjs/bull': 0.3.1_c86fa2ed7bc9e7a48760c2e5795b24d0
       '@nestjs/common': 7.6.18
       '@nestjs/core': 7.6.18_e6f0514ea3d89219387f66417a78dd96
       '@nestjs/cqrs': 7.0.1_2664420588e0901c7943acb4693cbaf4
@@ -6322,15 +6382,21 @@ packages:
       '@types/jest': 26.0.23
       '@types/lodash': 4.14.171
       '@types/node': 15.12.4
+      bull: 3.22.9
       class-transformer: 0.4.0
+      concurrently: 6.2.0
       ethers: 5.3.0
-      jest: 27.0.5
+      ganache-cli: 6.12.2
+      jest: 27.0.5_ts-node@9.1.1
       lodash: 4.17.21
       pg: 8.6.0
       reflect-metadata: 0.1.13
       ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
+      ts-node: 9.1.1_typescript@4.3.4
+      tsconfig-paths: 3.10.1
       typeorm: 0.2.34
       typescript: 4.3.4
+      wait-on: 5.3.0
     transitivePeerDependencies:
       - '@nestjs/microservices'
       - '@nestjs/websockets'
@@ -6340,12 +6406,14 @@ packages:
       - class-transformer
       - class-validator
       - debug
+      - express
+      - fastify-swagger
       - node-notifier
       - passport
       - pg-native
       - reflect-metadata
       - rxjs
       - supports-color
-      - ts-node
+      - swagger-ui-express
       - utf-8-validate
     dev: false
