@@ -248,4 +248,31 @@ describe('Transfer module', () => {
 
         await app.close();
     });
+
+    it.concurrent('sends event if no commands are given', async () => {
+        const { app, eventBus, repository, validateEventHandler } = await setup({
+            sites: {
+                sellerAddress: '0x111',
+                buyerAddress: '0x222'
+            },
+            commands: [],
+            providers: []
+        });
+
+        await app.init();
+        await publishStart(eventBus);
+        await waitForPersistance();
+
+        const request = await repository.findByCertificateId(1);
+
+        expect(validateEventHandler).toBeCalledWith(
+            expect.objectContaining({
+                payload: expect.objectContaining({
+                    requestId: request?.id
+                })
+            })
+        );
+
+        await app.close();
+    });
 });

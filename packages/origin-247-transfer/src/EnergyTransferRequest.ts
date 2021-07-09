@@ -77,6 +77,12 @@ export class EnergyTransferRequest {
     }
 
     public startValidation(validatorNames: string[]): void {
+        if (validatorNames.length === 0) {
+            this.attrs.computedValidationStatus = TransferValidationStatus.Valid;
+
+            return;
+        }
+
         this.attrs.validationStatusRecord = validatorNames.reduce(
             (status, command) => ({
                 ...status,

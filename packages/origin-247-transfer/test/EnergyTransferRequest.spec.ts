@@ -6,7 +6,7 @@ describe('Energy Transfer Request', () => {
             expect(etr.toAttrs().computedValidationStatus).toBe(status);
         };
 
-        const createEtr = () => {
+        const createEtr = (validators = ['validator1', 'validator2']) => {
             const etr = EnergyTransferRequest.fromAttrs({
                 id: 1,
                 ...EnergyTransferRequest.newAttributes({
@@ -18,7 +18,7 @@ describe('Energy Transfer Request', () => {
                 })
             });
 
-            etr.startValidation(['validator1', 'validator2']);
+            etr.startValidation(validators);
 
             return etr;
         };
@@ -27,6 +27,12 @@ describe('Energy Transfer Request', () => {
             const etr = createEtr();
 
             expectStatus(etr, TransferValidationStatus.Pending);
+        });
+
+        it('starts with valid status if is created with empty validators', () => {
+            const etr = createEtr([]);
+
+            expectStatus(etr, TransferValidationStatus.Valid);
         });
 
         it('properly updates valid status', () => {
@@ -79,7 +85,7 @@ describe('Energy Transfer Request', () => {
     });
 
     describe('isValid', () => {
-        const createEtr = () => {
+        const createEtr = (validators = ['validator1', 'validator2']) => {
             const etr = EnergyTransferRequest.fromAttrs({
                 id: 1,
                 ...EnergyTransferRequest.newAttributes({
@@ -91,7 +97,7 @@ describe('Energy Transfer Request', () => {
                 })
             });
 
-            etr.startValidation(['validator1', 'validator2']);
+            etr.startValidation(validators);
 
             return etr;
         };
@@ -100,6 +106,12 @@ describe('Energy Transfer Request', () => {
             const etr = createEtr();
 
             expect(etr.isValid()).toBe(false);
+        });
+
+        it('is initially valid if no validators are given', () => {
+            const etr = createEtr([]);
+
+            expect(etr.isValid()).toBe(true);
         });
 
         it('is true only if all are valid', () => {

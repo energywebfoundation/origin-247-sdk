@@ -116,6 +116,17 @@ export class TransferService {
 
         await this.energyTransferRequestRepository.save(request);
 
+        // If request is immediately valid (which may happen if no validators are supplied)
+        if (request.isValid()) {
+            this.eventBus.publish(
+                new ValidatedTransferRequestEvent({
+                    requestId: request.id
+                })
+            );
+
+            return;
+        }
+
         await Promise.all(
             this.validateCommands.map(async (Command) => {
                 const result = await this.executeCommand(Command, request);
