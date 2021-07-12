@@ -1,10 +1,19 @@
-import { ValidateTransferCommandCtor } from './commands/ValidateTransferCommand';
-
 export enum TransferValidationStatus {
     Pending = 'pending',
     Valid = 'valid',
     Invalid = 'invalid',
     Error = 'error'
+}
+
+export interface IUpdateStatusResult {
+    success: boolean;
+    message?: string;
+}
+
+export enum UpdateStatusCode {
+    Success = 'success',
+    NoValidator = 'noValidator',
+    NotPending = 'notPending'
 }
 
 export interface EnergyTransferRequestPublicAttrs {
@@ -92,13 +101,14 @@ export class EnergyTransferRequest {
         );
     }
 
-    public updateValidationStatus(validatorName: string, status: TransferValidationStatus): void {
+    public updateValidationStatus(
+        validatorName: string,
+        status: TransferValidationStatus
+    ): UpdateStatusCode {
         const currentStatus = this.attrs.validationStatusRecord[validatorName];
 
         if (!currentStatus) {
-            throw new Error(
-                `Cannot update status of transfer request: ${this.attrs.id}, because validator "${validatorName}" is not present`
-            );
+            return UpdateStatusCode.NoValidator;
         }
 
         if (currentStatus !== TransferValidationStatus.Pending) {
@@ -106,11 +116,8 @@ export class EnergyTransferRequest {
              * This may happen randomly if for example we have asymmetric validator,
              * that instantly updates validation status after we start validation
              */
-            console.warn(
-                `Skipping update of transfer request: ${this.attrs.id} to ${status}, because it already has status ${currentStatus}`
-            );
 
-            return;
+            return UpdateStatusCode.NotPending;
         }
 
         this.attrs.validationStatusRecord[validatorName] = status;
@@ -126,6 +133,8 @@ export class EnergyTransferRequest {
         } else if (statuses.every((s) => s === TransferValidationStatus.Valid)) {
             this.attrs.computedValidationStatus = TransferValidationStatus.Valid;
         }
+
+        return UpdateStatusCode.Success;
     }
 
     public toAttrs(): EnergyTransferRequestAttrs {

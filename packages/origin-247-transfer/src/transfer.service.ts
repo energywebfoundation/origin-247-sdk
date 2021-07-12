@@ -15,7 +15,11 @@ import {
     ValidateTransferCommandCtor,
     VALIDATE_TRANSFER_COMMANDS_TOKEN
 } from './commands/ValidateTransferCommand';
-import { EnergyTransferRequest, TransferValidationStatus } from './EnergyTransferRequest';
+import {
+    EnergyTransferRequest,
+    TransferValidationStatus,
+    UpdateStatusCode
+} from './EnergyTransferRequest';
 import { ValidatedTransferRequestEvent } from './events';
 
 interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
@@ -144,7 +148,21 @@ export class TransferService {
         const { requestId, validatorName: commandName, status } = command;
 
         await this.energyTransferRequestRepository.updateWithLock(requestId, (request) => {
-            request.updateValidationStatus(commandName, status);
+            const result = request.updateValidationStatus(commandName, status);
+
+            switch (result) {
+                case UpdateStatusCode.NoValidator:
+                    throw new Error(
+                        `Cannot update status of transfer request: ${requestId}, because validator "${commandName}" is not present`
+                    );
+                case UpdateStatusCode.NotPending:
+                    this.logger.warn(
+                        `Skipping update of transfer request: ${requestId} to ${status}, because it is not pending`
+                    );
+                    return;
+                default:
+                    return;
+            }
         });
 
         // This has to be run/checked after the transaction above finishes
