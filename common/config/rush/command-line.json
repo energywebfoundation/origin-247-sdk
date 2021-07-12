@@ -33,8 +33,8 @@
         "commandKind": "bulk",
         "name": "test:e2e",
         "summary": "Run e2e tests",
-        "safeForSimultaneousRushProcesses": true,
-        "enableParallelism": true,
+        "safeForSimultaneousRushProcesses": false,
+        "enableParallelism": false,
         "ignoreMissingScript": true,
         "allowWarningsInSuccessfulBuild": true
     },

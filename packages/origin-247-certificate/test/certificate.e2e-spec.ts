@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { CertificateService } from '../src';
 
-jest.setTimeout(30 * 1000);
+jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
 const transactionTime = () => new Promise((resolve) => setTimeout(resolve, 10000));
