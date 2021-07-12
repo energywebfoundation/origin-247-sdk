@@ -33,6 +33,15 @@
         "commandKind": "bulk",
         "name": "test:e2e",
         "summary": "Run e2e tests",
+        "safeForSimultaneousRushProcesses": false,
+        "enableParallelism": false,
+        "ignoreMissingScript": true,
+        "allowWarningsInSuccessfulBuild": true
+    },
+    {
+        "commandKind": "bulk",
+        "name": "test:unit",
+        "summary": "Run unit tests",
         "safeForSimultaneousRushProcesses": true,
         "enableParallelism": true,
         "ignoreMissingScript": true,

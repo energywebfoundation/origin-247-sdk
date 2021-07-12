@@ -48,9 +48,8 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
             }
         };
 
-        this.db.push(certificate);
-
         setTimeout(() => {
+            this.db.push(certificate);
             this.eventBus.publish(new CertificatePersistedEvent(certificate.id));
         }, 2000);
 

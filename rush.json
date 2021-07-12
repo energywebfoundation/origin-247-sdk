@@ -383,6 +383,10 @@
         {
             "packageName": "@energyweb/origin-247-certificate",
             "projectFolder": "packages/origin-247-certificate"
+        },
+        {
+            "packageName": "@energyweb/origin-247-transfer",
+            "projectFolder": "packages/origin-247-transfer"
         }
         // {
         //   /**
