@@ -14,13 +14,13 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @CreateDateColumn()
+    @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 
-    @Column({ type: 'timestamp' })
+    @Column({ type: 'timestamptz' })
     transferDate: Date;
 
     @Column({ type: 'text' })

@@ -102,9 +102,15 @@ export class EnergyTransferRequest {
         }
 
         if (currentStatus !== TransferValidationStatus.Pending) {
-            throw new Error(
-                `Cannot update status of transfer request: ${this.attrs.id} to ${status}, because it already has status ${currentStatus}`
+            /**
+             * This may happen randomly if for example we have asymmetric validator,
+             * that instantly updates validation status after we start validation
+             */
+            console.warn(
+                `Skipping update of transfer request: ${this.attrs.id} to ${status}, because it already has status ${currentStatus}`
             );
+
+            return;
         }
 
         this.attrs.validationStatusRecord[validatorName] = status;
