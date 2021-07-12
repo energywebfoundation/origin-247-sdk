@@ -29,7 +29,7 @@ import {
 
 const testLogger = new Logger('e2e');
 
-const web3 = 'http://localhost:8545';
+const web3 = process.env.WEB3 ?? 'http://localhost:8545';
 const provider = getProviderWithFallback(web3);
 
 export const registryDeployer = {

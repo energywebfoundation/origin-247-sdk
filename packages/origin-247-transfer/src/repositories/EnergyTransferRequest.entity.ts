@@ -20,7 +20,7 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     @UpdateDateColumn()
     updatedAt: Date;
 
-    @Column({ type: 'date' })
+    @Column({ type: 'timestamp' })
     transferDate: Date;
 
     @Column({ type: 'text' })
