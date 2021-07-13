@@ -12,6 +12,7 @@ Despite typical 24/7 SDK requirements and setup, you will need
 
 ## Installation
 
+0. Add peer runtime dependencies: `yarn add @energyweb/issuer @energyweb/issuer-api`
 1. For NestJS Bull please consult: https://docs.nestjs.com/techniques/queues and setup `BullModule.forRoot`.
 2. For migrations, please add entry to your `package.json` scripts section:
 

@@ -1,6 +1,6 @@
 {
     "name": "@energyweb/origin-247-certificate",
-    "version": "0.0.2-alpha.3.0",
+    "version": "0.0.2-alpha.1626162149.0",
     "main": "./dist/js/src/index.js",
     "types": "./dist/js/src/index.d.ts",
     "scripts": {
@@ -16,10 +16,6 @@
         "publish:release": "lerna version --create-release github --conventional-commits --exact --yes --message \"chore(release): publish /skip-deploy\" && lerna publish from-git --yes"
     },
     "dependencies": {
-        "@energyweb/issuer": "3.2.1-alpha.1625651017.0",
-        "@energyweb/issuer-api": "0.2.1-alpha.1625651017.0",
-        "@energyweb/origin-backend-utils": "1.5.2-alpha.1625651017.0",
-        "@energyweb/utils-general": "11.0.3-alpha.1625651017.0",
         "@nestjs/bull": "0.3.1",
         "@nestjs/common": "7.6.18",
         "@nestjs/core": "7.6.18",
@@ -32,6 +28,10 @@
         "typeorm": "0.2.34"
     },
     "devDependencies": {
+        "@energyweb/issuer": "3.2.1-alpha.1625651017.0",
+        "@energyweb/issuer-api": "0.2.1-alpha.1625651017.0",
+        "@energyweb/origin-backend-utils": "1.5.2-alpha.1625651017.0",
+        "@energyweb/utils-general": "11.0.3-alpha.1625651017.0",
         "@nestjs/passport": "7.1.5",
         "@nestjs/platform-express": "7.6.18",
         "@nestjs/testing": "7.6.18",
@@ -44,6 +44,10 @@
         "ts-jest": "27.0.3",
         "typescript": "4.3.4",
         "wait-on": "5.3.0"
+    },
+    "peerDependencies": {
+        "@energyweb/issuer": "3.2.1-alpha.1625651017.0",
+        "@energyweb/issuer-api": "0.2.1-alpha.1625651017.0"
     },
     "jest": {
         "moduleFileExtensions": [
@@ -59,5 +63,5 @@
         "testEnvironment": "node",
         "forceExit": true
     },
-    "gitHead": "a898a4737b118e9f873d17d581c31699af254ee8"
+    "gitHead": "db832fe23c9df632c676274f3ec1f5f60567e62c"
 }
