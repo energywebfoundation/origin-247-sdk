@@ -50,8 +50,13 @@ jobs:
             - name: Install application
               run: node common/scripts/install-run-rush.js update
 
-            - name: Build
-              run: node common/scripts/install-run-rush.js build
+            # This step is required by rush bug.
+            # Consult https://github.com/microsoft/rushstack/issues/2807 for more info
+            - name: Rebuild peer dependency
+              run: node common/scripts/install-run-rush.js rebuild --verbose --to origin-247-certificate
+
+            - name: Rebuild
+              run: node common/scripts/install-run-rush.js rebuild --verbose
 
             - name: Run all test:unit in packages
               run: node common/scripts/install-run-rush.js test:unit --verbose
