@@ -19,6 +19,6 @@
         "resolveJsonModule": true,
         "preserveWatchOutput": true
     },
-    "include": ["src/**/*", "test/**/*", "migrations/*", "ormconfig*.ts"],
+    "include": ["src/**/*", "tests/**/*", "migrations/*", "ormconfig*.ts"],
     "exclude": ["node_modules", "dist"]
 }

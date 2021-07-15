@@ -1,9 +1,9 @@
-import { matcher } from '../src';
+import { spreadMatcher } from '../src';
 
-describe('Matcher', () => {
+describe('spreadMatcher', () => {
     describe('consumer priority', () => {
         it('2 consumers within same group - should distribute evenly between same priority consumers', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -68,7 +68,7 @@ describe('Matcher', () => {
         });
 
         it('2 consumers within same group - should distribute evenly between same priority consumers, regardless of consumptions', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -133,7 +133,7 @@ describe('Matcher', () => {
         });
 
         it('2 consumers within same group - should distribute one more to first consumer when generations are indivisible equally', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -198,7 +198,7 @@ describe('Matcher', () => {
         });
 
         it('3 consumers within same group - should distribute evenly between same priority consumers', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -280,7 +280,7 @@ describe('Matcher', () => {
         });
 
         it('3 consumers within same group - should distribute last indivisible generation (1) to first consumer', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -362,7 +362,7 @@ describe('Matcher', () => {
         });
 
         it('3 consumers within same group - should distribute last indivisible generation (2) from different generators to first consumer', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -449,7 +449,7 @@ describe('Matcher', () => {
         });
 
         it('2 consumers within different groups - should satisfy higher priority group first', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [{ id: 'consumerA', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }],
                     [{ id: 'consumerB', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }]
@@ -507,7 +507,7 @@ describe('Matcher', () => {
         });
 
         it('2 consumer priority groups, 2 consumer each - should satisfy higher priority group first', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -613,7 +613,7 @@ describe('Matcher', () => {
 
     describe('generator priority', () => {
         it('2 generators - should distribute evenly between same priority generators', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [{ id: 'consumerA', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }]
                 ],
@@ -654,7 +654,7 @@ describe('Matcher', () => {
         });
 
         it('2 generators - should distribute last indivisible consumption (1) from first generation on list', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [{ id: 'consumerA', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }]
                 ],
@@ -678,7 +678,7 @@ describe('Matcher', () => {
         });
 
         it('3 generators - should distribute evenly between same priority generators', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -735,7 +735,7 @@ describe('Matcher', () => {
         });
 
         it('3 generators - should distribute last indivisible consumption (1) from first generation on list', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -791,7 +791,7 @@ describe('Matcher', () => {
         });
 
         it('3 generators - should distribute last indivisible consumption (2) from first two generations on list', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -847,7 +847,7 @@ describe('Matcher', () => {
         });
 
         it('2 generators and 2 consumers - should distribute evenly between same priority generators', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -891,7 +891,7 @@ describe('Matcher', () => {
         });
 
         it('3 generators and 2 consumers - should distribute evenly between same priority generators', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -948,7 +948,7 @@ describe('Matcher', () => {
         });
 
         it('2 generators and 3 consumers - should distribute evenly between same priority generators', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -1018,7 +1018,7 @@ describe('Matcher', () => {
 
     describe('leftover consumptions', () => {
         it('should return only leftover consumptions when there are no generations', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -1061,7 +1061,7 @@ describe('Matcher', () => {
         });
 
         it('should return leftover consumptions when the generations cannot satisfy all consumptions', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         { id: 'consumerA', priority: [[{ id: 'generatorA' }]] },
@@ -1101,7 +1101,7 @@ describe('Matcher', () => {
 
     describe('excess generations', () => {
         it('should return only excess generations when there are no consumptions to satisfy', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         {
@@ -1127,7 +1127,7 @@ describe('Matcher', () => {
         });
 
         it('should return excess generations when the consumptions are satisfied and there are generations left', () => {
-            const result = matcher({
+            const result = spreadMatcher({
                 priority: [
                     [
                         { id: 'consumerA', priority: [[{ id: 'generatorA' }]] },

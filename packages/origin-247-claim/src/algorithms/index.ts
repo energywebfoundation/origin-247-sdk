@@ -1,1 +1,1 @@
-export * from './matcher';
+export * from './spreadMatcher';

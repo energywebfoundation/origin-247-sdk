@@ -1,41 +1,38 @@
 import { groupBy, minBy, sumBy, cloneDeep } from 'lodash';
 
-type ConsumerId = string;
-type GeneratorId = string;
-
-export interface MatcherData {
+export interface SpreadMatcherData {
     priority: {
         id: string;
         priority: { id: string }[][];
     }[][];
-    entityGroups: [Entity[], Entity[]];
+    entityGroups: [SpreadMatcherEntity[], SpreadMatcherEntity[]];
 }
 
-export interface Match {
+export interface SpreadMatch {
     entities: [string, string];
     volume: number;
 }
 
-export interface MatcherResult {
-    matches: Match[];
-    leftoverEntities: [Entity[], Entity[]];
+export interface SpreadMatcherResult {
+    matches: SpreadMatch[];
+    leftoverEntities: [SpreadMatcherEntity[], SpreadMatcherEntity[]];
 }
 
-interface Entity {
+export interface SpreadMatcherEntity {
     id: string;
     volume: number;
 }
 
-type Route = [ConsumerId, GeneratorId];
+type Route = [string, string];
 
 interface RoundInput {
     routes: Route[];
-    entityGroups: [Entity[], Entity[]];
+    entityGroups: [SpreadMatcherEntity[], SpreadMatcherEntity[]];
 }
 
-export const matcher = (originalData: MatcherData): MatcherResult => {
+export const spreadMatcher = (originalData: SpreadMatcherData): SpreadMatcherResult => {
     const data = cloneDeep(originalData);
-    const matches: Match[][] = [];
+    const matches: SpreadMatch[][] = [];
 
     let i = 0;
 
@@ -79,7 +76,7 @@ export const matcher = (originalData: MatcherData): MatcherResult => {
  * Given matches sums them together - multiple matches for the same entities can happen,
  * and we want sum of these matches.
  */
-const sumMatches = (matches: Match[]): Match[] => {
+const sumMatches = (matches: SpreadMatch[]): SpreadMatch[] => {
     return Object.values(groupBy(matches, (m) => `${m.entities[0]}${m.entities[1]}`)).map(
         (matches) => ({
             entities: matches[0].entities,
@@ -93,8 +90,11 @@ const sumMatches = (matches: Match[]): Match[] => {
  * It's not optimal, but it's safe - it divides entity volumes over second entities count,
  * and that's easiest method to compute volume, that can be distributed without any errors in algorithm.
  */
-const computeSafeDistribution = (entities1: Entity[], entities2: Entity[]) => {
-    const compute = (entities: Entity[], otherEntitiesLength: number) =>
+const computeSafeDistribution = (
+    entities1: SpreadMatcherEntity[],
+    entities2: SpreadMatcherEntity[]
+) => {
+    const compute = (entities: SpreadMatcherEntity[], otherEntitiesLength: number) =>
         entities.map((entity) => ({
             entityId: entity.id,
             volume: entity.volume,
@@ -121,7 +121,7 @@ const getCompetingEntites = (routes: Route[], entityId: string) => {
 /**
  * Create matches
  */
-const matchRound = (input: RoundInput): Match[] => {
+const matchRound = (input: RoundInput): SpreadMatch[] => {
     const entityToDistribute = computeSafeDistribution(
         input.entityGroups[0],
         input.entityGroups[1]
@@ -155,15 +155,13 @@ const matchRound = (input: RoundInput): Match[] => {
 /**
  * Return organized input for next matching rout
  */
-const getRoundInput = (data: MatcherData): RoundInput => {
+const getRoundInput = (data: SpreadMatcherData): RoundInput => {
     const entity1round = getFirstUsableGroup(data.priority, data.entityGroups[0]);
 
     const routes = entity1round.flatMap((entity1) => {
-        const prefferedGeneratorGroup = getFirstUsableGroup(entity1.priority, data.entityGroups[1]);
+        const prefferedEntity2Group = getFirstUsableGroup(entity1.priority, data.entityGroups[1]);
 
-        return prefferedGeneratorGroup.map(
-            (entity2) => [entity1.id, entity2.id] as [string, string]
-        );
+        return prefferedEntity2Group.map((entity2) => [entity1.id, entity2.id] as [string, string]);
     });
 
     return {
@@ -180,12 +178,15 @@ const getRoundInput = (data: MatcherData): RoundInput => {
  * it returns first group that has any volume left.
  * It also removes entries from group, that don't have any volume.
  */
-const getFirstUsableGroup = <T extends { id: string }>(groups: T[][], data: Entity[]) => {
+const getFirstUsableGroup = <T extends { id: string }>(
+    groups: T[][],
+    data: SpreadMatcherEntity[]
+) => {
     const groupsWithVolume = groups
         .map((group) => {
             const withVolume = group.map((entry) => ({
                 ...entry,
-                // it is possible that some entry in group has no consumption/generation
+                // it is possible that some entry in group has no data volume
                 volume: data.find((c) => c.id === entry.id)?.volume ?? 0
             }));
 
