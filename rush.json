@@ -387,6 +387,10 @@
         {
             "packageName": "@energyweb/origin-247-transfer",
             "projectFolder": "packages/origin-247-transfer"
+        },
+        {
+            "packageName": "@energyweb/origin-247-claim",
+            "projectFolder": "packages/origin-247-claim"
         }
         // {
         //   /**

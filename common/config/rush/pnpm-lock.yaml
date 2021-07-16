@@ -3,7 +3,6 @@ lockfileVersion: 5.3
 specifiers:
   '@energyweb/issuer': 3.2.1-alpha.1625651017.0
   '@energyweb/issuer-api': 0.2.1-alpha.1625651017.0
-  '@energyweb/origin-247-certificate': ^0.0.2-alpha.1626083770.0
   '@energyweb/origin-backend-utils': 1.5.2-alpha.1625651017.0
   '@energyweb/utils-general': 11.0.3-alpha.1625651017.0
   '@nestjs/bull': 0.3.1
@@ -15,6 +14,7 @@ specifiers:
   '@nestjs/testing': 7.6.18
   '@nestjs/typeorm': 7.1.5
   '@rush-temp/origin-247-certificate': file:./projects/origin-247-certificate.tgz
+  '@rush-temp/origin-247-claim': file:./projects/origin-247-claim.tgz
   '@rush-temp/origin-247-transfer': file:./projects/origin-247-transfer.tgz
   '@types/bull': 3.15.1
   '@types/jest': 26.0.23
@@ -39,7 +39,6 @@ specifiers:
 dependencies:
   '@energyweb/issuer': 3.2.1-alpha.1625651017.0
   '@energyweb/issuer-api': 0.2.1-alpha.1625651017.0_eb9935bd4f97b23ab8881eee244eb1f7
-  '@energyweb/origin-247-certificate': 0.0.2-alpha.1626084321.0_037dc7b7d2399f4623ff58161b27e748
   '@energyweb/origin-backend-utils': 1.5.2-alpha.1625651017.0_037dc7b7d2399f4623ff58161b27e748
   '@energyweb/utils-general': 11.0.3-alpha.1625651017.0
   '@nestjs/bull': 0.3.1_c86fa2ed7bc9e7a48760c2e5795b24d0
@@ -51,6 +50,7 @@ dependencies:
   '@nestjs/testing': 7.6.18_9cd0f963ae6f35bf288217e4f1c45cb4
   '@nestjs/typeorm': 7.1.5_476bd709bf4288b37cfeb220ce38756a
   '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_d6b54fd4eaabebb097645626555e6c09
+  '@rush-temp/origin-247-claim': file:projects/origin-247-claim.tgz_passport@0.4.1
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.4.1
   '@types/bull': 3.15.1
   '@types/jest': 26.0.23
@@ -6034,8 +6034,63 @@ packages:
       - utf-8-validate
     dev: false
 
+  file:projects/origin-247-claim.tgz_passport@0.4.1:
+    resolution: {integrity: sha512-GUAELWD4jUbMnnzBLM83YmmKcTbTiZR56WFhY/O4D1+/ckD64a/KYK2058XUhL122nWLnl3Oyi02vaj4zQJsrg==, tarball: file:projects/origin-247-claim.tgz}
+    id: file:projects/origin-247-claim.tgz
+    name: '@rush-temp/origin-247-claim'
+    version: 0.0.0
+    dependencies:
+      '@energyweb/issuer': 3.2.1-alpha.1625651017.0
+      '@energyweb/issuer-api': 0.2.1-alpha.1625651017.0_eb9935bd4f97b23ab8881eee244eb1f7
+      '@energyweb/origin-backend-utils': 1.5.2-alpha.1625651017.0_037dc7b7d2399f4623ff58161b27e748
+      '@energyweb/utils-general': 11.0.3-alpha.1625651017.0
+      '@nestjs/bull': 0.3.1_c86fa2ed7bc9e7a48760c2e5795b24d0
+      '@nestjs/common': 7.6.18_class-transformer@0.4.0
+      '@nestjs/core': 7.6.18_e6f0514ea3d89219387f66417a78dd96
+      '@nestjs/cqrs': 7.0.1_2664420588e0901c7943acb4693cbaf4
+      '@nestjs/passport': 7.1.5_fd45a09fcff1f973814c588ad08d33e0
+      '@nestjs/platform-express': 7.6.18_2664420588e0901c7943acb4693cbaf4
+      '@nestjs/testing': 7.6.18_9cd0f963ae6f35bf288217e4f1c45cb4
+      '@nestjs/typeorm': 7.1.5_476bd709bf4288b37cfeb220ce38756a
+      '@types/jest': 26.0.23
+      '@types/lodash': 4.14.171
+      '@types/node': 15.12.4
+      bull: 3.22.9
+      class-transformer: 0.4.0
+      concurrently: 6.2.0
+      ethers: 5.4.1
+      ganache-cli: 6.12.2
+      jest: 27.0.5_ts-node@9.1.1
+      lodash: 4.17.21
+      pg: 8.6.0
+      ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
+      ts-node: 9.1.1_typescript@4.3.4
+      tsconfig-paths: 3.10.1
+      typeorm: 0.2.34
+      typescript: 4.3.4
+      wait-on: 5.3.0
+    transitivePeerDependencies:
+      - '@nestjs/microservices'
+      - '@nestjs/websockets'
+      - bufferutil
+      - cache-manager
+      - canvas
+      - class-validator
+      - debug
+      - express
+      - fastify-swagger
+      - node-notifier
+      - passport
+      - pg-native
+      - reflect-metadata
+      - rxjs
+      - supports-color
+      - swagger-ui-express
+      - utf-8-validate
+    dev: false
+
   file:projects/origin-247-transfer.tgz_passport@0.4.1:
-    resolution: {integrity: sha512-KU8Fs7p70U0Aray7AVPBLIuU3kpOxftX+ZxG+wMMblwqQlpfqfOTjJ2Uq/o2KySkhvaD5zNRAOGDz5H2dg64lQ==, tarball: file:projects/origin-247-transfer.tgz}
+    resolution: {integrity: sha512-WcS9Eq2h2CKRa83/5iNU4SfZT2847J5xMyOKrkC6vkDc2Uj8D9UZ2oLgFZIsMFeo1E58k+RmfATA7wkABH+hjA==, tarball: file:projects/origin-247-transfer.tgz}
     id: file:projects/origin-247-transfer.tgz
     name: '@rush-temp/origin-247-transfer'
     version: 0.0.0

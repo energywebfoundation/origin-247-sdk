@@ -1,0 +1,71 @@
+{
+    "name": "@energyweb/origin-247-claim",
+    "version": "0.0.1",
+    "main": "./dist/js/src/index.js",
+    "types": "./dist/js/src/index.d.ts",
+    "scripts": {
+        "test:unit": "jest --testRegex '\\.spec\\.ts$'",
+        "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8547 && yarn drop && yarn migrate && yarn test:e2e:jest\"",
+        "test:e2e:jest": "WEB3=http://localhost:8547 jest --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
+        "build": "tsc -b tsconfig.json",
+        "migrate": "yarn typeorm:run && yarn typeorm:run:issuer",
+        "drop": "yarn typeorm:drop && yarn typeorm:drop:issuer",
+        "typeorm": "ts-node -r tsconfig-paths/register node_modules/typeorm/cli.js --config ormconfig-dev.ts",
+        "typeorm:drop": "yarn typeorm schema:drop",
+        "typeorm:run": "yarn typeorm migration:run",
+        "typeorm:run:issuer": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",
+        "typeorm:drop:issuer": "node_modules/typeorm/cli.js schema:drop --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",
+        "run:ganache": "ganache-cli -q -m 'govern long helmet alert stay supply kick knife boss until buzz unlock' -l 8000000 -e 1000000 -a 20 -p 8547",
+        "publish:canary": "lerna publish --yes --skip-git --exact --cd-version=prerelease --pre-dist-tag canary --preid=alpha.$BUILD_ID",
+        "publish:release": "lerna version --create-release github --conventional-commits --exact --yes --message \"chore(release): publish /skip-deploy\" && lerna publish from-git --yes"
+    },
+    "dependencies": {
+        "@nestjs/common": "7.6.18",
+        "@nestjs/core": "7.6.18",
+        "@nestjs/cqrs": "7.0.1",
+        "@nestjs/typeorm": "7.1.5",
+        "ethers": "5.4.1",
+        "pg": "8.6.0",
+        "typeorm": "0.2.34",
+        "lodash": "4.17.21"
+    },
+    "peerDependencies": {
+        "@energyweb/origin-247-certificate": "^0.0.2-alpha.1626083770.0"
+    },
+    "devDependencies": {
+        "@nestjs/passport": "7.1.5",
+        "@nestjs/platform-express": "7.6.18",
+        "@nestjs/testing": "7.6.18",
+        "@types/jest": "26.0.23",
+        "@types/node": "15.12.4",
+        "jest": "27.0.5",
+        "ts-jest": "27.0.3",
+        "ts-node": "9.1.1",
+        "ganache-cli": "6.12.2",
+        "concurrently": "6.2.0",
+        "wait-on": "5.3.0",
+        "typescript": "4.3.4",
+        "@types/lodash": "4.14.171",
+        "@energyweb/issuer": "3.2.1-alpha.1625651017.0",
+        "@energyweb/issuer-api": "0.2.1-alpha.1625651017.0",
+        "@energyweb/origin-backend-utils": "1.5.2-alpha.1625651017.0",
+        "@energyweb/utils-general": "11.0.3-alpha.1625651017.0",
+        "@nestjs/bull": "0.3.1",
+        "bull": "3.22.9",
+        "tsconfig-paths": "3.10.1",
+        "class-transformer": "0.4.0"
+    },
+    "jest": {
+        "moduleFileExtensions": [
+            "js",
+            "json",
+            "ts"
+        ],
+        "rootDir": ".",
+        "transform": {
+            "^.+\\.(t|j)s$": "ts-jest"
+        },
+        "coverageDirectory": "../coverage",
+        "testEnvironment": "node"
+    }
+}
