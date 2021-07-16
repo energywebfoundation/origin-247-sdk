@@ -1,4 +1,5 @@
-import { groupBy, minBy, sumBy, cloneDeep } from 'lodash';
+import { groupBy, cloneDeep } from 'lodash';
+import { BigNumber } from 'ethers';
 
 export interface SpreadMatcherData {
     priority: {
@@ -10,7 +11,7 @@ export interface SpreadMatcherData {
 
 export interface SpreadMatch {
     entities: [string, string];
-    volume: number;
+    volume: BigNumber;
 }
 
 export interface SpreadMatcherResult {
@@ -20,7 +21,7 @@ export interface SpreadMatcherResult {
 
 export interface SpreadMatcherEntity {
     id: string;
-    volume: number;
+    volume: BigNumber;
 }
 
 type Route = [string, string];
@@ -46,8 +47,8 @@ export const spreadMatcher = (originalData: SpreadMatcherData): SpreadMatcherRes
         }
 
         const allGroupsHaveVolume = [
-            data.entityGroups[0].some((v) => v.volume > 0),
-            data.entityGroups[1].some((v) => v.volume > 0)
+            data.entityGroups[0].some((v) => v.volume.gt(0)),
+            data.entityGroups[1].some((v) => v.volume.gt(0))
         ].every(Boolean);
 
         if (!allGroupsHaveVolume) {
@@ -57,8 +58,11 @@ export const spreadMatcher = (originalData: SpreadMatcherData): SpreadMatcherRes
         const roundMatches = matchRound(getRoundInput(data));
 
         roundMatches.forEach((match) => {
-            data.entityGroups[0].find((c) => c.id === match.entities[0])!.volume -= match.volume;
-            data.entityGroups[1].find((g) => g.id === match.entities[1])!.volume -= match.volume;
+            const entity1 = data.entityGroups[0].find((c) => c.id === match.entities[0])!;
+            const entity2 = data.entityGroups[1].find((g) => g.id === match.entities[1])!;
+
+            entity1.volume = entity1.volume.sub(match.volume);
+            entity2.volume = entity2.volume.sub(match.volume);
         });
 
         matches.push(roundMatches);
@@ -80,7 +84,7 @@ const sumMatches = (matches: SpreadMatch[]): SpreadMatch[] => {
     return Object.values(groupBy(matches, (m) => `${m.entities[0]}${m.entities[1]}`)).map(
         (matches) => ({
             entities: matches[0].entities,
-            volume: sumBy(matches, (m) => m.volume)
+            volume: bigNumSum(matches.map((m) => m.volume))
         })
     );
 };
@@ -98,20 +102,20 @@ const computeSafeDistribution = (
         entities.map((entity) => ({
             entityId: entity.id,
             volume: entity.volume,
-            distributedVolume: Math.floor(entity.volume / otherEntitiesLength)
+            distributedVolume: entity.volume.div(otherEntitiesLength)
         }));
 
-    return minBy(
+    return bigNumMinBy(
         [...compute(entities1, entities2.length), ...compute(entities2, entities1.length)],
         (e) => e.distributedVolume
-    )!;
+    );
 };
 
 /**
  * Return entities, that are connected to given entity by a route.
  * This way we can find all entities that will be competing over another entity.
  */
-const getCompetingEntites = (routes: Route[], entityId: string) => {
+const getCompetingEntities = (routes: Route[], entityId: string) => {
     return routes
         .filter((route) => route.includes(entityId))
         .flat()
@@ -127,22 +131,22 @@ const matchRound = (input: RoundInput): SpreadMatch[] => {
         input.entityGroups[1]
     );
 
-    if (entityToDistribute.distributedVolume === 0) {
-        const competetingEntities = getCompetingEntites(input.routes, entityToDistribute.entityId);
+    if (entityToDistribute.distributedVolume.eq(0)) {
+        const competingEntities = getCompetingEntities(input.routes, entityToDistribute.entityId);
 
         // Since each entity will receive one volume, these numbers are equal
-        const entitiesCountToUse = entityToDistribute.volume;
+        const entitiesCountToUse = entityToDistribute.volume.toNumber(); // low enough
 
         // We need to check to which group entity to distribute belongs
         const isEntityFirst = input.entityGroups[0].find(
             (e) => e.id === entityToDistribute.entityId
         );
 
-        return competetingEntities.slice(0, entitiesCountToUse).map((connectedEntity) => ({
+        return competingEntities.slice(0, entitiesCountToUse).map((connectedEntity) => ({
             entities: isEntityFirst
                 ? [entityToDistribute.entityId, connectedEntity]
                 : [connectedEntity, entityToDistribute.entityId],
-            volume: 1
+            volume: BigNumber.from(1)
         }));
     }
 
@@ -159,9 +163,9 @@ const getRoundInput = (data: SpreadMatcherData): RoundInput => {
     const entity1round = getFirstUsableGroup(data.priority, data.entityGroups[0]);
 
     const routes = entity1round.flatMap((entity1) => {
-        const prefferedEntity2Group = getFirstUsableGroup(entity1.priority, data.entityGroups[1]);
+        const preferredEntity2Group = getFirstUsableGroup(entity1.priority, data.entityGroups[1]);
 
-        return prefferedEntity2Group.map((entity2) => [entity1.id, entity2.id] as [string, string]);
+        return preferredEntity2Group.map((entity2) => [entity1.id, entity2.id] as [string, string]);
     });
 
     return {
@@ -187,12 +191,20 @@ const getFirstUsableGroup = <T extends { id: string }>(
             const withVolume = group.map((entry) => ({
                 ...entry,
                 // it is possible that some entry in group has no data volume
-                volume: data.find((c) => c.id === entry.id)?.volume ?? 0
+                volume: data.find((c) => c.id === entry.id)?.volume ?? BigNumber.from(0)
             }));
 
-            return withVolume.filter((entry) => entry.volume > 0);
+            return withVolume.filter((entry) => entry.volume.gt(0));
         })
         .filter((group) => group.length > 0);
 
     return groupsWithVolume[0] ?? [];
+};
+
+const bigNumSum = (bigNumbers: BigNumber[]) =>
+    bigNumbers.reduce((sum, v) => sum.add(v), BigNumber.from(0));
+const bigNumMinBy = <T>(collection: T[], cb: (v: T) => BigNumber): T => {
+    return collection.reduce((smallest, current) => {
+        return cb(current).lt(cb(smallest)) ? current : smallest;
+    }, collection[0]);
 };
