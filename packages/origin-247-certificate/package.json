@@ -22,7 +22,7 @@
         "@nestjs/cqrs": "7.0.1",
         "@nestjs/typeorm": "7.1.5",
         "bull": "3.22.9",
-        "ethers": "5.4.1",
+        "ethers": "5.3.1",
         "passport": "0.4.1",
         "pg": "8.6.0",
         "typeorm": "0.2.34"
