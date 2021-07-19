@@ -1,19 +1,19 @@
 import { BigNumber } from 'ethers';
-import { spreadMatcher, SpreadMatcherData, SpreadMatcherEntity, SpreadMatcherResult } from '../src';
+import { SpreadMatcher } from '../src';
 
 describe('spreadMatcher', () => {
     describe('consumer priority', () => {
         it('2 consumers within same group - should distribute evenly between same priority consumers', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -31,19 +31,19 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(4);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 75
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 75
             });
 
@@ -70,15 +70,15 @@ describe('spreadMatcher', () => {
 
         it('2 consumers within same group - should distribute evenly between same priority consumers, regardless of consumptions', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -96,19 +96,19 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(4);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 75
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 75
             });
 
@@ -135,15 +135,15 @@ describe('spreadMatcher', () => {
 
         it('2 consumers within same group - should distribute one more to first consumer when generations are indivisible equally', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -161,19 +161,19 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(4);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 75
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 74
             });
 
@@ -200,19 +200,19 @@ describe('spreadMatcher', () => {
 
         it('3 consumers within same group - should distribute evenly between same priority consumers', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerC',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -231,27 +231,27 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(6);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 50
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 50
             });
             expect(result.matches[4]).toEqual({
-                entities: ['consumerC', 'generatorA'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[5]).toEqual({
-                entities: ['consumerC', 'generatorB'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorB' }],
                 volume: 50
             });
 
@@ -282,19 +282,19 @@ describe('spreadMatcher', () => {
 
         it('3 consumers within same group - should distribute last indivisible generation (1) to first consumer', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerC',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -313,27 +313,27 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(6);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 34
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 33
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 33
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 33
             });
             expect(result.matches[4]).toEqual({
-                entities: ['consumerC', 'generatorA'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorA' }],
                 volume: 33
             });
             expect(result.matches[5]).toEqual({
-                entities: ['consumerC', 'generatorB'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorB' }],
                 volume: 33
             });
 
@@ -364,19 +364,19 @@ describe('spreadMatcher', () => {
 
         it('3 consumers within same group - should distribute last indivisible generation (2) from different generators to first consumer', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerC',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -395,11 +395,11 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(6);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 34
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 34
             });
             // It's getting unequally distributed and provided to consumerA,
@@ -408,19 +408,19 @@ describe('spreadMatcher', () => {
             // and in case of 1 generation left - it's distributed to first consumer on list
 
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 33
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 33
             });
             expect(result.matches[4]).toEqual({
-                entities: ['consumerC', 'generatorA'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorA' }],
                 volume: 33
             });
             expect(result.matches[5]).toEqual({
-                entities: ['consumerC', 'generatorB'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorB' }],
                 volume: 33
             });
 
@@ -451,9 +451,19 @@ describe('spreadMatcher', () => {
 
         it('2 consumers within different groups - should satisfy higher priority group first', () => {
             const result = integerMatcher({
-                priority: [
-                    [{ id: 'consumerA', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }],
-                    [{ id: 'consumerB', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }]
+                groupPriority: [
+                    [
+                        {
+                            id: 'consumerA',
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                        }
+                    ],
+                    [
+                        {
+                            id: 'consumerB',
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                        }
+                    ]
                 ],
                 entityGroups: [
                     [
@@ -469,19 +479,19 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(4);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 75
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 75
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 25
             });
 
@@ -509,25 +519,25 @@ describe('spreadMatcher', () => {
 
         it('2 consumer priority groups, 2 consumer each - should satisfy higher priority group first', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ],
                     [
                         {
                             id: 'consumerC',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerD',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -547,35 +557,35 @@ describe('spreadMatcher', () => {
 
             // expect(result.matches).toHaveLength(4);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 50
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 50
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 50
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 50
             });
             expect(result.matches[4]).toEqual({
-                entities: ['consumerC', 'generatorA'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[5]).toEqual({
-                entities: ['consumerC', 'generatorB'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorB' }],
                 volume: 25
             });
             expect(result.matches[6]).toEqual({
-                entities: ['consumerD', 'generatorA'],
+                entities: [{ id: 'consumerD' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[7]).toEqual({
-                entities: ['consumerD', 'generatorB'],
+                entities: [{ id: 'consumerD' }, { id: 'generatorB' }],
                 volume: 25
             });
 
@@ -615,8 +625,13 @@ describe('spreadMatcher', () => {
     describe('generator priority', () => {
         it('2 generators - should distribute evenly between same priority generators', () => {
             const result = integerMatcher({
-                priority: [
-                    [{ id: 'consumerA', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }]
+                groupPriority: [
+                    [
+                        {
+                            id: 'consumerA',
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                        }
+                    ]
                 ],
                 entityGroups: [
                     [{ id: 'consumerA', volume: 100 }],
@@ -629,11 +644,11 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(2);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 50
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 50
             });
 
@@ -656,8 +671,13 @@ describe('spreadMatcher', () => {
 
         it('2 generators - should distribute last indivisible consumption (1) from first generation on list', () => {
             const result = integerMatcher({
-                priority: [
-                    [{ id: 'consumerA', priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]] }]
+                groupPriority: [
+                    [
+                        {
+                            id: 'consumerA',
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                        }
+                    ]
                 ],
                 entityGroups: [
                     [{ id: 'consumerA', volume: 51 }],
@@ -669,22 +689,22 @@ describe('spreadMatcher', () => {
             });
 
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 26
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 25
             });
         });
 
         it('3 generators - should distribute evenly between same priority generators', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [
+                            groupPriority: [
                                 [{ id: 'generatorA' }, { id: 'generatorB' }, { id: 'generatorC' }]
                             ]
                         }
@@ -702,15 +722,15 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(3);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 40
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 40
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerA', 'generatorC'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorC' }],
                 volume: 40
             });
 
@@ -737,11 +757,11 @@ describe('spreadMatcher', () => {
 
         it('3 generators - should distribute last indivisible consumption (1) from first generation on list', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [
+                            groupPriority: [
                                 [{ id: 'generatorA' }, { id: 'generatorB' }, { id: 'generatorC' }]
                             ]
                         }
@@ -758,15 +778,15 @@ describe('spreadMatcher', () => {
             });
 
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 34
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 33
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerA', 'generatorC'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorC' }],
                 volume: 33
             });
 
@@ -793,11 +813,11 @@ describe('spreadMatcher', () => {
 
         it('3 generators - should distribute last indivisible consumption (2) from first two generations on list', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [
+                            groupPriority: [
                                 [{ id: 'generatorA' }, { id: 'generatorB' }, { id: 'generatorC' }]
                             ]
                         }
@@ -814,15 +834,15 @@ describe('spreadMatcher', () => {
             });
 
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 34
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 34
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerA', 'generatorC'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorC' }],
                 volume: 33
             });
 
@@ -849,15 +869,15 @@ describe('spreadMatcher', () => {
 
         it('2 generators and 2 consumers - should distribute evenly between same priority generators', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -874,36 +894,36 @@ describe('spreadMatcher', () => {
             });
 
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 25
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 25
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 25
             });
         });
 
         it('3 generators and 2 consumers - should distribute evenly between same priority generators', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [
+                            groupPriority: [
                                 [{ id: 'generatorA' }, { id: 'generatorB' }, { id: 'generatorC' }]
                             ]
                         },
                         {
                             id: 'consumerB',
-                            priority: [
+                            groupPriority: [
                                 [{ id: 'generatorA' }, { id: 'generatorB' }, { id: 'generatorC' }]
                             ]
                         }
@@ -923,46 +943,46 @@ describe('spreadMatcher', () => {
             });
 
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 10
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 10
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerA', 'generatorC'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorC' }],
                 volume: 10
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 10
             });
             expect(result.matches[4]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 10
             });
             expect(result.matches[5]).toEqual({
-                entities: ['consumerB', 'generatorC'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorC' }],
                 volume: 10
             });
         });
 
         it('2 generators and 3 consumers - should distribute evenly between same priority generators', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerC',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -980,27 +1000,27 @@ describe('spreadMatcher', () => {
             });
 
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 5
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerA', 'generatorB'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorB' }],
                 volume: 5
             });
             expect(result.matches[2]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 5
             });
             expect(result.matches[3]).toEqual({
-                entities: ['consumerB', 'generatorB'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorB' }],
                 volume: 5
             });
             expect(result.matches[4]).toEqual({
-                entities: ['consumerC', 'generatorA'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorA' }],
                 volume: 5
             });
             expect(result.matches[5]).toEqual({
-                entities: ['consumerC', 'generatorB'],
+                entities: [{ id: 'consumerC' }, { id: 'generatorB' }],
                 volume: 5
             });
 
@@ -1020,19 +1040,19 @@ describe('spreadMatcher', () => {
     describe('leftover consumptions', () => {
         it('should return only leftover consumptions when there are no generations', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerC',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -1063,10 +1083,10 @@ describe('spreadMatcher', () => {
 
         it('should return leftover consumptions when the generations cannot satisfy all consumptions', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
-                        { id: 'consumerA', priority: [[{ id: 'generatorA' }]] },
-                        { id: 'consumerB', priority: [[{ id: 'generatorA' }]] }
+                        { id: 'consumerA', groupPriority: [[{ id: 'generatorA' }]] },
+                        { id: 'consumerB', groupPriority: [[{ id: 'generatorA' }]] }
                     ]
                 ],
                 entityGroups: [
@@ -1080,11 +1100,11 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(2);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 5
             });
             expect(result.matches[1]).toEqual({
-                entities: ['consumerB', 'generatorA'],
+                entities: [{ id: 'consumerB' }, { id: 'generatorA' }],
                 volume: 5
             });
 
@@ -1103,15 +1123,15 @@ describe('spreadMatcher', () => {
     describe('excess generations', () => {
         it('should return only excess generations when there are no consumptions to satisfy', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
                         {
                             id: 'consumerA',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         },
                         {
                             id: 'consumerB',
-                            priority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                            groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
                         }
                     ]
                 ],
@@ -1129,10 +1149,10 @@ describe('spreadMatcher', () => {
 
         it('should return excess generations when the consumptions are satisfied and there are generations left', () => {
             const result = integerMatcher({
-                priority: [
+                groupPriority: [
                     [
-                        { id: 'consumerA', priority: [[{ id: 'generatorA' }]] },
-                        { id: 'consumerB', priority: [[{ id: 'generatorA' }]] }
+                        { id: 'consumerA', groupPriority: [[{ id: 'generatorA' }]] },
+                        { id: 'consumerB', groupPriority: [[{ id: 'generatorA' }]] }
                     ]
                 ],
                 entityGroups: [[{ id: 'consumerA', volume: 5 }], [{ id: 'generatorA', volume: 10 }]]
@@ -1140,7 +1160,7 @@ describe('spreadMatcher', () => {
 
             expect(result.matches).toHaveLength(1);
             expect(result.matches[0]).toEqual({
-                entities: ['consumerA', 'generatorA'],
+                entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
                 volume: 5
             });
 
@@ -1151,6 +1171,32 @@ describe('spreadMatcher', () => {
             });
         });
         // excess generations end
+    });
+
+    describe('Custom data', () => {
+        it('returns entities custom data in match result', () => {
+            const result = SpreadMatcher.spreadMatcher({
+                groupPriority: [
+                    [
+                        { id: 'consumerA', groupPriority: [[{ id: 'generatorA' }]] },
+                        { id: 'consumerB', groupPriority: [[{ id: 'generatorA' }]] }
+                    ]
+                ],
+                entityGroups: [
+                    [{ id: 'consumerA', volume: BigNumber.from(5), type: 'consumer' }],
+                    [{ id: 'generatorA', volume: BigNumber.from(10), type: 'generator' }]
+                ]
+            });
+
+            expect(result.matches).toHaveLength(1);
+            expect(result.matches[0]).toEqual({
+                entities: [
+                    { id: 'consumerA', type: 'consumer' },
+                    { id: 'generatorA', type: 'generator' }
+                ],
+                volume: BigNumber.from(5)
+            });
+        });
     });
     // Matching algorithm end
 });
@@ -1164,17 +1210,17 @@ type IntegerVolume<T> = {
         : IntegerVolume<T[K]>;
 };
 
-const integerMatcher = (
-    params: IntegerVolume<SpreadMatcherData>
-): IntegerVolume<SpreadMatcherResult> => {
-    const result = spreadMatcher({
-        priority: params.priority,
+const integerMatcher = <T extends SpreadMatcher.Entity, P extends SpreadMatcher.Entity>(
+    params: IntegerVolume<SpreadMatcher.Params<T, P>>
+): IntegerVolume<SpreadMatcher.Result<T, P>> => {
+    const result = SpreadMatcher.spreadMatcher({
+        groupPriority: params.groupPriority,
         entityGroups: params.entityGroups.map((g) =>
             g.map((e) => ({
                 id: e.id,
                 volume: BigNumber.from(e.volume)
             }))
-        ) as [SpreadMatcherEntity[], SpreadMatcherEntity[]]
+        ) as [SpreadMatcher.Entity[], SpreadMatcher.Entity[]]
     });
 
     return {
@@ -1187,6 +1233,6 @@ const integerMatcher = (
         matches: result.matches.map((m) => ({
             ...m,
             volume: m.volume.toNumber()
-        }))
+        })) as any
     };
 };
