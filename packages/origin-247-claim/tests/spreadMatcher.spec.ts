@@ -1197,6 +1197,57 @@ describe('spreadMatcher', () => {
                 volume: BigNumber.from(5)
             });
         });
+
+        it('does not collide on id duplicates', () => {
+            const result = SpreadMatcher.spreadMatcher({
+                groupPriority: [
+                    [
+                        { id: 'consumerA', groupPriority: [[{ id: 'generatorA' }]] },
+                        { id: 'consumerB', groupPriority: [[{ id: 'generatorA' }]] }
+                    ]
+                ],
+                entityGroups: [
+                    [
+                        { id: 'consumerA', volume: BigNumber.from(6), type: 'consumer' },
+                        { id: 'consumerA', volume: BigNumber.from(6), type: 'battery' }
+                    ],
+                    [
+                        { id: 'generatorA', volume: BigNumber.from(10), type: 'generator' },
+                        { id: 'generatorA', volume: BigNumber.from(10), type: 'battery' }
+                    ]
+                ]
+            });
+
+            expect(result.matches).toHaveLength(4);
+            expect(result.matches[0]).toEqual({
+                entities: [
+                    { id: 'consumerA', type: 'consumer' },
+                    { id: 'generatorA', type: 'generator' }
+                ],
+                volume: BigNumber.from(3)
+            });
+            expect(result.matches[1]).toEqual({
+                entities: [
+                    { id: 'consumerA', type: 'consumer' },
+                    { id: 'generatorA', type: 'battery' }
+                ],
+                volume: BigNumber.from(3)
+            });
+            expect(result.matches[2]).toEqual({
+                entities: [
+                    { id: 'consumerA', type: 'battery' },
+                    { id: 'generatorA', type: 'generator' }
+                ],
+                volume: BigNumber.from(3)
+            });
+            expect(result.matches[3]).toEqual({
+                entities: [
+                    { id: 'consumerA', type: 'battery' },
+                    { id: 'generatorA', type: 'battery' }
+                ],
+                volume: BigNumber.from(3)
+            });
+        });
     });
     // Matching algorithm end
 });
