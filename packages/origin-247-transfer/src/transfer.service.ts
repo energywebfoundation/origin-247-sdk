@@ -21,6 +21,7 @@ import {
     UpdateStatusCode
 } from './EnergyTransferRequest';
 import { ValidatedTransferRequestEvent } from './events';
+import { BigNumber } from 'ethers';
 
 interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
 
@@ -66,6 +67,13 @@ export class TransferService {
             transferDate
         });
 
+        if (BigNumber.from(energyValue).eq(0)) {
+            this.logger.debug(
+                `Skipping certificate issuance for ETR ${request.id}. Received zero reading for ${generatorId} for ${transferDate}.`
+            );
+            return;
+        }
+
         const certificate = await this.certificateService.issue({
             deviceId: generatorId,
             energyValue: energyValue,
@@ -99,11 +107,13 @@ export class TransferService {
         );
 
         if (!request) {
-            this.logger.warn(`
-                No transfer request found for certificate: ${certificateId}.
-                This can mean, that there was a race condition, and CertificatePersisted event was received,
-                before we could save the certificate id on ETR.
-            `);
+            /**
+             * No transfer request found.
+             * This can mean, that there was a race condition,
+             * and CertificatePersisted event was received,
+             * before we could save the certificate id on ETR.
+             * It usually happens fairly often, so it's expected
+             */
 
             return;
         }
