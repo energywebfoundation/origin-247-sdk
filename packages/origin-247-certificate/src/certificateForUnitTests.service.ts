@@ -7,7 +7,9 @@ import {
     ITransferCommand,
     ISuccessResponse,
     IIssuedCertificate,
-    IIssueCommandParams
+    IIssueCommandParams,
+    IBatchClaimCommand,
+    IBatchTransferCommand
 } from './types';
 import { Injectable } from '@nestjs/common';
 import { CertificatePersistedEvent } from './externals';
@@ -116,6 +118,46 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
 
         return {
             success: true
+        };
+    }
+
+    public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
+        const result = await Promise.all(
+            originalCertificates.map((certificate) => this.issue(certificate))
+        );
+
+        return result.map((r) => r.id);
+    }
+
+    public async batchClaim(command: IBatchClaimCommand): Promise<ISuccessResponse> {
+        const result = await Promise.all(
+            command.certificates.map((certificate) =>
+                this.claim({
+                    ...certificate,
+                    forAddress: command.forAddress,
+                    claimData: command.claimData
+                })
+            )
+        );
+
+        return {
+            success: result.every((r) => r.success)
+        };
+    }
+
+    public async batchTransfer(command: IBatchTransferCommand): Promise<ISuccessResponse> {
+        const result = await Promise.all(
+            command.certificates.map((certificate) =>
+                this.transfer({
+                    ...certificate,
+                    fromAddress: command.fromAddress,
+                    toAddress: command.toAddress
+                })
+            )
+        );
+
+        return {
+            success: result.every((r) => r.success)
         };
     }
 }
