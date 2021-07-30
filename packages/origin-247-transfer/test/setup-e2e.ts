@@ -133,6 +133,8 @@ export const bootstrapTestInstance = async () => {
         ENERGY_TRANSFER_REQUEST_REPOSITORY
     );
 
+    await databaseService.truncate('energy_transfer_request_v2');
+
     return {
         databaseService,
         certificateService,
@@ -144,7 +146,7 @@ export const bootstrapTestInstance = async () => {
                     energyValue: '60',
                     fromTime: new Date(),
                     generatorId: 'a1',
-                    metadata: null,
+                    metadata: { field: 'test' },
                     toTime: new Date(),
                     transferDate: new Date()
                 })

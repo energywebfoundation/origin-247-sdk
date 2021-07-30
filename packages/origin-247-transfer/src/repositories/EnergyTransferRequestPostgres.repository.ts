@@ -1,12 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
-import { EnergyTransferRequest } from '../EnergyTransferRequest';
+import { EnergyTransferRequest, NewAttributesParams, State } from '../EnergyTransferRequest';
 import { EnergyTransferRequestEntity, tableName } from './EnergyTransferRequest.entity';
-import {
-    ICreateNewCommand,
-    EnergyTransferRequestRepository
-} from './EnergyTransferRequest.repository';
+import { EnergyTransferRequestRepository } from './EnergyTransferRequest.repository';
+import { omit } from 'lodash';
 
 @Injectable()
 export class EnergyTransferRequestPostgresRepository implements EnergyTransferRequestRepository {
@@ -21,12 +19,28 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
         await this.repository.update({ id: entity.id }, entity.toAttrs());
     }
 
-    public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
+    public async saveManyInTransaction(entities: EnergyTransferRequest[]): Promise<void> {
+        await this.connection.transaction(async (manager) => {
+            const updates = entities.map((e) =>
+                manager.update(EnergyTransferRequestEntity, { id: e.id }, e.toAttrs())
+            );
+
+            await Promise.all(updates);
+        });
+    }
+
+    public async createNew(command: NewAttributesParams): Promise<EnergyTransferRequest> {
         const entity = this.repository.create(EnergyTransferRequest.newAttributes(command));
 
         const savedEntity = await this.repository.save(entity);
 
         return EnergyTransferRequest.fromAttrs(savedEntity);
+    }
+
+    public async findAll(): Promise<EnergyTransferRequest[]> {
+        const results = await this.repository.find();
+
+        return results.map(EnergyTransferRequest.fromAttrs);
     }
 
     public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {
@@ -39,6 +53,14 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
         const request = await this.repository.findOne(id);
 
         return request ? EnergyTransferRequest.fromAttrs(request) : null;
+    }
+
+    public async findByState(state: State): Promise<EnergyTransferRequest[]> {
+        const results = await this.repository.find({
+            state
+        });
+
+        return results.map(EnergyTransferRequest.fromAttrs);
     }
 
     /**
@@ -71,6 +93,7 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
 
             const request = EnergyTransferRequest.fromAttrs({
                 ...rawRequest,
+                certificateData: JSON.parse(rawRequest.certificateData),
                 validationStatusRecord: JSON.parse(rawRequest.validationStatusRecord)
             });
 

@@ -4,236 +4,56 @@ import {
     EnergyTransferRequestRepository,
     ENERGY_TRANSFER_REQUEST_REPOSITORY
 } from './repositories/EnergyTransferRequest.repository';
-import { GenerationReadingStoredPayload } from './events/GenerationReadingStored.event';
-import { QueryBus, CommandBus, EventBus } from '@nestjs/cqrs';
-import {
-    GetTransferSitesQuery,
-    IGetTransferSitesQueryResponse
-} from './queries/GetTransferSites.query';
-import { Logger } from '@nestjs/common';
-import {
-    ValidateTransferCommandCtor,
-    VALIDATE_TRANSFER_COMMANDS_TOKEN
-} from './commands/ValidateTransferCommand';
-import {
-    EnergyTransferRequest,
-    TransferValidationStatus,
-    UpdateStatusCode
-} from './EnergyTransferRequest';
-import { ValidatedTransferRequestEvent } from './events';
-import { BigNumber } from 'ethers';
-
-interface IIssueCommand extends GenerationReadingStoredPayload<unknown> {}
-
-export interface IUpdateValidationStatusCommand {
-    requestId: number;
-    status: TransferValidationStatus;
-    validatorName: string;
-}
+import { EnergyTransferRequest, State } from './EnergyTransferRequest';
+import { groupBy, values, chunk } from 'lodash';
+import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
 
 @Injectable()
 export class TransferService {
-    private readonly logger = new Logger(TransferService.name);
-
     constructor(
         @Inject(CERTIFICATE_SERVICE_TOKEN)
         private certificateService: CertificateService<unknown>,
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
-        private energyTransferRequestRepository: EnergyTransferRequestRepository,
-        @Inject(VALIDATE_TRANSFER_COMMANDS_TOKEN)
-        private validateCommands: ValidateTransferCommandCtor[],
-        private queryBus: QueryBus,
-        private commandBus: CommandBus,
-        private eventBus: EventBus
+        private etrRepository: EnergyTransferRequestRepository,
+        @Inject(BATCH_CONFIGURATION_TOKEN)
+        private batchConfiguration: BatchConfiguration
     ) {}
 
-    public async issue(command: IIssueCommand): Promise<void> {
-        const { generatorId, energyValue, transferDate, fromTime, toTime, metadata } = command;
+    public async transferTask() {
+        const etrs = await this.etrRepository.findByState(State.TransferAwaiting);
 
-        const sites: IGetTransferSitesQueryResponse | null = await this.queryBus.execute(
-            new GetTransferSitesQuery({ generatorId })
+        const groupedEtrs = values(
+            groupBy(etrs, (e) => `${e.sites.sellerAddress}${e.sites.buyerAddress}`)
         );
 
-        if (!sites) {
-            this.logger.log(`No sites queries for ${generatorId}`);
-            return;
-        }
+        for (const etrGroup of groupedEtrs) {
+            const chunkedEtrs = chunk(etrGroup, this.batchConfiguration.transferBatchSize);
 
-        const request = await this.energyTransferRequestRepository.createNew({
-            buyerAddress: sites.buyerAddress,
-            sellerAddress: sites.sellerAddress,
-            volume: energyValue,
-            generatorId,
-            transferDate
-        });
-
-        if (BigNumber.from(energyValue).eq(0)) {
-            this.logger.debug(
-                `Skipping certificate issuance for ETR ${request.id}. Received zero reading for ${generatorId} for ${transferDate}.`
-            );
-            return;
-        }
-
-        const certificate = await this.certificateService.issue({
-            deviceId: generatorId,
-            energyValue: energyValue,
-            fromTime,
-            toTime,
-            userId: sites.sellerAddress,
-            toAddress: sites.sellerAddress,
-            metadata
-        });
-
-        request.updateCertificateId(certificate.id);
-
-        await this.energyTransferRequestRepository.save(request);
-
-        // There is a risk of race condition between `issue` finish and `CertificatePersistedEvent`
-        // If certificate is already persisted (it can be found by service)
-        // Then we should proceed as we received the event
-
-        const isCertificatePersisted = Boolean(
-            await this.certificateService.getById(certificate.id)
-        );
-
-        if (isCertificatePersisted) {
-            await this.persistRequestCertificate(certificate.id);
-        }
-    }
-
-    public async persistRequestCertificate(certificateId: number): Promise<void> {
-        const request = await this.energyTransferRequestRepository.findByCertificateId(
-            certificateId
-        );
-
-        if (!request) {
-            /**
-             * No transfer request found.
-             * This can mean, that there was a race condition,
-             * and CertificatePersisted event was received,
-             * before we could save the certificate id on ETR.
-             * It usually happens fairly often, so it's expected
-             */
-
-            return;
-        }
-
-        request.markCertificatePersisted();
-
-        await this.energyTransferRequestRepository.save(request);
-
-        await this.startValidation(request);
-    }
-
-    private async startValidation(request: EnergyTransferRequest): Promise<void> {
-        request.startValidation(this.validateCommands.map((c) => c.name));
-
-        await this.energyTransferRequestRepository.save(request);
-
-        // If request is immediately valid (which may happen if no validators are supplied)
-        if (request.isValid()) {
-            this.eventBus.publish(
-                new ValidatedTransferRequestEvent({
-                    requestId: request.id
-                })
-            );
-
-            return;
-        }
-
-        await Promise.all(
-            this.validateCommands.map(async (Command) => {
-                const result = await this.executeCommand(Command, request);
-
-                await this.updateValidationStatus({
-                    validatorName: Command.name,
-                    requestId: request.id,
-                    status: result.validationResult
-                });
-            })
-        );
-    }
-
-    public async updateValidationStatus(command: IUpdateValidationStatusCommand): Promise<void> {
-        const { requestId, validatorName: commandName, status } = command;
-
-        await this.energyTransferRequestRepository.updateWithLock(requestId, (request) => {
-            const result = request.updateValidationStatus(commandName, status);
-
-            switch (result) {
-                case UpdateStatusCode.NoValidator:
-                    throw new Error(
-                        `Cannot update status of transfer request: ${requestId}, because validator "${commandName}" is not present`
-                    );
-                case UpdateStatusCode.NotPending:
-                    this.logger.warn(
-                        `Skipping update of transfer request: ${requestId} to ${status}, because it is not pending`
-                    );
-                    return;
-                default:
-                    return;
+            for (const chunk of chunkedEtrs) {
+                await this.transferCertificates(chunk);
             }
-        });
-
-        // This has to be run/checked after the transaction above finishes
-        const request = await this.energyTransferRequestRepository.findById(requestId);
-
-        if (request && request.isValid()) {
-            this.eventBus.publish(
-                new ValidatedTransferRequestEvent({
-                    requestId: request.id
-                })
-            );
         }
     }
 
-    public async transferCertificate(requestId: number): Promise<void> {
-        const request = await this.energyTransferRequestRepository.findById(requestId);
+    private async transferCertificates(etrs: EnergyTransferRequest[]): Promise<void> {
+        etrs.forEach((etr) => etr.transferStarted());
+        await this.etrRepository.saveManyInTransaction(etrs);
 
-        if (!request) {
-            this.logger.error(
-                `Received transfer request for request ${requestId}, but not such found`
-            );
-            return;
-        }
-
-        if (!request.certificateId) {
-            this.logger.error(
-                `Received transfer request for request ${requestId}, but this request has no certificate`
-            );
-            return;
-        }
-
-        if (!request.isValid()) {
-            this.logger.error(
-                `Received transfer request for request ${requestId}, but this request is not valid`
-            );
-            return;
-        }
-
-        await this.certificateService.transfer({
-            certificateId: request.certificateId,
-            fromAddress: request.sites.sellerAddress,
-            toAddress: request.sites.buyerAddress,
-            energyValue: request.volume
-        });
-    }
-
-    private async executeCommand(
-        Command: ValidateTransferCommandCtor,
-        request: EnergyTransferRequest
-    ) {
         try {
-            const command = new Command(request.toPublicAttrs());
+            await this.certificateService.batchTransfer({
+                fromAddress: etrs[0].sites.sellerAddress,
+                toAddress: etrs[0].sites.buyerAddress,
+                certificates: etrs.map((etr) => ({
+                    certificateId: etr.certificateId!, // verified by `transferStarted` state
+                    energyValue: etr.volume
+                }))
+            });
 
-            return await this.commandBus.execute(command);
+            etrs.forEach((etr) => etr.transferFinished());
         } catch (e) {
-            this.logger.error(`
-                One of validation commands (${Command.name}) returned error for request: ${request.id}:
-                "${e.message}"
-            `);
-
-            return { validationResult: TransferValidationStatus.Error };
+            etrs.forEach((etr) => etr.transferError(e.message));
         }
+
+        await this.etrRepository.saveManyInTransaction(etrs);
     }
 }

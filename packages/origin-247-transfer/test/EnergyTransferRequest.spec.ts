@@ -1,135 +1,138 @@
-import { EnergyTransferRequest, TransferValidationStatus } from '../src';
+import { EnergyTransferRequest, State, TransferValidationStatus } from '../src';
 
 describe('Energy Transfer Request', () => {
     describe('computedValidationStatus', () => {
-        const expectStatus = (etr: EnergyTransferRequest, status: TransferValidationStatus) => {
-            expect(etr.toAttrs().computedValidationStatus).toBe(status);
+        const expectState = (etr: EnergyTransferRequest, state: State) => {
+            expect(etr.toAttrs().state).toBe(state);
         };
 
-        const createEtr = (validators = ['validator1', 'validator2']) => {
+        const createEtr = (volume = '100') => {
             const etr = EnergyTransferRequest.fromAttrs({
                 id: 1,
                 ...EnergyTransferRequest.newAttributes({
                     buyerAddress: '',
-                    generatorId: '',
                     sellerAddress: '',
                     transferDate: new Date(),
-                    volume: ''
+                    volume,
+                    certificateData: {
+                        generatorId: '',
+                        fromTime: new Date().toISOString(),
+                        toTime: new Date().toISOString(),
+                        metadata: null
+                    }
                 })
             });
-
-            etr.startValidation(validators);
 
             return etr;
         };
 
-        it('starts with pending status', () => {
+        it('has correct happy-path state flow - with two validators', () => {
             const etr = createEtr();
 
-            expectStatus(etr, TransferValidationStatus.Pending);
-        });
+            expectState(etr, State.IssuanceAwaiting);
+            expect(etr.certificateId).toBe(null);
 
-        it('starts with valid status if is created with empty validators', () => {
-            const etr = createEtr([]);
+            etr.issuanceStarted();
+            expectState(etr, State.IssuanceInProgress);
 
-            expectStatus(etr, TransferValidationStatus.Valid);
-        });
+            etr.issuanceFinished(1);
+            expectState(etr, State.PersistenceAwaiting);
+            expect(etr.certificateId).toBe(1);
 
-        it('properly updates valid status', () => {
-            const etr = createEtr();
+            etr.persisted();
+            expectState(etr, State.ValidationAwaiting);
+
+            etr.startValidation(['validator1', 'validator2']);
+            expectState(etr, State.ValidationInProgress);
 
             etr.updateValidationStatus('validator1', TransferValidationStatus.Valid);
-            expectStatus(etr, TransferValidationStatus.Pending);
+            expectState(etr, State.ValidationInProgress);
 
             etr.updateValidationStatus('validator2', TransferValidationStatus.Valid);
-            expectStatus(etr, TransferValidationStatus.Valid);
+            expectState(etr, State.TransferAwaiting); // it immediately goes to being transferred
+
+            etr.transferStarted();
+            expectState(etr, State.TransferInProgress);
+
+            etr.transferFinished();
+            expectState(etr, State.Transferred);
+        });
+
+        it('immediately goes to Skipped status if created if no volume', () => {
+            const etr = createEtr('0');
+
+            expectState(etr, State.Skipped);
+        });
+
+        it('immediately goes to TransferAwaiting status if created with empty validators', () => {
+            const etr = createEtr();
+
+            etr.issuanceStarted();
+            etr.issuanceFinished(1);
+            etr.persisted();
+            etr.startValidation([]);
+
+            expectState(etr, State.TransferAwaiting);
         });
 
         it('properly updates error status', () => {
-            const etr1 = createEtr();
-
-            etr1.updateValidationStatus('validator1', TransferValidationStatus.Valid);
-            expectStatus(etr1, TransferValidationStatus.Pending);
-
-            etr1.updateValidationStatus('validator2', TransferValidationStatus.Error);
-            expectStatus(etr1, TransferValidationStatus.Error);
-        });
-
-        it('properly updates invalid status', () => {
             const etr = createEtr();
 
+            etr.issuanceStarted();
+            etr.issuanceFinished(1);
+            etr.persisted();
+            etr.startValidation(['validator1', 'validator2']);
+
             etr.updateValidationStatus('validator1', TransferValidationStatus.Valid);
-            expectStatus(etr, TransferValidationStatus.Pending);
+            expectState(etr, State.ValidationInProgress);
+
+            etr.updateValidationStatus('validator2', TransferValidationStatus.Error);
+            expectState(etr, State.ValidationError);
+        });
+
+        it('properly updates error status', () => {
+            const etr = createEtr();
+
+            etr.issuanceStarted();
+            etr.issuanceFinished(1);
+            etr.persisted();
+            etr.startValidation(['validator1', 'validator2']);
+
+            etr.updateValidationStatus('validator1', TransferValidationStatus.Valid);
+            expectState(etr, State.ValidationInProgress);
 
             etr.updateValidationStatus('validator2', TransferValidationStatus.Invalid);
-            expectStatus(etr, TransferValidationStatus.Invalid);
+            expectState(etr, State.ValidationInvalid);
         });
 
-        it('immediately sets invalid or error statuses', () => {
-            const etr1 = createEtr();
-
-            etr1.updateValidationStatus('validator1', TransferValidationStatus.Error);
-            expectStatus(etr1, TransferValidationStatus.Error);
-
-            etr1.updateValidationStatus('validator2', TransferValidationStatus.Valid);
-            expectStatus(etr1, TransferValidationStatus.Error);
-
-            const etr2 = createEtr();
-
-            etr2.updateValidationStatus('validator1', TransferValidationStatus.Invalid);
-            expectStatus(etr2, TransferValidationStatus.Invalid);
-
-            etr2.updateValidationStatus('validator2', TransferValidationStatus.Pending);
-            expectStatus(etr2, TransferValidationStatus.Invalid);
-        });
-    });
-
-    describe('isValid', () => {
-        const createEtr = (validators = ['validator1', 'validator2']) => {
-            const etr = EnergyTransferRequest.fromAttrs({
-                id: 1,
-                ...EnergyTransferRequest.newAttributes({
-                    buyerAddress: '',
-                    generatorId: '',
-                    sellerAddress: '',
-                    transferDate: new Date(),
-                    volume: ''
-                })
-            });
-
-            etr.startValidation(validators);
-
-            return etr;
-        };
-
-        it('is initially not valid', () => {
+        it('immediately sets validator error status', () => {
             const etr = createEtr();
 
-            expect(etr.isValid()).toBe(false);
+            etr.issuanceStarted();
+            etr.issuanceFinished(1);
+            etr.persisted();
+            etr.startValidation(['validator1', 'validator2']);
+
+            etr.updateValidationStatus('validator1', TransferValidationStatus.Error);
+            expectState(etr, State.ValidationError);
+
+            etr.updateValidationStatus('validator2', TransferValidationStatus.Invalid);
+            expectState(etr, State.ValidationError);
         });
 
-        it('is initially valid if no validators are given', () => {
-            const etr = createEtr([]);
-
-            expect(etr.isValid()).toBe(true);
-        });
-
-        it('is true only if all are valid', () => {
+        it('immediately sets validator invalid status', () => {
             const etr = createEtr();
 
-            etr.updateValidationStatus('validator1', TransferValidationStatus.Valid);
-            expect(etr.isValid()).toBe(false);
-
-            etr.updateValidationStatus('validator2', TransferValidationStatus.Valid);
-            expect(etr.isValid()).toBe(true);
-        });
-
-        it('is not true if any of validators is not valid', () => {
-            const etr = createEtr();
+            etr.issuanceStarted();
+            etr.issuanceFinished(1);
+            etr.persisted();
+            etr.startValidation(['validator1', 'validator2']);
 
             etr.updateValidationStatus('validator1', TransferValidationStatus.Invalid);
-            etr.updateValidationStatus('validator2', TransferValidationStatus.Valid);
-            expect(etr.isValid()).toBe(false);
+            expectState(etr, State.ValidationInvalid);
+
+            etr.updateValidationStatus('validator2', TransferValidationStatus.Error);
+            expectState(etr, State.ValidationInvalid);
         });
     });
 });
