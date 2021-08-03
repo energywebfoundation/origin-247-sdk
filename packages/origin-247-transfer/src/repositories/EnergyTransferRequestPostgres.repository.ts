@@ -80,6 +80,7 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
                 .createQueryBuilder()
                 .update(EnergyTransferRequestEntity)
                 .set(request.toAttrs())
+                .where({ id: request.id })
                 .getQueryAndParameters();
 
             await queryRunner.query(updateQuery[0], updateQuery[1]);
