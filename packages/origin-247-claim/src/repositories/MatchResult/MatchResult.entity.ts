@@ -29,14 +29,11 @@ export class MatchResultEntity {
     volume: string; //BigNumber
 
     @Column({ type: 'timestamptz' })
-    from: Date;
-
-    @Column({ type: 'timestamptz' })
-    to: Date;
+    timestamp: Date;
 
     @Column({ type: 'simple-json' })
-    consumerMetadata: any;
+    consumerMetadata: unknown;
 
     @Column({ type: 'simple-json' })
-    generatorMetadata: any;
+    generatorMetadata: unknown;
 }

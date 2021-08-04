@@ -32,8 +32,7 @@ describe('MatchResult - e2e', () => {
                 consumerMetadata: {},
                 generatorMetadata: {},
                 volume: '100000',
-                from: new Date(),
-                to: new Date()
+                timestamp: new Date()
             });
 
             const found = await matchResultRepository.getAll();
@@ -66,8 +65,7 @@ describe('MatchResult - e2e', () => {
                 [Entity.Consumer, Entity.Generator]
             );
 
-            expect(res).toHaveLength(1);
-            expect(res[0].entries).toHaveLength(2);
+            expect(res).toHaveLength(2);
         });
 
         it('findGrouped() should group by single column', async () => {
@@ -121,6 +119,22 @@ describe('MatchResult - e2e', () => {
             );
             expect(res).toHaveLength(4);
         });
+
+        it('should throw error when empty groupOptions is passed', async () => {
+            try {
+                await matchResultRepository.findGrouped(
+                    {
+                        consumerIds: ['consumerOne', 'consumerTwo'],
+                        generatorIds: ['generatorOne', 'generatorTwo', 'generatorThree'],
+                        from: new Date('2021-08-01T10:00:00.000Z'),
+                        to: new Date('2021-08-01T12:00:00.000Z')
+                    },
+                    []
+                );
+            } catch (err) {
+                expect(err.message).toEqual('At least one group option must be provided.');
+            }
+        });
     });
 
     async function seed() {
@@ -142,8 +156,7 @@ const matchResults = [
         consumerMetadata: {},
         generatorMetadata: {},
         volume: '100000',
-        from: new Date('2021-08-01T10:45:00.000Z'),
-        to: new Date('2021-08-01T11:00:00.000Z')
+        timestamp: new Date('2021-08-01T11:00:00.000Z')
     },
     {
         consumerId: 'consumerOne',
@@ -151,8 +164,7 @@ const matchResults = [
         consumerMetadata: {},
         generatorMetadata: {},
         volume: '100000',
-        from: new Date('2021-08-01T10:45:00.000Z'),
-        to: new Date('2021-08-01T11:00:00.000Z')
+        timestamp: new Date('2021-08-01T11:00:00.000Z')
     },
     {
         consumerId: 'consumerOne',
@@ -160,8 +172,7 @@ const matchResults = [
         consumerMetadata: {},
         generatorMetadata: {},
         volume: '100000',
-        from: new Date('2021-08-01T10:45:00.000Z'),
-        to: new Date('2021-08-01T11:00:00.000Z')
+        timestamp: new Date('2021-08-01T11:00:00.000Z')
     },
     {
         consumerId: 'consumerTwo',
@@ -169,8 +180,7 @@ const matchResults = [
         consumerMetadata: {},
         generatorMetadata: {},
         volume: '100000',
-        from: new Date('2021-08-01T10:45:00.000Z'),
-        to: new Date('2021-08-01T11:00:00.000Z')
+        timestamp: new Date('2021-08-01T11:00:00.000Z')
     },
     {
         consumerId: 'consumerTwo',
@@ -178,8 +188,7 @@ const matchResults = [
         consumerMetadata: {},
         generatorMetadata: {},
         volume: '100000',
-        from: new Date('2021-08-01T11:00:00.000Z'),
-        to: new Date('2021-08-01T11:15:00.000Z')
+        timestamp: new Date('2021-08-01T11:15:00.000Z')
     },
     {
         consumerId: 'consumerTwo',
@@ -187,7 +196,6 @@ const matchResults = [
         consumerMetadata: {},
         generatorMetadata: {},
         volume: '100000',
-        from: new Date('2021-08-01T11:15:00.000Z'),
-        to: new Date('2021-08-01T11:30:00.000Z')
+        timestamp: new Date('2021-08-01T11:30:00.000Z')
     }
 ];

@@ -28,8 +28,7 @@ export class ExcessGenerationPostgresRepository implements ExcessGenerationRepos
         return await this.repository.find({
             where: {
                 generatorId: In(findOptions.generatorIds),
-                from: Between(findOptions.from, findOptions.to),
-                to: Between(findOptions.from, findOptions.to)
+                timestamp: Between(findOptions.from, findOptions.to)
             }
         });
     }

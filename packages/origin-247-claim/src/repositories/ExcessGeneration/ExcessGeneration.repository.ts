@@ -11,8 +11,7 @@ export interface FindOptions {
 export enum ExcessGenerationColumns {
     Id = 'id',
     GeneratorId = 'generatorId',
-    DateFrom = 'from',
-    DateTo = 'to',
+    Timestamp = 'timestamp',
     GeneratorMetadata = 'generatorMetadata',
     Volume = 'volume',
     CreatedAt = 'createdAt',

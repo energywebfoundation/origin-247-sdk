@@ -34,15 +34,14 @@ export class MatchResultPostgresRepository implements MatchResultRepository {
             where: {
                 consumerId: In(findOptions.consumerIds),
                 generatorId: In(findOptions.generatorIds),
-                from: Between(findOptions.from, findOptions.to),
-                to: Between(findOptions.from, findOptions.to)
+                timestamp: Between(findOptions.from, findOptions.to)
             }
         });
     }
 
     public async findGrouped(
         findOptions: FindOptions,
-        groupOptions: Entity[]
+        groupOptions: [Entity] | [Entity, Entity]
     ): Promise<GroupedMatchResults[]> {
         if (!groupOptions.length) {
             throw new Error('At least one group option must be provided.');
@@ -67,11 +66,7 @@ export class MatchResultPostgresRepository implements MatchResultRepository {
                     "'"
                 ).join(', ')})`
             )
-            .andWhere(`"${MatchResultColumns.DateFrom}" between :dateFrom and :dateTo`, {
-                dateFrom: findOptions.from,
-                dateTo: findOptions.to
-            })
-            .andWhere(`"${MatchResultColumns.DateTo}" between :dateFrom and :dateTo`, {
+            .andWhere(`"${MatchResultColumns.Timestamp}" between :dateFrom and :dateTo`, {
                 dateFrom: findOptions.from,
                 dateTo: findOptions.to
             })
