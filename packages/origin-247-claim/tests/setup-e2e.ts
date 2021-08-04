@@ -79,11 +79,20 @@ export const bootstrapTestInstance = async () => {
                 username: process.env.DB_USERNAME ?? 'postgres',
                 password: process.env.DB_PASSWORD ?? 'postgres',
                 database: process.env.DB_DATABASE ?? 'origin',
-                entities: [...IssuerEntities, MatchResultEntity],
-                logging: true,
+                entities: [
+                    ...IssuerEntities,
+                    MatchResultEntity,
+                    LeftoverConsumptionEntity,
+                    ExcessGenerationEntity
+                ],
+                logging: ['info'],
                 keepConnectionAlive: true
             }),
-            TypeOrmModule.forFeature([MatchResultEntity]),
+            TypeOrmModule.forFeature([
+                MatchResultEntity,
+                LeftoverConsumptionEntity,
+                ExcessGenerationEntity
+            ]),
             CqrsModule,
             QueueingModule(),
             BlockchainPropertiesModule,

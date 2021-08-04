@@ -24,7 +24,7 @@ describe('MatchResult - e2e', () => {
         await seed();
     });
 
-    describe('matchResultRepository', () => {
+    describe('MatchResultRepository', () => {
         it('should create a match result', async () => {
             await matchResultRepository.create({
                 consumerId: 'consumerOne',
@@ -81,8 +81,6 @@ describe('MatchResult - e2e', () => {
                 [Entity.Consumer]
             );
             expect(res).toHaveLength(2);
-            expect(res[0].entries).toHaveLength(2);
-            expect(res[1].entries).toHaveLength(3);
         });
 
         it('findGrouped() should group by single column - different order', async () => {
@@ -95,12 +93,7 @@ describe('MatchResult - e2e', () => {
                 },
                 [Entity.Generator]
             );
-            console.log(JSON.stringify(res, null, 2));
-
             expect(res).toHaveLength(3);
-            expect(res[0].entries).toHaveLength(1);
-            expect(res[1].entries).toHaveLength(4);
-            expect(res[2].entries).toHaveLength(1);
         });
 
         it('findGrouped() should group by two columns', async () => {
@@ -114,10 +107,6 @@ describe('MatchResult - e2e', () => {
                 [Entity.Consumer, Entity.Generator]
             );
             expect(res).toHaveLength(4);
-            expect(res[0].entries).toHaveLength(1);
-            expect(res[1].entries).toHaveLength(1);
-            expect(res[2].entries).toHaveLength(3);
-            expect(res[3].entries).toHaveLength(1);
         });
 
         it('findGrouped() should group by two columns - different order', async () => {
@@ -131,10 +120,6 @@ describe('MatchResult - e2e', () => {
                 [Entity.Generator, Entity.Consumer]
             );
             expect(res).toHaveLength(4);
-            expect(res[0].entries).toHaveLength(1);
-            expect(res[1].entries).toHaveLength(1);
-            expect(res[2].entries).toHaveLength(3);
-            expect(res[3].entries).toHaveLength(1);
         });
     });
 
