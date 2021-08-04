@@ -11,8 +11,7 @@ export interface FindOptions {
 export enum LeftoverConsumptionColumns {
     Id = 'id',
     ConsumerId = 'consumerId',
-    DateFrom = 'from',
-    DateTo = 'to',
+    Timestamp = 'timestamp',
     ConsumerMetadata = 'consumerMetadata',
     Volume = 'volume',
     CreatedAt = 'createdAt',

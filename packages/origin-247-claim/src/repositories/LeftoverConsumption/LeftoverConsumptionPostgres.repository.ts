@@ -28,8 +28,7 @@ export class LeftoverConsumptionPostgresRepository implements LeftoverConsumptio
         return await this.repository.find({
             where: {
                 consumerId: In(findOptions.consumerIds),
-                from: Between(findOptions.from, findOptions.to),
-                to: Between(findOptions.from, findOptions.to)
+                timestamp: Between(findOptions.from, findOptions.to)
             }
         });
     }

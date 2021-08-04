@@ -6,7 +6,7 @@ import {
     Column
 } from 'typeorm';
 
-export const tableName = 'excess_generation';
+export const tableName = 'match_excess_generation';
 
 @Entity(tableName)
 export class ExcessGenerationEntity {
@@ -26,11 +26,8 @@ export class ExcessGenerationEntity {
     volume: string; //BigNumber
 
     @Column({ type: 'timestamptz' })
-    from: Date;
-
-    @Column({ type: 'timestamptz' })
-    to: Date;
+    timestamp: Date;
 
     @Column({ type: 'simple-json' })
-    generatorMetadata: any;
+    generatorMetadata: unknown;
 }
