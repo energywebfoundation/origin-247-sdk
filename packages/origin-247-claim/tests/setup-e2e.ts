@@ -3,19 +3,34 @@ import { BlockchainPropertiesService, BlockchainPropertiesModule } from '@energy
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
-import { EventBus, CqrsModule } from '@nestjs/cqrs';
+import { CqrsModule } from '@nestjs/cqrs';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 
 import { entities as IssuerEntities } from '@energyweb/issuer-api';
 import { PassportModule } from '@nestjs/passport';
-import { MatchResultEntity } from '../src/repositories/MatchResult.entity';
+
+import { MatchResultEntity } from '../src/repositories/MatchResult/MatchResult.entity';
 import {
-    MatchResultRepository,
-    MATCH_RESULT_REPOSITORY
-} from '../src/repositories/MatchResult.repository';
-import { MatchResultPostgresRepository } from '../src/repositories/MatchResultPostgres.repository';
+    MATCH_RESULT_REPOSITORY,
+    MatchResultRepository
+} from '../src/repositories/MatchResult/MatchResult.repository';
+import { MatchResultPostgresRepository } from '../src/repositories/MatchResult/MatchResultPostgres.repository';
+
+import { LeftoverConsumptionEntity } from '../src/repositories/LeftoverConsumption/LeftoverConsumption.entity';
+import {
+    LEFTOVER_CONSUMPTION_REPOSITORY,
+    LeftoverConsumptionRepository
+} from '../src/repositories/LeftoverConsumption/LeftoverConsumption.repository';
+import { LeftoverConsumptionPostgresRepository } from '../src/repositories/LeftoverConsumption/LeftoverConsumptionPostgres.repository';
+
+import { ExcessGenerationEntity } from '../src/repositories/ExcessGeneration/ExcessGeneration.entity';
+import {
+    EXCESS_GENERATION_REPOSITORY,
+    ExcessGenerationRepository
+} from '../src/repositories/ExcessGeneration/ExcessGeneration.repository';
+import { ExcessGenerationPostgresRepository } from '../src/repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
 
 const testLogger = new Logger('e2e');
 
@@ -65,7 +80,7 @@ export const bootstrapTestInstance = async () => {
                 password: process.env.DB_PASSWORD ?? 'postgres',
                 database: process.env.DB_DATABASE ?? 'origin',
                 entities: [...IssuerEntities, MatchResultEntity],
-                logging: ['info'],
+                logging: true,
                 keepConnectionAlive: true
             }),
             TypeOrmModule.forFeature([MatchResultEntity]),
@@ -79,6 +94,14 @@ export const bootstrapTestInstance = async () => {
             {
                 provide: MATCH_RESULT_REPOSITORY,
                 useClass: MatchResultPostgresRepository
+            },
+            {
+                provide: LEFTOVER_CONSUMPTION_REPOSITORY,
+                useClass: LeftoverConsumptionPostgresRepository
+            },
+            {
+                provide: EXCESS_GENERATION_REPOSITORY,
+                useClass: ExcessGenerationPostgresRepository
             }
         ]
     }).compile();
@@ -89,7 +112,13 @@ export const bootstrapTestInstance = async () => {
     const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(
         BlockchainPropertiesService
     );
-    const repository = await app.resolve<MatchResultRepository>(MATCH_RESULT_REPOSITORY);
+    const matchResultRepository = await app.resolve<MatchResultRepository>(MATCH_RESULT_REPOSITORY);
+    const leftoverConsumptionRepository = await app.resolve<LeftoverConsumptionRepository>(
+        LEFTOVER_CONSUMPTION_REPOSITORY
+    );
+    const excessGenerationRepository = await app.resolve<ExcessGenerationRepository>(
+        EXCESS_GENERATION_REPOSITORY
+    );
 
     const blockchainProperties = await blockchainPropertiesService.create(
         provider.network.chainId,
@@ -114,7 +143,9 @@ export const bootstrapTestInstance = async () => {
 
     return {
         databaseService,
-        repository,
+        matchResultRepository,
+        leftoverConsumptionRepository,
+        excessGenerationRepository,
         app
     };
 };

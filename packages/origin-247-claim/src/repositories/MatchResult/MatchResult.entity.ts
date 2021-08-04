@@ -19,14 +19,11 @@ export class MatchResultEntity {
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 
-    // in case of generalized entities, it will be the user's responsibility
-    // to make sure that those ids always refer to the same entities
-    // otherwise, with different contexts, the data will be invalid
     @Column({ type: 'text' })
-    firstEntityId: string;
+    consumerId: string;
 
     @Column({ type: 'text' })
-    secondEntityId: string;
+    generatorId: string;
 
     @Column({ type: 'text' })
     volume: string; //BigNumber
@@ -38,8 +35,8 @@ export class MatchResultEntity {
     to: Date;
 
     @Column({ type: 'simple-json' })
-    firstEntityMetaData: any;
+    consumerMetadata: any;
 
     @Column({ type: 'simple-json' })
-    secondEntityMetaData: any;
+    generatorMetadata: any;
 }

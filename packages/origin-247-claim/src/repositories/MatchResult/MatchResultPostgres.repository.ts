@@ -3,32 +3,20 @@ import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { Repository, Connection, Between, In, createQueryBuilder } from 'typeorm';
 
 import { MatchResultEntity, tableName } from './MatchResult.entity';
-import { FindOptions, MatchResultRepository, NewMatchResult } from './MatchResult.repository';
-
-enum Entity {
-    FirstEntity = 'firstEntityId',
-    SecondEntity = 'secondEntityId'
-}
-
-enum Column {
-    FirstEntityId = 'firstEntityId',
-    SecondEntityId = 'secondEntityId',
-    From = 'from',
-    To = 'to'
-}
-
-interface GroupedMatchResults {
-    firstEntityId?: string;
-    secondEntityId?: string;
-    array_agg: MatchResultEntity[];
-}
+import {
+    FindOptions,
+    MatchResultRepository,
+    NewMatchResult,
+    Entity,
+    MatchResultColumns,
+    GroupedMatchResults
+} from './MatchResult.repository';
 
 @Injectable()
 export class MatchResultPostgresRepository implements MatchResultRepository {
     constructor(
         @InjectRepository(MatchResultEntity)
         private repository: Repository<MatchResultEntity>,
-
         @InjectConnection()
         private connection: Connection
     ) {}
@@ -44,8 +32,8 @@ export class MatchResultPostgresRepository implements MatchResultRepository {
     public async find(findOptions: FindOptions): Promise<MatchResultEntity[]> {
         return await this.repository.find({
             where: {
-                firstEntityId: In(findOptions.firstEntityId),
-                secondEntityId: In(findOptions.secondEntityId),
+                consumerId: In(findOptions.consumerIds),
+                generatorId: In(findOptions.generatorIds),
                 from: Between(findOptions.from, findOptions.to),
                 to: Between(findOptions.from, findOptions.to)
             }
@@ -65,24 +53,37 @@ export class MatchResultPostgresRepository implements MatchResultRepository {
         const matchResultQuery = this.connection
             .createQueryBuilder()
             .select(sanitized)
-            .addSelect(this.createJSONFromRow())
+            .addSelect(`array_agg(row_to_json(${tableName})) as entries`)
             .from(tableName, tableName)
+            .where(
+                `"${MatchResultColumns.ConsumerId}" IN (${this.sanitizeInput(
+                    findOptions.consumerIds,
+                    "'"
+                ).join(', ')})`
+            )
+            .andWhere(
+                `"${MatchResultColumns.GeneratorId}" IN (${this.sanitizeInput(
+                    findOptions.generatorIds,
+                    "'"
+                ).join(', ')})`
+            )
+            .andWhere(`"${MatchResultColumns.DateFrom}" between :dateFrom and :dateTo`, {
+                dateFrom: findOptions.from,
+                dateTo: findOptions.to
+            })
+            .andWhere(`"${MatchResultColumns.DateTo}" between :dateFrom and :dateTo`, {
+                dateFrom: findOptions.from,
+                dateTo: findOptions.to
+            })
             .groupBy(sanitized.join(', '))
             .getQueryAndParameters();
 
-        const res = await queryRunner.query(matchResultQuery[0]);
-        console.log(JSON.stringify(res, null, 2));
-        // return JSON.parse(res);
+        const res = await queryRunner.query(matchResultQuery[0], matchResultQuery[1]);
         return res;
     }
 
-    private sanitizeInput(input: string[]): string[] {
-        return input.map((i) => `"${i}"`);
-    }
-
-    private createJSONFromRow(): string {
-        const toJSON = `array_agg(row_to_json(${tableName}))`;
-        // const toJSON = `array_agg(jsonb_build_object('volume', volume, 'from', "from", 'to', "to", 'firstEntityMetaData', "firstEntityMetaData", 'secondEntityMetaData', "secondEntityMetaData"))`;
-        return toJSON;
+    private sanitizeInput(input: string[], token?: string): string[] {
+        const sanitizationToken = token ?? `"`;
+        return input.map((i) => `${sanitizationToken}${i}${sanitizationToken}`);
     }
 }
