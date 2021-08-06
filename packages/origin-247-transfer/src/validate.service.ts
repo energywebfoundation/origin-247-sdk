@@ -54,30 +54,21 @@ export class ValidateService {
         etrs.forEach((etr) => etr.startValidation(this.validateCommands.map((c) => c.name)));
         await this.etrRepository.saveManyInTransaction(etrs);
 
-        if (this.validateCommands.length > 0) {
-            await Promise.all(
-                etrs.map(async (etr) => {
-                    try {
-                        await Promise.all(
-                            this.validateCommands.map(async (Command) => {
-                                const result = await this.executeCommand(Command, etr);
-
-                                await this.updateValidationStatus({
-                                    validatorName: Command.name,
-                                    requestId: etr.id,
-                                    status: result.validationResult
-                                });
-                            })
-                        );
-                    } catch (e) {
-                        etr.validationError(e.message);
-                        await this.etrRepository.save(etr);
-                    }
-                })
-            );
-        } else {
+        if (this.validateCommands.length === 0) {
             this.eventBus.publish(new AwaitingTransferEvent());
+            return;
         }
+
+        const validateEtrsPromises = etrs.map(async (etr) => {
+            try {
+                await this.validateEtr(etr);
+            } catch (e) {
+                etr.validationError(e.message);
+                await this.etrRepository.save(etr);
+            }
+        });
+
+        await Promise.all(validateEtrsPromises);
     }
 
     public async updateValidationStatus(command: IUpdateValidationStatusCommand): Promise<void> {
@@ -107,6 +98,20 @@ export class ValidateService {
         if (isValid) {
             this.eventBus.publish(new AwaitingTransferEvent());
         }
+    }
+
+    private async validateEtr(request: EnergyTransferRequest): Promise<void> {
+        const validationPromises = this.validateCommands.map(async (Command) => {
+            const result = await this.executeCommand(Command, request);
+
+            await this.updateValidationStatus({
+                validatorName: Command.name,
+                requestId: request.id,
+                status: result.validationResult
+            });
+        });
+
+        await Promise.all(validationPromises);
     }
 
     private async executeCommand(
