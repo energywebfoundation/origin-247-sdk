@@ -44,7 +44,7 @@ export const setup = async (options: {
                 batchConfiguration: {
                     issueAggregateSeconds: 1,
                     validateAggregateSeconds: 1,
-                    transferAggregateSeconds: 1
+                    transferAggregateSeconds: 5
                 }
             })
         ],

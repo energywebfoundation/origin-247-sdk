@@ -198,7 +198,7 @@ export class EnergyTransferRequest {
     }
 
     public transferError(error: string) {
-        this.nextState(State.TransferAwaiting, State.TransferInProgress);
+        this.nextState(State.TransferInProgress, State.TransferError);
         this.attrs.processError = error;
     }
 
