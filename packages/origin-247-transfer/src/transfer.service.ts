@@ -40,7 +40,7 @@ export class TransferService {
         await this.etrRepository.saveManyInTransaction(etrs);
 
         try {
-            await this.certificateService.batchTransfer({
+            const result = await this.certificateService.batchTransfer({
                 fromAddress: etrs[0].sites.sellerAddress,
                 toAddress: etrs[0].sites.buyerAddress,
                 certificates: etrs.map((etr) => ({
@@ -48,6 +48,10 @@ export class TransferService {
                     energyValue: etr.volume
                 }))
             });
+
+            if (!result.success) {
+                throw new Error(result.message ?? 'Unknown transfer error');
+            }
 
             etrs.forEach((etr) => etr.transferFinished());
         } catch (e) {
