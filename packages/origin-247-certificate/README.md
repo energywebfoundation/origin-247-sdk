@@ -91,3 +91,10 @@ Therefore all certificate types (including service) imported from the module giv
 
 Metadata is serialized internally via `JSON.stringify` therefore metadata **has to** be serializable.
 Any value accepted by `JSON.stringify` can be used as metadata (including null - which is default value for metadata field)
+
+### Environment configuration
+
+| Variable name                     | Default value    | Description                                                                                                                      |
+| --------------------------------- | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `CERTIFICATE_QUEUE_LOCK_DURATION` | 240 \* 1000 [ms] | How long processor can lock given queue item before marking it stale (stalled queue items are rerun again) - change with caution |
+| `CERTIFICATE_QUEUE_DELAY`         | 10 \* 1000 [ms]  | How long each queue item should wait before finishing it's processing - helps with some transaction nonce problems               |
