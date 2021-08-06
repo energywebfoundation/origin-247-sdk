@@ -19,7 +19,10 @@ const serviceProvider = {
         IssuerCertificateModule,
         CqrsModule,
         BullModule.registerQueue({
-            name: 'blockchain-actions'
+            name: 'blockchain-actions',
+            settings: {
+                lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
+            }
         })
     ]
 })

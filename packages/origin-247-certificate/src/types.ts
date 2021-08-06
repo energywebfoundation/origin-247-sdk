@@ -66,6 +66,22 @@ export interface ITransferCommand {
     energyValue?: string;
 }
 
+export interface IBatchIssueCommand<T> {
+    certificates: IIssueCommand<T>[];
+}
+
+export interface IBatchClaimCommand {
+    certificates: { certificateId: number; energyValue: string }[];
+    claimData: IClaimData;
+    forAddress: string;
+}
+
+export interface IBatchTransferCommand {
+    certificates: { certificateId: number; energyValue: string }[];
+    fromAddress: string;
+    toAddress: string;
+}
+
 export interface ISuccessResponse {
     success: boolean;
     statusCode?: number;
@@ -75,7 +91,10 @@ export interface ISuccessResponse {
 export enum BlockchainActionType {
     Issuance = 'Issuance',
     Transfer = 'Transfer',
-    Claim = 'Claim'
+    Claim = 'Claim',
+    BatchIssuance = 'BatchIssuance',
+    BatchTransfer = 'BatchTransfer',
+    BatchClaim = 'BatchClaim'
 }
 
 interface IAction<T, P> {
@@ -86,6 +105,9 @@ interface IAction<T, P> {
 export type BlockchainAction =
     | IAction<BlockchainActionType.Issuance, IIssueCommand<any>>
     | IAction<BlockchainActionType.Transfer, ITransferCommand>
-    | IAction<BlockchainActionType.Claim, IClaimCommand>;
+    | IAction<BlockchainActionType.Claim, IClaimCommand>
+    | IAction<BlockchainActionType.BatchIssuance, IBatchIssueCommand<any>>
+    | IAction<BlockchainActionType.BatchTransfer, IBatchTransferCommand>
+    | IAction<BlockchainActionType.BatchClaim, IBatchClaimCommand>;
 
 export const CERTIFICATE_SERVICE_TOKEN = Symbol.for('CERTIFICATE_SERVICE_TOKEN');

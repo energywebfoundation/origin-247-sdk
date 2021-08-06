@@ -1,278 +1,168 @@
+import {
+    TransferValidationStatus,
+    State,
+    EnergyTransferRequestAttrs,
+    IValidateTransferCommandHandler
+} from '../src';
+import { publishStart, setup } from './setup';
 import { CommandHandler } from '@nestjs/cqrs';
-import { TransferValidationStatus, IValidateTransferCommandHandler } from '../src';
-import { publishStart, setup, waitForPersistance, waitForEvent, waitForValidation } from './setup';
 
-jest.setTimeout(10000);
+jest.setTimeout(30 * 1000);
 
-/**
- * @WARN - times in these tests are fine tuned to provide expected results
- * Since many things are happening through CQRS module there is no other way.
- */
+const wait = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
 
 describe('Transfer module', () => {
-    it.concurrent('creates ETR with given sites and data', async () => {
-        const { app, queryBus, commandBus, eventBus, repository } = await setup({
-            sites: {
-                buyerAddress: '0x111',
-                sellerAddress: '0x222'
+    it('creates ETR with given sites and data', async () => {
+        await doTest(
+            {
+                commands: [],
+                handlers: {}
             },
-            commands: []
-        });
-
-        await app.init();
-        await publishStart(eventBus);
-        await waitForPersistance();
-
-        const request = await repository.findByCertificateId(1);
-
-        expect(request?.toAttrs()).toEqual(
-            expect.objectContaining({
-                volume: '60',
-                generatorId: 'a1',
-                buyerAddress: '0x111',
-                sellerAddress: '0x222'
-            })
+            (etr) => {
+                expect(etr).toEqual(
+                    expect.objectContaining({
+                        volume: '60',
+                        sellerAddress: '0x111',
+                        buyerAddress: '0x222'
+                    })
+                );
+            }
         );
-
-        await app.close();
     });
 
-    it.concurrent('does not create ETR if no sites are returned', async () => {
-        const { app, queryBus, commandBus, eventBus, repository } = await setup({
+    it('does not create ETR if no sites are returned', async () => {
+        const { app, eventBus, getEtr } = await setup({
             sites: null,
             commands: []
         });
 
         await app.init();
-        await publishStart(eventBus);
-        await waitForPersistance();
 
-        const request = await repository.findByCertificateId(1);
+        publishStart(eventBus);
+        await wait(1);
+
+        const request = await getEtr();
 
         expect(request).toBeNull();
 
         await app.close();
     });
 
-    it.concurrent('marks ETR as persisted', async () => {
-        const { app, eventBus, repository } = await setup({
-            sites: {
-                sellerAddress: '0x111',
-                buyerAddress: '0x222'
-            },
-            commands: []
-        });
-
-        await app.init();
-        await publishStart(eventBus);
-
-        const requestBefore = await repository.findByCertificateId(1);
-        expect(requestBefore?.toAttrs().isCertificatePersisted).toBe(false);
-
-        await waitForPersistance();
-
-        const requestAfter = await repository.findByCertificateId(1);
-        expect(requestAfter?.toAttrs().isCertificatePersisted).toBe(true);
-
-        await app.close();
-    });
-
-    it.concurrent('saves all validations as pending before starting validating', async () => {
-        class Command1 {}
-        class Command2 {}
-
-        @CommandHandler(Command1)
-        class Command1Handler implements IValidateTransferCommandHandler {
-            async execute() {
-                await waitForValidation();
-                return { validationResult: TransferValidationStatus.Valid };
-            }
-        }
-
-        @CommandHandler(Command2)
-        class Command2Handler implements IValidateTransferCommandHandler {
-            async execute() {
-                await waitForValidation();
-                return { validationResult: TransferValidationStatus.Valid };
-            }
-        }
-
-        const { app, queryBus, commandBus, eventBus, repository } = await setup({
-            sites: {
-                sellerAddress: '0x111',
-                buyerAddress: '0x222'
-            },
-            commands: [Command1, Command2],
-            providers: [Command1Handler, Command2Handler]
-        });
-
-        await app.init();
-        await publishStart(eventBus);
-        await waitForPersistance();
-
-        const request = await repository.findByCertificateId(1);
-        expect(request?.toAttrs().validationStatusRecord).toEqual({
-            Command1: TransferValidationStatus.Pending,
-            Command2: TransferValidationStatus.Pending
-        });
-
-        await app.close();
-    });
-
-    it.concurrent(
-        'immediately saves validation error if command handler is not defined',
-        async () => {
-            class Command1 {}
-            class Command2 {}
-
-            @CommandHandler(Command1)
-            class Command1Handler implements IValidateTransferCommandHandler {
-                async execute() {
-                    await waitForValidation();
-                    return { validationResult: TransferValidationStatus.Valid };
+    it('it validates using provided validators', async () => {
+        await doTest(
+            {
+                commands: ['Command1', 'Command2'],
+                handlers: {
+                    Command1: TransferValidationStatus.Valid,
+                    Command2: TransferValidationStatus.Invalid
                 }
-            }
-
-            const { app, eventBus, repository } = await setup({
-                sites: {
-                    sellerAddress: '0x111',
-                    buyerAddress: '0x222'
-                },
-                commands: [Command1, Command2],
-                providers: [Command1Handler]
-            });
-
-            await app.init();
-            await publishStart(eventBus);
-            await waitForPersistance();
-
-            const request = await repository.findByCertificateId(1);
-            expect(request?.toAttrs().validationStatusRecord).toEqual({
-                Command1: TransferValidationStatus.Pending,
-                Command2: TransferValidationStatus.Error
-            });
-
-            await app.close();
-        }
-    );
-
-    it.concurrent(
-        'saves validation results - and dont send event if not all is valid',
-        async () => {
-            class Command1 {}
-            class Command2 {}
-
-            @CommandHandler(Command1)
-            class Command1Handler implements IValidateTransferCommandHandler {
-                async execute() {
-                    return { validationResult: TransferValidationStatus.Valid };
-                }
-            }
-
-            @CommandHandler(Command2)
-            class Command2Handler implements IValidateTransferCommandHandler {
-                async execute() {
-                    return { validationResult: TransferValidationStatus.Invalid };
-                }
-            }
-
-            const { app, eventBus, repository, validateEventHandler } = await setup({
-                sites: {
-                    sellerAddress: '0x111',
-                    buyerAddress: '0x222'
-                },
-                commands: [Command1, Command2],
-                providers: [Command1Handler, Command2Handler]
-            });
-
-            await app.init();
-            await publishStart(eventBus);
-            await waitForPersistance();
-
-            const request = await repository.findByCertificateId(1);
-            expect(request?.toAttrs().validationStatusRecord).toEqual({
-                Command1: TransferValidationStatus.Valid,
-                Command2: TransferValidationStatus.Invalid
-            });
-
-            expect(validateEventHandler).not.toBeCalled();
-
-            await app.close();
-        }
-    );
-
-    it.concurrent('sends event if all is valid', async () => {
-        class Command1 {}
-        class Command2 {}
-
-        @CommandHandler(Command1)
-        class Command1Handler implements IValidateTransferCommandHandler {
-            async execute() {
-                return { validationResult: TransferValidationStatus.Valid };
-            }
-        }
-
-        @CommandHandler(Command2)
-        class Command2Handler implements IValidateTransferCommandHandler {
-            async execute() {
-                return { validationResult: TransferValidationStatus.Valid };
-            }
-        }
-
-        const { app, eventBus, repository, validateEventHandler } = await setup({
-            sites: {
-                sellerAddress: '0x111',
-                buyerAddress: '0x222'
             },
-            commands: [Command1, Command2],
-            providers: [Command1Handler, Command2Handler]
-        });
-
-        await app.init();
-        await publishStart(eventBus);
-        await waitForPersistance();
-
-        const request = await repository.findByCertificateId(1);
-        expect(request?.toAttrs().validationStatusRecord).toEqual({
-            Command1: TransferValidationStatus.Valid,
-            Command2: TransferValidationStatus.Valid
-        });
-
-        expect(validateEventHandler).toBeCalledWith(
-            expect.objectContaining({
-                payload: expect.objectContaining({
-                    requestId: request?.id
-                })
-            })
+            (etr) => {
+                expect(etr.validationStatusRecord).toEqual({
+                    Command1: TransferValidationStatus.Valid,
+                    Command2: TransferValidationStatus.Invalid
+                });
+            }
         );
-
-        await app.close();
     });
 
-    it.concurrent('sends event if no commands are given', async () => {
-        const { app, eventBus, repository, validateEventHandler } = await setup({
-            sites: {
-                sellerAddress: '0x111',
-                buyerAddress: '0x222'
+    it('saves validation error if command handler is not defined', async () => {
+        await doTest(
+            {
+                commands: ['Command1', 'Command2'],
+                handlers: {
+                    Command1: TransferValidationStatus.Valid
+                }
             },
-            commands: [],
-            providers: []
-        });
+            (etr) => {
+                expect(etr.validationStatusRecord).toEqual({
+                    Command1: TransferValidationStatus.Valid,
+                    Command2: TransferValidationStatus.Error
+                });
 
-        await app.init();
-        await publishStart(eventBus);
-        await waitForPersistance();
-
-        const request = await repository.findByCertificateId(1);
-
-        expect(validateEventHandler).toBeCalledWith(
-            expect.objectContaining({
-                payload: expect.objectContaining({
-                    requestId: request?.id
-                })
-            })
+                expect(etr.state).toBe(State.ValidationError);
+            }
         );
+    });
 
-        await app.close();
+    it('transfers etr if no commands are defined', async () => {
+        await doTest(
+            {
+                commands: [],
+                handlers: {}
+            },
+            (etr) => {
+                expect(etr.state).toBe(State.Transferred);
+            }
+        );
+    });
+
+    it('transfers etr with commands defined', async () => {
+        await doTest(
+            {
+                commands: ['Command1', 'Command2'],
+                handlers: {
+                    Command1: TransferValidationStatus.Valid,
+                    Command2: TransferValidationStatus.Valid
+                }
+            },
+            (etr) => {
+                expect(etr.state).toBe(State.Transferred);
+            }
+        );
     });
 });
+
+interface DoTestData {
+    commands: string[];
+    handlers: Record<string, TransferValidationStatus>;
+}
+
+const doTest = async (data: DoTestData, cb: (etr: EnergyTransferRequestAttrs) => void) => {
+    class Command1 {}
+    class Command2 {}
+
+    @CommandHandler(Command1)
+    class Command1Handler implements IValidateTransferCommandHandler {
+        async execute() {
+            return { validationResult: data.handlers['Command1'] };
+        }
+    }
+
+    @CommandHandler(Command2)
+    class Command2Handler implements IValidateTransferCommandHandler {
+        async execute() {
+            return { validationResult: data.handlers['Command2'] };
+        }
+    }
+
+    const commandMap = {
+        Command1: Command1,
+        Command2: Command2
+    };
+
+    const handlerMap = {
+        Command1: Command1Handler,
+        Command2: Command2Handler
+    };
+
+    const { app, eventBus, getEtr } = await setup({
+        sites: {
+            sellerAddress: '0x111',
+            buyerAddress: '0x222'
+        },
+        commands: data.commands.map((cmd) => commandMap[cmd]),
+        providers: Object.keys(data.handlers).map((cmd) => handlerMap[cmd])
+    });
+
+    await app.init();
+
+    publishStart(eventBus);
+    await wait(5);
+
+    const etr = (await getEtr())?.toAttrs();
+
+    cb(etr);
+
+    await app.close();
+};

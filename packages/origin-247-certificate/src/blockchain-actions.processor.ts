@@ -6,7 +6,10 @@ import { BlockchainAction, BlockchainActionType } from './types';
 import {
     ClaimCertificateCommand,
     IssueCertificateCommand,
-    TransferCertificateCommand
+    TransferCertificateCommand,
+    BatchClaimCertificatesCommand,
+    BatchIssueCertificatesCommand,
+    BatchTransferCertificatesCommand
 } from '@energyweb/issuer-api';
 
 @Processor('blockchain-actions')
@@ -16,7 +19,7 @@ export class BlockchainActionsProcessor {
     constructor(private readonly commandBus: CommandBus) {}
 
     @Process({ concurrency: 1 })
-    async handle(payload: Job<BlockchainAction>): Promise<any> {
+    async handle(payload: Job<BlockchainAction>): Promise<unknown> {
         const result = await this.process(payload);
 
         /**
@@ -35,7 +38,7 @@ export class BlockchainActionsProcessor {
         return result;
     }
 
-    async process({ data }: Job<BlockchainAction>): Promise<any> {
+    async process({ data }: Job<BlockchainAction>): Promise<unknown> {
         switch (data.type) {
             case BlockchainActionType.Issuance:
                 const issuanceParams = data.payload;
@@ -44,7 +47,7 @@ export class BlockchainActionsProcessor {
                 return await this.commandBus.execute(
                     new IssueCertificateCommand(
                         issuanceParams.toAddress,
-                        issuanceParams.energyValue.toString(),
+                        issuanceParams.energyValue,
                         issuanceParams.fromTime,
                         issuanceParams.toTime,
                         issuanceParams.deviceId,
@@ -63,9 +66,7 @@ export class BlockchainActionsProcessor {
                         transferParams.certificateId,
                         transferParams.fromAddress,
                         transferParams.toAddress,
-                        transferParams.energyValue
-                            ? transferParams.energyValue.toString()
-                            : undefined
+                        transferParams.energyValue ? transferParams.energyValue : undefined
                     )
                 );
 
@@ -79,6 +80,59 @@ export class BlockchainActionsProcessor {
                         claimParams.claimData,
                         claimParams.forAddress,
                         claimParams.energyValue ? claimParams.energyValue.toString() : undefined
+                    )
+                );
+
+            case BlockchainActionType.BatchIssuance:
+                const batchIssuanceParams = data.payload;
+                this.logger.debug(
+                    `Triggering batch issuance for: ${JSON.stringify(batchIssuanceParams)}`
+                );
+
+                return await this.commandBus.execute(
+                    new BatchIssueCertificatesCommand(
+                        batchIssuanceParams.certificates.map((certificate) => ({
+                            to: certificate.toAddress,
+                            deviceId: certificate.deviceId,
+                            energy: certificate.energyValue,
+                            fromTime: certificate.fromTime,
+                            toTime: certificate.toTime,
+                            metadata: JSON.stringify(certificate.metadata)
+                        }))
+                    )
+                );
+
+            case BlockchainActionType.BatchTransfer:
+                const batchTransferParams = data.payload;
+                this.logger.debug(
+                    `Triggering batch transfer for: ${JSON.stringify(batchTransferParams)}`
+                );
+
+                return await this.commandBus.execute(
+                    new BatchTransferCertificatesCommand(
+                        batchTransferParams.certificates.map((c) => ({
+                            id: c.certificateId,
+                            amount: c.energyValue
+                        })),
+                        batchTransferParams.toAddress,
+                        batchTransferParams.fromAddress
+                    )
+                );
+
+            case BlockchainActionType.BatchClaim:
+                const batchClaimParams = data.payload;
+                this.logger.debug(
+                    `Triggering batch claim for: ${JSON.stringify(batchClaimParams)}`
+                );
+
+                return await this.commandBus.execute(
+                    new BatchClaimCertificatesCommand(
+                        batchClaimParams.certificates.map((c) => ({
+                            id: c.certificateId,
+                            amount: c.energyValue
+                        })),
+                        batchClaimParams.claimData,
+                        batchClaimParams.forAddress
                     )
                 );
         }

@@ -1,12 +1,5 @@
 import { Test } from '@nestjs/testing';
-import {
-    QueryHandler,
-    QueryBus,
-    EventBus,
-    CommandBus,
-    EventsHandler,
-    IEventHandler
-} from '@nestjs/cqrs';
+import { QueryHandler, QueryBus, EventBus, CommandBus } from '@nestjs/cqrs';
 import {
     EnergyTransferRequestRepository,
     ENERGY_TRANSFER_REQUEST_REPOSITORY,
@@ -14,15 +7,10 @@ import {
     GetTransferSitesQuery,
     IGetTransferSitesQueryHandler,
     TransferModuleForUnitTest,
-    ValidatedTransferRequestEvent,
     ValidateTransferCommandCtor
 } from '../src';
 
-export const waitForEvent = () => new Promise((resolve) => setTimeout(resolve, 500));
-export const waitForPersistance = () => new Promise((resolve) => setTimeout(resolve, 3000));
-export const waitForValidation = () => new Promise((resolve) => setTimeout(resolve, 2000));
-
-export const publishStart = async (eventBus: EventBus) => {
+export const publishStart = (eventBus: EventBus) => {
     eventBus.publish(
         new GenerationReadingStoredEvent({
             energyValue: '60',
@@ -33,8 +21,6 @@ export const publishStart = async (eventBus: EventBus) => {
             transferDate: new Date()
         })
     );
-
-    await waitForEvent();
 };
 
 export const setup = async (options: {
@@ -43,7 +29,6 @@ export const setup = async (options: {
     providers?: any[];
 }) => {
     const getSitesQuery = jest.fn((_) => options.sites);
-    const validateEventHandler = jest.fn((_) => {});
 
     @QueryHandler(GetTransferSitesQuery)
     class SitesQueryHandler implements IGetTransferSitesQueryHandler {
@@ -52,16 +37,18 @@ export const setup = async (options: {
         }
     }
 
-    @EventsHandler(ValidatedTransferRequestEvent)
-    class ValidatedEventHandler implements IEventHandler {
-        async handle(event) {
-            return validateEventHandler(event);
-        }
-    }
-
     const moduleFixture = await Test.createTestingModule({
-        imports: [TransferModuleForUnitTest.register({ validateCommands: options.commands })],
-        providers: [SitesQueryHandler, ValidatedEventHandler, ...(options.providers ?? [])]
+        imports: [
+            TransferModuleForUnitTest.register({
+                validateCommands: options.commands,
+                batchConfiguration: {
+                    issueAggregateSeconds: 1,
+                    validateAggregateSeconds: 1,
+                    transferAggregateSeconds: 5
+                }
+            })
+        ],
+        providers: [SitesQueryHandler, ...(options.providers ?? [])]
     }).compile();
 
     const app = moduleFixture.createNestApplication();
@@ -78,6 +65,6 @@ export const setup = async (options: {
         commandBus,
         eventBus,
         repository,
-        validateEventHandler
+        getEtr: async () => (await repository.findById(1))!
     };
 };

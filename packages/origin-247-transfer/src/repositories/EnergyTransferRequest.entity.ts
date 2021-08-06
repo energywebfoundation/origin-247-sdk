@@ -5,9 +5,14 @@ import {
     UpdateDateColumn,
     Column
 } from 'typeorm';
-import { EnergyTransferRequestAttrs, TransferValidationStatus } from '../EnergyTransferRequest';
+import {
+    CertificateData,
+    EnergyTransferRequestAttrs,
+    State,
+    TransferValidationStatus
+} from '../EnergyTransferRequest';
 
-export const tableName = 'energy_transfer_request';
+export const tableName = 'energy_transfer_request_v2';
 
 @Entity(tableName)
 export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
@@ -30,20 +35,20 @@ export class EnergyTransferRequestEntity implements EnergyTransferRequestAttrs {
     buyerAddress: string;
 
     @Column({ type: 'text' })
-    generatorId: string;
-
-    @Column({ type: 'text' })
     volume: string;
 
     @Column({ type: 'int4', nullable: true, unique: true })
     certificateId: number | null;
 
-    @Column({ type: 'boolean' })
-    isCertificatePersisted: boolean;
-
     @Column('simple-json')
     validationStatusRecord: Record<string, TransferValidationStatus>;
 
-    @Column({ type: 'text' })
-    computedValidationStatus: TransferValidationStatus;
+    @Column({ type: 'text', nullable: true })
+    processError: string | null;
+
+    @Column({ type: 'text', nullable: true })
+    state: State;
+
+    @Column({ type: 'simple-json' })
+    certificateData: CertificateData;
 }

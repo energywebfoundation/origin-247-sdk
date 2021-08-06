@@ -1,16 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { EnergyTransferRequest } from '../EnergyTransferRequest';
-import {
-    EnergyTransferRequestRepository,
-    ICreateNewCommand
-} from './EnergyTransferRequest.repository';
+import { EnergyTransferRequest, NewAttributesParams, State } from '../EnergyTransferRequest';
+import { EnergyTransferRequestRepository } from './EnergyTransferRequest.repository';
 
 @Injectable()
 export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRequestRepository {
-    private serial: number = 0;
+    private serial: number = 1;
     private db: EnergyTransferRequest[] = [];
 
-    public async createNew(command: ICreateNewCommand): Promise<EnergyTransferRequest> {
+    public async createNew(command: NewAttributesParams): Promise<EnergyTransferRequest> {
         const entity: EnergyTransferRequest = EnergyTransferRequest.fromAttrs({
             ...EnergyTransferRequest.newAttributes(command),
             id: this.serial++
@@ -25,10 +22,22 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
         // changing entity changes original object in memory, so no point in saving
     }
 
+    public async saveManyInTransaction(entity: EnergyTransferRequest[]): Promise<void> {
+        // changing entity changes original object in memory, so no point in saving
+    }
+
+    public async findAll(): Promise<EnergyTransferRequest[]> {
+        return this.db.slice();
+    }
+
     public async findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null> {
         const request = this.db.find((e) => e.certificateId === certificateId);
 
         return request ?? null;
+    }
+
+    public async findByState(state: State): Promise<EnergyTransferRequest[]> {
+        return this.db.filter((e) => e.toAttrs().state === state);
     }
 
     public async findById(id: number): Promise<EnergyTransferRequest | null> {

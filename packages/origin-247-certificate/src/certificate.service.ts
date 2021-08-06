@@ -13,7 +13,9 @@ import {
     BlockchainActionType,
     BlockchainAction,
     IIssuedCertificate,
-    IIssueCommandParams
+    IIssueCommandParams,
+    IBatchClaimCommand,
+    IBatchTransferCommand
 } from './types';
 
 const jobOptions = {
@@ -81,6 +83,59 @@ export class CertificateService<T = null> {
             {
                 payload: command,
                 type: BlockchainActionType.Transfer
+            },
+            jobOptions
+        );
+
+        const result = await job.finished();
+
+        return result;
+    }
+
+    public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
+        const certificates = originalCertificates.map(
+            (certificate) =>
+                ({
+                    ...certificate,
+                    fromTime: Math.round(certificate.fromTime.getTime() / 1000),
+                    toTime: Math.round(certificate.toTime.getTime() / 1000)
+                } as IIssueCommand<T>)
+        );
+
+        const job = await this.blockchainActionsQueue.add(
+            {
+                payload: {
+                    certificates
+                },
+                type: BlockchainActionType.BatchIssuance
+            },
+            jobOptions
+        );
+
+        const result: number[] = await job.finished();
+
+        return result;
+    }
+
+    public async batchClaim(command: IBatchClaimCommand): Promise<ISuccessResponse> {
+        const job = await this.blockchainActionsQueue.add(
+            {
+                payload: command,
+                type: BlockchainActionType.BatchClaim
+            },
+            jobOptions
+        );
+
+        const result = await job.finished();
+
+        return result;
+    }
+
+    public async batchTransfer(command: IBatchTransferCommand): Promise<ISuccessResponse> {
+        const job = await this.blockchainActionsQueue.add(
+            {
+                payload: command,
+                type: BlockchainActionType.BatchTransfer
             },
             jobOptions
         );

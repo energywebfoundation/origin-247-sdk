@@ -1,13 +1,13 @@
 import { UpdateTransferValidationCommand } from '../commands';
 import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
-import { TransferService } from '../transfer.service';
+import { ValidateService } from '../validate.service';
 
 @CommandHandler(UpdateTransferValidationCommand)
 export class UpdateTransferValidationCommandHandler
     implements ICommandHandler<UpdateTransferValidationCommand> {
-    constructor(public transferService: TransferService) {}
+    constructor(public validateService: ValidateService) {}
 
     async execute(command: UpdateTransferValidationCommand) {
-        await this.transferService.updateValidationStatus(command.payload);
+        await this.validateService.updateValidationStatus(command.payload);
     }
 }

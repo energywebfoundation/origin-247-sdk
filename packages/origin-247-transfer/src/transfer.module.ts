@@ -6,7 +6,6 @@ import { Module, DynamicModule } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GenerationReadingStoredEventHandler } from './handlers/GenerationReadingStoredEvent.handler';
-import { CertificatePersistedEventHandler } from './handlers/CertificatePersistedEvent.handler';
 import {
     EnergyTransferRequestInMemoryRepository,
     EnergyTransferRequestEntity,
@@ -18,12 +17,36 @@ import {
     ValidateTransferCommandCtor,
     VALIDATE_TRANSFER_COMMANDS_TOKEN
 } from './commands/ValidateTransferCommand';
-import { ValidatedTransferRequestEventHandler } from './handlers';
 import { UpdateTransferValidationCommandHandler } from './handlers/UpdateTransferValidationCommand.handler';
+import { ValidateService } from './validate.service';
+import { IssueService } from './issue.service';
+import { AwaitingValidationEventHandler } from './batch/validate.batch';
+import { AwaitingTransferEventHandler } from './batch/transfer.batch';
+import { AwaitingIssuanceEventHandler } from './batch/issue.batch';
+import {
+    BatchConfiguration,
+    BATCH_CONFIGURATION_TOKEN,
+    defaultBatchConfiguration
+} from './batch/configuration';
+import { defaults } from 'lodash';
 
 export interface ITransferModuleParams {
     validateCommands: ValidateTransferCommandCtor[];
+    batchConfiguration?: Partial<BatchConfiguration>;
 }
+
+const batchHandlers = [
+    AwaitingValidationEventHandler,
+    AwaitingTransferEventHandler,
+    AwaitingIssuanceEventHandler
+];
+
+const integrationHandlers = [
+    GenerationReadingStoredEventHandler,
+    UpdateTransferValidationCommandHandler
+];
+
+const services = [TransferService, IssueService, ValidateService];
 
 @Module({})
 export class TransferModule {
@@ -31,11 +54,9 @@ export class TransferModule {
         return {
             module: TransferModule,
             providers: [
-                GenerationReadingStoredEventHandler,
-                CertificatePersistedEventHandler,
-                TransferService,
-                ValidatedTransferRequestEventHandler,
-                UpdateTransferValidationCommandHandler,
+                ...services,
+                ...integrationHandlers,
+                ...batchHandlers,
                 {
                     provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
                     useClass: EnergyTransferRequestPostgresRepository
@@ -43,6 +64,10 @@ export class TransferModule {
                 {
                     provide: VALIDATE_TRANSFER_COMMANDS_TOKEN,
                     useValue: params.validateCommands
+                },
+                {
+                    provide: BATCH_CONFIGURATION_TOKEN,
+                    useValue: defaults(params.batchConfiguration ?? {}, defaultBatchConfiguration)
                 }
             ],
             imports: [
@@ -60,11 +85,9 @@ export class TransferModuleForUnitTest {
         return {
             module: TransferModuleForUnitTest,
             providers: [
-                GenerationReadingStoredEventHandler,
-                CertificatePersistedEventHandler,
-                TransferService,
-                ValidatedTransferRequestEventHandler,
-                UpdateTransferValidationCommandHandler,
+                ...services,
+                ...integrationHandlers,
+                ...batchHandlers,
                 {
                     provide: ENERGY_TRANSFER_REQUEST_REPOSITORY,
                     useClass: EnergyTransferRequestInMemoryRepository
@@ -72,6 +95,10 @@ export class TransferModuleForUnitTest {
                 {
                     provide: VALIDATE_TRANSFER_COMMANDS_TOKEN,
                     useValue: params.validateCommands
+                },
+                {
+                    provide: BATCH_CONFIGURATION_TOKEN,
+                    useValue: defaults(params.batchConfiguration ?? {}, defaultBatchConfiguration)
                 }
             ],
             imports: [CqrsModule, CertificateForUnitTestsModule]

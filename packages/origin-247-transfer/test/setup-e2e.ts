@@ -133,6 +133,9 @@ export const bootstrapTestInstance = async () => {
         ENERGY_TRANSFER_REQUEST_REPOSITORY
     );
 
+    await databaseService.query('TRUNCATE energy_transfer_request_v2 RESTART IDENTITY CASCADE;');
+    await databaseService.query('TRUNCATE issuer_certificate RESTART IDENTITY CASCADE;');
+
     return {
         databaseService,
         certificateService,
@@ -144,7 +147,7 @@ export const bootstrapTestInstance = async () => {
                     energyValue: '60',
                     fromTime: new Date(),
                     generatorId: 'a1',
-                    metadata: null,
+                    metadata: { field: 'test' },
                     toTime: new Date(),
                     transferDate: new Date()
                 })
