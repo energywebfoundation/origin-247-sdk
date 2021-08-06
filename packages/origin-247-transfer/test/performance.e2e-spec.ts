@@ -17,7 +17,7 @@ describe('Transfer module - e2e', () => {
 
         times(count, () => startProcess());
 
-        await wait(300);
+        await wait(360);
 
         const requests = await repository.findAll();
 
