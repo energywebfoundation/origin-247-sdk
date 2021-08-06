@@ -133,7 +133,8 @@ export const bootstrapTestInstance = async () => {
         ENERGY_TRANSFER_REQUEST_REPOSITORY
     );
 
-    await databaseService.truncate('energy_transfer_request_v2');
+    await databaseService.query('TRUNCATE energy_transfer_request_v2 RESTART IDENTITY CASCADE;');
+    await databaseService.query('TRUNCATE issuer_certificate RESTART IDENTITY CASCADE;');
 
     return {
         databaseService,
