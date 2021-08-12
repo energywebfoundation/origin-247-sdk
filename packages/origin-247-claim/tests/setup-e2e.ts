@@ -31,6 +31,8 @@ import {
     ExcessGenerationRepository
 } from '../src/repositories/ExcessGeneration/ExcessGeneration.repository';
 import { ExcessGenerationPostgresRepository } from '../src/repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
+import { ClaimModule } from '../src/claim.module';
+import { ClaimService } from '../src/claim.service';
 
 const testLogger = new Logger('e2e');
 
@@ -96,7 +98,8 @@ export const bootstrapTestInstance = async () => {
             CqrsModule,
             QueueingModule(),
             BlockchainPropertiesModule,
-            PassportModule.register({ defaultStrategy: 'jwt' })
+            PassportModule.register({ defaultStrategy: 'jwt' }),
+            ClaimModule
         ],
         providers: [
             DatabaseService,
@@ -129,6 +132,8 @@ export const bootstrapTestInstance = async () => {
         EXCESS_GENERATION_REPOSITORY
     );
 
+    const claimService = await app.resolve<ClaimService>(ClaimService);
+
     const blockchainProperties = await blockchainPropertiesService.create(
         provider.network.chainId,
         registry.address,
@@ -155,6 +160,7 @@ export const bootstrapTestInstance = async () => {
         matchResultRepository,
         leftoverConsumptionRepository,
         excessGenerationRepository,
+        claimService,
         app
     };
 };
