@@ -33,7 +33,11 @@ import {
 import { ExcessGenerationPostgresRepository } from '../src/repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
 import { ClaimModule } from '../src/claim.module';
 import { ClaimService } from '../src/claim.service';
-
+import {
+    CertificateModule,
+    CertificateService,
+    CERTIFICATE_SERVICE_TOKEN
+} from '@energyweb/origin-247-certificate';
 const testLogger = new Logger('e2e');
 
 const web3 = process.env.WEB3 ?? 'http://localhost:8545';
@@ -99,7 +103,8 @@ export const bootstrapTestInstance = async () => {
             QueueingModule(),
             BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' }),
-            ClaimModule
+            ClaimModule,
+            CertificateModule
         ],
         providers: [
             DatabaseService,
@@ -133,6 +138,7 @@ export const bootstrapTestInstance = async () => {
     );
 
     const claimService = await app.resolve<ClaimService>(ClaimService);
+    const certificateService = await app.resolve<CertificateService>(CERTIFICATE_SERVICE_TOKEN);
 
     const blockchainProperties = await blockchainPropertiesService.create(
         provider.network.chainId,
@@ -141,7 +147,6 @@ export const bootstrapTestInstance = async () => {
         web3,
         registryDeployer.privateKey
     );
-
     await CertificateUtils.approveOperator(
         registryDeployer.address,
         blockchainProperties.wrap(userWallet.privateKey)
@@ -161,6 +166,7 @@ export const bootstrapTestInstance = async () => {
         leftoverConsumptionRepository,
         excessGenerationRepository,
         claimService,
+        certificateService,
         app
     };
 };
