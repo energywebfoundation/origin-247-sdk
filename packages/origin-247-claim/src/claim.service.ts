@@ -146,8 +146,11 @@ export class ClaimService {
 
     private filterZeroVolumeMatches(matchingResult: IMatchingOutput): IMatchingOutput {
         return {
-            ...matchingResult,
-            matches: matchingResult.matches.filter((m) => m.volume.gt(0))
+            matches: matchingResult.matches.filter((m) => m.volume.gt(0)),
+            leftoverConsumptions: matchingResult.leftoverConsumptions.filter((lc) =>
+                lc.volume.gt(0)
+            ),
+            excessGenerations: matchingResult.excessGenerations.filter((eg) => eg.volume.gt(0))
         };
     }
 }
