@@ -6,7 +6,7 @@
     "scripts": {
         "test:unit": "jest --testRegex '\\.spec\\.ts$'",
         "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8547 && yarn drop && yarn migrate && yarn test:e2e:jest\"",
-        "test:e2e:jest": "WEB3=http://localhost:8547 jest --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
+        "test:e2e:jest": "WEB3=http://localhost:8547 jest --maxWorkers 1 --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
         "build": "tsc -b tsconfig.json",
         "migrate": "yarn typeorm:run && yarn typeorm:run:issuer",
         "drop": "yarn typeorm:drop && yarn typeorm:drop:issuer",
