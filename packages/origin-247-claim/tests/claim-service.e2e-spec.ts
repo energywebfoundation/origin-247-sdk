@@ -87,6 +87,71 @@ describe('Claiming - e2e', () => {
         expect(batchClaimSpy).toHaveBeenCalled();
         expect(matchRepoSpy).toHaveBeenCalled();
     });
+
+    it('should save matches with metadata', async () => {
+        const groupPriority = [
+            [
+                {
+                    id: 'consumerA',
+                    groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                },
+                {
+                    id: 'consumerB',
+                    groupPriority: [[{ id: 'generatorA' }, { id: 'generatorB' }]]
+                }
+            ]
+        ];
+        const consumptions = [
+            {
+                consumerId: 'consumerA',
+                volume: BigNumber.from(100),
+                customProperty: 'I want to have this',
+                anotherCustomProperty: 42
+            },
+            { consumerId: 'consumerB', volume: BigNumber.from(100) }
+        ];
+        const generations = [
+            { generatorId: 'generatorA', volume: BigNumber.from(100), certificateId: 1 },
+            {
+                generatorId: 'generatorB',
+                volume: BigNumber.from(100),
+                certificateId: 2,
+                propForMeta: {}
+            }
+        ];
+        const batchClaimSpy = jest.spyOn(certificateService, 'batchClaim');
+        const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
+
+        const res = await claimService.claim({
+            algorithmFn: spreadMatcherAlgo(groupPriority),
+            data: {
+                consumptions: consumptions,
+                generations: generations
+            },
+            claimCustomizationFn: claimCustomizer,
+            timeframe: {
+                from: new Date('2021-08-11T12:15:00.000Z'),
+                to: new Date('2021-08-11T12:30:00.000Z')
+            }
+        });
+
+        expect(batchClaimSpy).toHaveBeenCalled();
+        expect(matchRepoSpy).toHaveBeenCalled();
+
+        expect(res.matches[0].consumerMetadata).toHaveProperty(
+            'customProperty',
+            'I want to have this'
+        );
+        expect(res.matches[0].consumerMetadata).toHaveProperty('anotherCustomProperty', 42);
+        expect(res.matches[0].generatorMetadata).not.toHaveProperty('propForMeta');
+
+        expect(res.matches[1].consumerMetadata).toHaveProperty(
+            'customProperty',
+            'I want to have this'
+        );
+        expect(res.matches[1].consumerMetadata).toHaveProperty('anotherCustomProperty', 42);
+        expect(res.matches[1].generatorMetadata).toHaveProperty('propForMeta', {});
+    });
 });
 
 const spreadMatcherAlgo = (groupPriority: any): ((input: IMatchingInput) => IMatchingOutput) => {
