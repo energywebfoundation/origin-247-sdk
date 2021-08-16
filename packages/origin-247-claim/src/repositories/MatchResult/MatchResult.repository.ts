@@ -15,7 +15,7 @@ export interface GroupedMatchResults {
     entries: MatchResultEntity[];
 }
 
-export enum Entity {
+export enum GroupEntity {
     Consumer = 'consumerId',
     Generator = 'generatorId'
 }
@@ -38,5 +38,8 @@ export interface MatchResultRepository {
     create(matchResult: NewMatchResult): Promise<MatchResultEntity>;
     getAll(): Promise<MatchResultEntity[]>;
     find(findOptions: FindOptions): Promise<MatchResultEntity[]>;
-    findGrouped(findOptions: FindOptions, groupOptions: Entity[]): Promise<GroupedMatchResults[]>;
+    findGrouped(
+        findOptions: FindOptions,
+        groupOptions: [GroupEntity] | [GroupEntity, GroupEntity]
+    ): Promise<GroupedMatchResults[]>;
 }
