@@ -1,8 +1,8 @@
 import { bootstrapTestInstance } from './setup-e2e';
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import {
     MatchResultRepository,
-    Entity
+    GroupEntity
 } from '../src/repositories/MatchResult/MatchResult.repository';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 
@@ -62,7 +62,7 @@ describe('MatchResult - e2e', () => {
                     from: new Date('2021-08-01T11:00:00.000Z'),
                     to: new Date('2021-08-01T12:00:00.000Z')
                 },
-                [Entity.Consumer, Entity.Generator]
+                [GroupEntity.Consumer, GroupEntity.Generator]
             );
 
             expect(res).toHaveLength(2);
@@ -76,7 +76,7 @@ describe('MatchResult - e2e', () => {
                     from: new Date('2021-08-01T10:00:00.000Z'),
                     to: new Date('2021-08-01T12:00:00.000Z')
                 },
-                [Entity.Consumer]
+                [GroupEntity.Consumer]
             );
             expect(res).toHaveLength(2);
         });
@@ -89,7 +89,7 @@ describe('MatchResult - e2e', () => {
                     from: new Date('2021-08-01T10:00:00.000Z'),
                     to: new Date('2021-08-01T12:00:00.000Z')
                 },
-                [Entity.Generator]
+                [GroupEntity.Generator]
             );
             expect(res).toHaveLength(3);
         });
@@ -102,7 +102,7 @@ describe('MatchResult - e2e', () => {
                     from: new Date('2021-08-01T10:00:00.000Z'),
                     to: new Date('2021-08-01T12:00:00.000Z')
                 },
-                [Entity.Consumer, Entity.Generator]
+                [GroupEntity.Consumer, GroupEntity.Generator]
             );
             expect(res).toHaveLength(4);
         });
@@ -115,25 +115,9 @@ describe('MatchResult - e2e', () => {
                     from: new Date('2021-08-01T10:00:00.000Z'),
                     to: new Date('2021-08-01T12:00:00.000Z')
                 },
-                [Entity.Generator, Entity.Consumer]
+                [GroupEntity.Generator, GroupEntity.Consumer]
             );
             expect(res).toHaveLength(4);
-        });
-
-        it('should throw error when empty groupOptions is passed', async () => {
-            try {
-                await matchResultRepository.findGrouped(
-                    {
-                        consumerIds: ['consumerOne', 'consumerTwo'],
-                        generatorIds: ['generatorOne', 'generatorTwo', 'generatorThree'],
-                        from: new Date('2021-08-01T10:00:00.000Z'),
-                        to: new Date('2021-08-01T12:00:00.000Z')
-                    },
-                    []
-                );
-            } catch (err) {
-                expect(err.message).toEqual('At least one group option must be provided.');
-            }
         });
     });
 

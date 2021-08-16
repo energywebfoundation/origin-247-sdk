@@ -7,7 +7,7 @@ import {
     FindOptions,
     MatchResultRepository,
     NewMatchResult,
-    Entity,
+    GroupEntity,
     MatchResultColumns,
     GroupedMatchResults
 } from './MatchResult.repository';
@@ -41,12 +41,8 @@ export class MatchResultPostgresRepository implements MatchResultRepository {
 
     public async findGrouped(
         findOptions: FindOptions,
-        groupOptions: [Entity] | [Entity, Entity]
+        groupOptions: [GroupEntity] | [GroupEntity, GroupEntity]
     ): Promise<GroupedMatchResults[]> {
-        if (!groupOptions.length) {
-            throw new Error('At least one group option must be provided.');
-        }
-
         const sanitized = this.sanitizeInput(groupOptions);
         const queryRunner = this.connection.createQueryRunner();
         const matchResultQuery = this.connection

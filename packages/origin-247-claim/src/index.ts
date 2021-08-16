@@ -21,18 +21,5 @@ export {
 } from './repositories/LeftoverConsumption/LeftoverConsumption.repository';
 export * from './repositories/LeftoverConsumption/LeftoverConsumptionPostgres.repository';
 
-export {
-    tableName as excessGenerationTableName,
-    ExcessGenerationEntity
-} from './repositories/ExcessGeneration/ExcessGeneration.entity';
-export {
-    FindOptions as ExcessGenerationFindOptions,
-    ExcessGenerationColumns,
-    NewExcessGeneration,
-    ExcessGenerationRepository,
-    EXCESS_GENERATION_REPOSITORY
-} from './repositories/ExcessGeneration/ExcessGeneration.repository';
-export * from './repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
-
 export * from './claim.module';
-export * from './claim.service';
+export * from './claim.facade';

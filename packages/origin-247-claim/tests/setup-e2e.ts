@@ -16,14 +16,12 @@ import {
     MATCH_RESULT_REPOSITORY,
     MatchResultRepository
 } from '../src/repositories/MatchResult/MatchResult.repository';
-import { MatchResultPostgresRepository } from '../src/repositories/MatchResult/MatchResultPostgres.repository';
 
 import { LeftoverConsumptionEntity } from '../src/repositories/LeftoverConsumption/LeftoverConsumption.entity';
 import {
     LEFTOVER_CONSUMPTION_REPOSITORY,
     LeftoverConsumptionRepository
 } from '../src/repositories/LeftoverConsumption/LeftoverConsumption.repository';
-import { LeftoverConsumptionPostgresRepository } from '../src/repositories/LeftoverConsumption/LeftoverConsumptionPostgres.repository';
 
 import { ExcessGenerationEntity } from '../src/repositories/ExcessGeneration/ExcessGeneration.entity';
 import {
@@ -32,12 +30,12 @@ import {
 } from '../src/repositories/ExcessGeneration/ExcessGeneration.repository';
 import { ExcessGenerationPostgresRepository } from '../src/repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
 import { ClaimModule } from '../src/claim.module';
-import { ClaimService } from '../src/claim.service';
 import {
     CertificateModule,
     CertificateService,
     CERTIFICATE_SERVICE_TOKEN
 } from '@energyweb/origin-247-certificate';
+import { ClaimFacade } from '../src';
 const testLogger = new Logger('e2e');
 
 const web3 = process.env.WEB3 ?? 'http://localhost:8545';
@@ -106,21 +104,7 @@ export const bootstrapTestInstance = async () => {
             ClaimModule,
             CertificateModule
         ],
-        providers: [
-            DatabaseService,
-            {
-                provide: MATCH_RESULT_REPOSITORY,
-                useClass: MatchResultPostgresRepository
-            },
-            {
-                provide: LEFTOVER_CONSUMPTION_REPOSITORY,
-                useClass: LeftoverConsumptionPostgresRepository
-            },
-            {
-                provide: EXCESS_GENERATION_REPOSITORY,
-                useClass: ExcessGenerationPostgresRepository
-            }
-        ]
+        providers: [DatabaseService]
     }).compile();
 
     const app = moduleFixture.createNestApplication();
@@ -136,8 +120,8 @@ export const bootstrapTestInstance = async () => {
     const excessGenerationRepository = await app.resolve<ExcessGenerationRepository>(
         EXCESS_GENERATION_REPOSITORY
     );
+    const claimFacade = await app.resolve<ClaimFacade>(ClaimFacade);
 
-    const claimService = await app.resolve<ClaimService>(ClaimService);
     const certificateService = await app.resolve<CertificateService>(CERTIFICATE_SERVICE_TOKEN);
 
     const blockchainProperties = await blockchainPropertiesService.create(
@@ -165,8 +149,8 @@ export const bootstrapTestInstance = async () => {
         matchResultRepository,
         leftoverConsumptionRepository,
         excessGenerationRepository,
-        claimService,
         certificateService,
+        claimFacade,
         app
     };
 };

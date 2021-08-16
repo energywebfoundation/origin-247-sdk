@@ -11,6 +11,7 @@ import { LEFTOVER_CONSUMPTION_REPOSITORY } from './repositories/LeftoverConsumpt
 import { LeftoverConsumptionPostgresRepository } from './repositories/LeftoverConsumption/LeftoverConsumptionPostgres.repository';
 import { EXCESS_GENERATION_REPOSITORY } from './repositories/ExcessGeneration/ExcessGeneration.repository';
 import { ExcessGenerationPostgresRepository } from './repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
+import { ClaimFacade } from './claim.facade';
 
 @Module({
     imports: [
@@ -34,13 +35,9 @@ import { ExcessGenerationPostgresRepository } from './repositories/ExcessGenerat
         {
             provide: EXCESS_GENERATION_REPOSITORY,
             useClass: ExcessGenerationPostgresRepository
-        }
+        },
+        ClaimFacade
     ],
-    exports: [
-        ClaimService,
-        MATCH_RESULT_REPOSITORY,
-        LEFTOVER_CONSUMPTION_REPOSITORY,
-        EXCESS_GENERATION_REPOSITORY
-    ]
+    exports: [ClaimFacade]
 })
 export class ClaimModule {}

@@ -1,10 +1,7 @@
 import { bootstrapTestInstance, userWallet } from './setup-e2e';
-import { INestApplication, Logger } from '@nestjs/common';
+import { INestApplication } from '@nestjs/common';
 import { MatchResultRepository } from '../src/repositories/MatchResult/MatchResult.repository';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { LeftoverConsumptionRepository } from '../src/repositories/LeftoverConsumption/LeftoverConsumption.repository';
-import { ExcessGenerationRepository } from '../src/repositories/ExcessGeneration/ExcessGeneration.repository';
-import { ClaimService } from '../src/claim.service';
 import { SpreadMatcher } from '../src/algorithms/spreadMatcher';
 import {
     IConsumption,
@@ -17,24 +14,21 @@ import { BigNumber } from 'ethers';
 import { CertificateService, IBatchClaimCommand } from '@energyweb/origin-247-certificate';
 
 jest.setTimeout(60 * 1000);
+import { ClaimFacade } from '../src';
 
 describe('Claiming - e2e', () => {
     let app: INestApplication;
     let matchResultRepository: MatchResultRepository;
     let databaseService: DatabaseService;
-    let leftoverConsumptionRepository: LeftoverConsumptionRepository;
-    let excessGenerationRepository: ExcessGenerationRepository;
-    let claimService: ClaimService;
     let certificateService: CertificateService;
+    let claimFacade: ClaimFacade;
 
     beforeAll(async () => {
         ({
             app,
             matchResultRepository,
             databaseService,
-            leftoverConsumptionRepository,
-            excessGenerationRepository,
-            claimService,
+            claimFacade,
             certificateService
         } = await bootstrapTestInstance());
 
@@ -69,7 +63,7 @@ describe('Claiming - e2e', () => {
         const batchClaimSpy = jest.spyOn(certificateService, 'batchClaim');
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
-        const res = await claimService.claim({
+        const res = await claimFacade.claim({
             algorithmFn: spreadMatcherAlgo(groupPriority),
             data: {
                 consumptions: consumptions,
@@ -122,7 +116,7 @@ describe('Claiming - e2e', () => {
         const batchClaimSpy = jest.spyOn(certificateService, 'batchClaim');
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
-        const res = await claimService.claim({
+        const res = await claimFacade.claim({
             algorithmFn: spreadMatcherAlgo(groupPriority),
             data: {
                 consumptions: consumptions,
