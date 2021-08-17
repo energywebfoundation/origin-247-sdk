@@ -3,7 +3,7 @@
     "private": true,
     "scripts": {
         "publish:canary": "lerna publish --yes --skip-git --exact --cd-version=prerelease --pre-dist-tag canary --preid=alpha.$BUILD_ID",
-        "publish:release": "lerna version --create-release github --conventional-commits --exact --yes --message \"chore(release): publish /skip-deploy\" && lerna publish from-git --yes"
+        "publish:release": "lerna version --create-release github --conventional-commits --exact --message \"chore(release): publish\" && lerna publish from-git"
     },
     "workspaces": [
         "packages/*"
