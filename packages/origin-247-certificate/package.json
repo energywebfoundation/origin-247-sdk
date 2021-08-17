@@ -1,6 +1,6 @@
 {
     "name": "@energyweb/origin-247-certificate",
-    "version": "0.0.2-alpha.1626162149.0",
+    "version": "1.0.0",
     "main": "./dist/js/src/index.js",
     "types": "./dist/js/src/index.d.ts",
     "scripts": {
