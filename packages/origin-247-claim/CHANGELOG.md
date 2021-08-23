@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@1.0.0...@energyweb/origin-247-claim@1.1.0) (2021-08-23)
+
+
+### Features
+
+* **origin-247-claim:** allow missing entity priority ([0410559](https://github.com/energywebfoundation/origin-247-sdk/commit/041055933da4219cbe7aa6d680353068f765baab))
+
+
+
+
+
 # 1.0.0 (2021-08-17)
 
 
