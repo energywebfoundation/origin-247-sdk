@@ -86,7 +86,16 @@ export namespace SpreadMatcher {
                 break;
             }
 
-            const roundMatches = matchRound(getRoundInput(data));
+            const roundInput = getRoundInput(data);
+
+            // No routes can be computed
+            // if there is some consumption/generation left,
+            // but it won't be used because of missing priorities
+            if (roundInput.routes.length === 0) {
+                break;
+            }
+
+            const roundMatches = matchRound(roundInput);
 
             roundMatches.forEach((match) => {
                 const entity1 = data.entityGroups[0].find((e) => e === match.entities[0])!;

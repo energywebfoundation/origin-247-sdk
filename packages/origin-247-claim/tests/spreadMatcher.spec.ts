@@ -1249,7 +1249,20 @@ describe('spreadMatcher', () => {
             });
         });
     });
-    // Matching algorithm end
+
+    describe('Missing generator priorities', () => {
+        it('Skips generators not in group', () => {
+            const result = SpreadMatcher.spreadMatcher({
+                groupPriority: [[{ id: 'consumerA', groupPriority: [[{ id: 'generatorA' }]] }]],
+                entityGroups: [
+                    [{ id: 'consumerA', volume: BigNumber.from(50) }],
+                    [{ id: 'generatorB', volume: BigNumber.from(30) }]
+                ]
+            });
+
+            expect(result.matches).toHaveLength(0);
+        });
+    });
 });
 
 type Primitive = string | number | boolean | undefined | null;
