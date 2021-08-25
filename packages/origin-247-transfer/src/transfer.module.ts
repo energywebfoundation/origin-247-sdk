@@ -73,7 +73,7 @@ export class TransferModule {
             imports: [
                 TypeOrmModule.forFeature([EnergyTransferRequestEntity]),
                 CqrsModule,
-                CertificateModule
+                CertificateModule.register()
             ]
         };
     }
