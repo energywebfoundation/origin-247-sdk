@@ -92,17 +92,10 @@ export const bootstrapTestInstance = async () => {
                 logging: ['info'],
                 keepConnectionAlive: true
             }),
-            TypeOrmModule.forFeature([
-                MatchResultEntity,
-                LeftoverConsumptionEntity,
-                ExcessGenerationEntity
-            ]),
             CqrsModule,
             QueueingModule(),
-            BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' }),
-            ClaimModule,
-            CertificateModule
+            ClaimModule
         ],
         providers: [DatabaseService]
     }).compile();
