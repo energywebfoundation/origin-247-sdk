@@ -129,32 +129,16 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
         return result.map((r) => r.id);
     }
 
-    public async batchClaim(command: IBatchClaimCommand): Promise<ISuccessResponse> {
-        const result = await Promise.all(
-            command.certificates.map((certificate) =>
-                this.claim({
-                    ...certificate,
-                    forAddress: command.forAddress,
-                    claimData: command.claimData
-                })
-            )
-        );
+    public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
+        const result = await Promise.all(command.map((claim) => this.claim(claim)));
 
         return {
             success: result.every((r) => r.success)
         };
     }
 
-    public async batchTransfer(command: IBatchTransferCommand): Promise<ISuccessResponse> {
-        const result = await Promise.all(
-            command.certificates.map((certificate) =>
-                this.transfer({
-                    ...certificate,
-                    fromAddress: command.fromAddress,
-                    toAddress: command.toAddress
-                })
-            )
-        );
+    public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
+        const result = await Promise.all(command.map((transfer) => this.transfer(transfer)));
 
         return {
             success: result.every((r) => r.success)

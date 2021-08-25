@@ -71,7 +71,14 @@ describe('Certificate service', () => {
 
         const result = await certificateService.claim({
             certificateId: certificate.id,
-            claimData: {},
+            claimData: {
+                beneficiary: '',
+                countryCode: '',
+                location: '',
+                periodEndDate: '',
+                periodStartDate: '',
+                purpose: ''
+            },
             forAddress: userWallet.address,
             energyValue: '50'
         });
@@ -127,6 +134,61 @@ describe('Certificate service', () => {
 
         expect(transferedCertificate?.owners).toEqual({
             [userWallet.address]: '50',
+            [user2Wallet.address]: '50'
+        });
+    });
+
+    it.only('allows to batch issue, batch transfer, and batch claim certificate', async () => {
+        const [certificateId] = await certificateService.batchIssue([
+            {
+                deviceId: 'd1',
+                energyValue: '100',
+                fromTime: new Date(),
+                toTime: new Date(),
+                metadata: null,
+                toAddress: userWallet.address,
+                userId: userWallet.address
+            }
+        ]);
+
+        await transactionTime();
+
+        await certificateService.batchTransfer([
+            {
+                certificateId,
+                fromAddress: userWallet.address,
+                toAddress: user2Wallet.address,
+                energyValue: '50'
+            }
+        ]);
+
+        await transactionTime();
+
+        await certificateService.batchClaim([
+            {
+                certificateId,
+                claimData: {
+                    beneficiary: '',
+                    countryCode: '',
+                    location: '',
+                    periodEndDate: '',
+                    periodStartDate: '',
+                    purpose: ''
+                },
+                forAddress: user2Wallet.address,
+                energyValue: '50'
+            }
+        ]);
+
+        await transactionTime();
+
+        const certificate = await certificateService.getById(certificateId);
+
+        expect(certificate?.owners).toEqual({
+            [userWallet.address]: '50',
+            [user2Wallet.address]: '0'
+        });
+        expect(certificate?.claimers).toEqual({
             [user2Wallet.address]: '50'
         });
     });

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bull';
-import { CertificateModule as IssuerCertificateModule } from '@energyweb/issuer-api';
+import { IssuerModule } from '@energyweb/issuer-api';
 
 import { CertificateService } from './certificate.service';
 import { BlockchainActionsProcessor } from './blockchain-actions.processor';
@@ -16,7 +16,10 @@ const serviceProvider = {
     providers: [serviceProvider, BlockchainActionsProcessor],
     exports: [serviceProvider],
     imports: [
-        IssuerCertificateModule,
+        IssuerModule.register({
+            enableCertificationRequest: false,
+            enableTransactionLogging: true
+        }),
         CqrsModule,
         BullModule.registerQueue({
             name: 'blockchain-actions',
