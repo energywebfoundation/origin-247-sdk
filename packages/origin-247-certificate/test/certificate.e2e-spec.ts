@@ -138,7 +138,7 @@ describe('Certificate service', () => {
         });
     });
 
-    it.only('allows to batch issue, batch transfer, and batch claim certificate', async () => {
+    it('allows to batch issue, batch transfer, and batch claim certificate', async () => {
         const [certificateId] = await certificateService.batchIssue([
             {
                 deviceId: 'd1',
