@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@1.1.2...@energyweb/origin-247-claim@2.0.0) (2021-08-26)
+
+
+### Features
+
+* **origin-247-claim:** allow flexible batch claims ([f0f0916](https://github.com/energywebfoundation/origin-247-sdk/commit/f0f0916ec2b9c8f5d10cafbe60ae4a74d028bbe9))
+
+
+### BREAKING CHANGES
+
+* **origin-247-claim:** claimCustomizationFn now accepts different - more flexible - interface
+
+
+
+
+
 ## [1.1.2](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@1.1.1...@energyweb/origin-247-claim@1.1.2) (2021-08-23)
 
 **Note:** Version bump only for package @energyweb/origin-247-claim

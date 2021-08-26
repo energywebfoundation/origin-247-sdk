@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@1.0.0...@energyweb/origin-247-certificate@2.0.0) (2021-08-26)
+
+
+### chore
+
+* **origin-247-certificate:** allow to configure issuer-api options ([f3f4e6a](https://github.com/energywebfoundation/origin-247-sdk/commit/f3f4e6a87b6449ca23f6ec3b16c250d6fda898f5))
+
+
+### Features
+
+* **origin-247-certificate:** Update issuer-api, make batch methods easier to use ([574d36b](https://github.com/energywebfoundation/origin-247-sdk/commit/574d36b20173db89e774768ee1546b7aa7bfe49f))
+
+
+### BREAKING CHANGES
+
+* **origin-247-certificate:** CertificateModule now requires `.register()`
+* **origin-247-certificate:** now batch methods (transfer and claim) accept array of transfers/claims
+
+
+
+
+
 # 1.0.0 (2021-08-17)
 
 
