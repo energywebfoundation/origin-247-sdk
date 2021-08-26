@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.0.0...@energyweb/origin-247-certificate@2.0.1) (2021-08-26)
+
+
+### Reverts
+
+* Revert "chore(origin-247-certificate): allow to configure issuer-api options" ([73278a0](https://github.com/energywebfoundation/origin-247-sdk/commit/73278a0aa390a8d4afb9e024125ead7edcc9e9a2))
+
+
+
+
+
 # [2.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@1.0.0...@energyweb/origin-247-certificate@2.0.0) (2021-08-26)
 
 
