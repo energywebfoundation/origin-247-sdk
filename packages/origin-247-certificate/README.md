@@ -45,10 +45,12 @@ Import Certificate module into one of your applications modules:
 import { CertificateModule } from '@energyweb/origin-247-certificate';
 
 @Module({
-    imports: [CertificateModule]
+    imports: [CertificateModule.register()]
 })
 export class SomeModule {}
 ```
+
+Note, that via argument to `register` you can configure `issuer-api` behavior (for example, transaction tracking and certification request are disabled by default).
 
 Use the service:
 
