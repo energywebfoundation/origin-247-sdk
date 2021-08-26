@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
+import { Module, DynamicModule } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bull';
-import { CertificateModule as IssuerCertificateModule } from '@energyweb/issuer-api';
+import { IssuerModule, IssuerModuleOptions } from '@energyweb/issuer-api';
 
 import { CertificateService } from './certificate.service';
 import { BlockchainActionsProcessor } from './blockchain-actions.processor';
@@ -12,18 +12,33 @@ const serviceProvider = {
     useClass: CertificateService
 };
 
-@Module({
-    providers: [serviceProvider, BlockchainActionsProcessor],
-    exports: [serviceProvider],
-    imports: [
-        IssuerCertificateModule,
-        CqrsModule,
-        BullModule.registerQueue({
-            name: 'blockchain-actions',
-            settings: {
-                lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
-            }
-        })
-    ]
-})
-export class CertificateModule {}
+export interface CertificateModuleOptions {
+    issuerOptions?: Partial<IssuerModuleOptions>;
+}
+
+@Module({})
+export class CertificateModule {
+    static register(options: CertificateModuleOptions = {}): DynamicModule {
+        return {
+            module: CertificateModule,
+            providers: [serviceProvider, BlockchainActionsProcessor],
+            exports: [serviceProvider],
+            imports: [
+                IssuerModule.register({
+                    enableCertificationRequest: false,
+                    enableTransactionLogging: false,
+                    ...(options.issuerOptions ?? {})
+                }),
+                CqrsModule,
+                BullModule.registerQueue({
+                    name: 'blockchain-actions',
+                    settings: {
+                        lockDuration: Number(
+                            process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000
+                        )
+                    }
+                })
+            ]
+        };
+    }
+}

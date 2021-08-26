@@ -30,14 +30,14 @@
         "typeorm": "0.2.34"
     },
     "peerDependencies": {
-        "@energyweb/origin-247-certificate": "^0.0.2-alpha.1626083770.0"
+        "@energyweb/origin-247-certificate": "^1.0.0"
     },
     "devDependencies": {
-        "@energyweb/issuer": "3.2.1-alpha.1626693085.0",
-        "@energyweb/issuer-api": "0.2.1-alpha.1626693085.0",
+        "@energyweb/issuer": "3.2.1-alpha.1629812330.0",
+        "@energyweb/issuer-api": "0.2.1-alpha.1629812330.0",
         "@energyweb/origin-247-certificate": "1.0.0",
-        "@energyweb/origin-backend-utils": "1.5.2-alpha.1626693085.0",
-        "@energyweb/utils-general": "11.0.3-alpha.1626693085.0",
+        "@energyweb/origin-backend-utils": "1.5.2-alpha.1629812330.0",
+        "@energyweb/utils-general": "11.0.3-alpha.1629812330.0",
         "@nestjs/bull": "0.3.1",
         "@nestjs/passport": "7.1.5",
         "@nestjs/platform-express": "7.6.18",

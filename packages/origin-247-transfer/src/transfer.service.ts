@@ -5,7 +5,7 @@ import {
     ENERGY_TRANSFER_REQUEST_REPOSITORY
 } from './repositories/EnergyTransferRequest.repository';
 import { EnergyTransferRequest, State } from './EnergyTransferRequest';
-import { groupBy, values, chunk } from 'lodash';
+import { chunk } from 'lodash';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
 
 @Injectable()
@@ -22,16 +22,10 @@ export class TransferService {
     public async transferTask() {
         const etrs = await this.etrRepository.findByState(State.TransferAwaiting);
 
-        const groupedEtrs = values(
-            groupBy(etrs, (e) => `${e.sites.sellerAddress}${e.sites.buyerAddress}`)
-        );
+        const chunkedEtrs = chunk(etrs, this.batchConfiguration.transferBatchSize);
 
-        for (const etrGroup of groupedEtrs) {
-            const chunkedEtrs = chunk(etrGroup, this.batchConfiguration.transferBatchSize);
-
-            for (const chunk of chunkedEtrs) {
-                await this.transferCertificates(chunk);
-            }
+        for (const chunk of chunkedEtrs) {
+            await this.transferCertificates(chunk);
         }
     }
 
@@ -40,14 +34,14 @@ export class TransferService {
         await this.etrRepository.saveManyInTransaction(etrs);
 
         try {
-            const result = await this.certificateService.batchTransfer({
-                fromAddress: etrs[0].sites.sellerAddress,
-                toAddress: etrs[0].sites.buyerAddress,
-                certificates: etrs.map((etr) => ({
+            const result = await this.certificateService.batchTransfer(
+                etrs.map((etr) => ({
+                    fromAddress: etrs[0].sites.sellerAddress,
+                    toAddress: etrs[0].sites.buyerAddress,
                     certificateId: etr.certificateId!, // verified by `transferStarted` state
                     energyValue: etr.volume
                 }))
-            });
+            );
 
             if (!result.success) {
                 throw new Error(result.message ?? 'Unknown transfer error');

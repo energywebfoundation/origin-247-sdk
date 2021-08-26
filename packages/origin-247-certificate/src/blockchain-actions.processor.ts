@@ -3,6 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { CommandBus } from '@nestjs/cqrs';
 import { BlockchainAction, BlockchainActionType } from './types';
+import { BigNumber } from 'ethers';
 import {
     ClaimCertificateCommand,
     IssueCertificateCommand,
@@ -110,12 +111,12 @@ export class BlockchainActionsProcessor {
 
                 return await this.commandBus.execute(
                     new BatchTransferCertificatesCommand(
-                        batchTransferParams.certificates.map((c) => ({
-                            id: c.certificateId,
-                            amount: c.energyValue
-                        })),
-                        batchTransferParams.toAddress,
-                        batchTransferParams.fromAddress
+                        batchTransferParams.transfers.map((t) => ({
+                            id: t.certificateId,
+                            to: t.toAddress,
+                            from: t.fromAddress,
+                            amount: t.energyValue ? BigNumber.from(t.energyValue) : undefined
+                        }))
                     )
                 );
 
@@ -127,12 +128,12 @@ export class BlockchainActionsProcessor {
 
                 return await this.commandBus.execute(
                     new BatchClaimCertificatesCommand(
-                        batchClaimParams.certificates.map((c) => ({
+                        batchClaimParams.claims.map((c) => ({
                             id: c.certificateId,
-                            amount: c.energyValue
-                        })),
-                        batchClaimParams.claimData,
-                        batchClaimParams.forAddress
+                            from: c.forAddress,
+                            amount: c.energyValue ? BigNumber.from(c.energyValue) : undefined,
+                            claimData: c.claimData
+                        }))
                     )
                 );
         }

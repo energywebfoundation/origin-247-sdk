@@ -11,7 +11,7 @@ import {
     IMatchingOutput
 } from '../src/interfaces';
 import { BigNumber } from 'ethers';
-import { CertificateService, IBatchClaimCommand } from '@energyweb/origin-247-certificate';
+import { CertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
 
 jest.setTimeout(60 * 1000);
 import { ClaimFacade } from '../src';
@@ -60,7 +60,9 @@ describe('Claiming - e2e', () => {
             { generatorId: 'generatorA', volume: BigNumber.from(100), certificateId: 1 },
             { generatorId: 'generatorB', volume: BigNumber.from(100), certificateId: 2 }
         ];
-        const batchClaimSpy = jest.spyOn(certificateService, 'batchClaim');
+        const batchClaimSpy = jest
+            .spyOn(certificateService, 'batchClaim')
+            .mockImplementation(async () => ({ success: true }));
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
         const res = await claimFacade.claim({
@@ -113,7 +115,9 @@ describe('Claiming - e2e', () => {
                 propForMeta: {}
             }
         ];
-        const batchClaimSpy = jest.spyOn(certificateService, 'batchClaim');
+        const batchClaimSpy = jest
+            .spyOn(certificateService, 'batchClaim')
+            .mockImplementation(async () => ({ success: true }));
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
         const res = await claimFacade.claim({
@@ -170,15 +174,18 @@ const spreadMatcherAlgo = (groupPriority: any): ((input: IMatchingInput) => IMat
     };
 };
 
-const claimCustomizer = (input: IMatch<IConsumption, IGeneration>[]): IBatchClaimCommand[] => {
-    return [
-        {
-            certificates: input.map((m) => ({
-                certificateId: m.generation.certificateId,
-                energyValue: m.volume.toString()
-            })),
-            claimData: {},
-            forAddress: userWallet.address
-        }
-    ];
+const claimCustomizer = (input: IMatch<IConsumption, IGeneration>[]): IClaimCommand[] => {
+    return input.map((m) => ({
+        certificateId: m.generation.certificateId,
+        claimData: {
+            beneficiary: '',
+            countryCode: '',
+            location: '',
+            periodEndDate: '',
+            periodStartDate: '',
+            purpose: ''
+        },
+        energyValue: m.volume.toString(),
+        forAddress: userWallet.address
+    }));
 };

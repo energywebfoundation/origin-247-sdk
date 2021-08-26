@@ -13,9 +13,7 @@ import {
     BlockchainActionType,
     BlockchainAction,
     IIssuedCertificate,
-    IIssueCommandParams,
-    IBatchClaimCommand,
-    IBatchTransferCommand
+    IIssueCommandParams
 } from './types';
 
 const jobOptions = {
@@ -117,10 +115,12 @@ export class CertificateService<T = null> {
         return result;
     }
 
-    public async batchClaim(command: IBatchClaimCommand): Promise<ISuccessResponse> {
+    public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
         const job = await this.blockchainActionsQueue.add(
             {
-                payload: command,
+                payload: {
+                    claims: command
+                },
                 type: BlockchainActionType.BatchClaim
             },
             jobOptions
@@ -131,10 +131,12 @@ export class CertificateService<T = null> {
         return result;
     }
 
-    public async batchTransfer(command: IBatchTransferCommand): Promise<ISuccessResponse> {
+    public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
         const job = await this.blockchainActionsQueue.add(
             {
-                payload: command,
+                payload: {
+                    transfers: command
+                },
                 type: BlockchainActionType.BatchTransfer
             },
             jobOptions

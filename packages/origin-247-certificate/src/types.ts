@@ -1,4 +1,8 @@
 import { IClaimData, IClaim } from '@energyweb/issuer';
+import {
+    BatchCertificateClaim,
+    BatchCertificateTransfer
+} from '@energyweb/issuer/dist/js/src/blockchain-facade/CertificateBatchOperations';
 
 export type UnixTimestamp = number;
 
@@ -71,15 +75,11 @@ export interface IBatchIssueCommand<T> {
 }
 
 export interface IBatchClaimCommand {
-    certificates: { certificateId: number; energyValue: string }[];
-    claimData: IClaimData;
-    forAddress: string;
+    claims: IClaimCommand[];
 }
 
 export interface IBatchTransferCommand {
-    certificates: { certificateId: number; energyValue: string }[];
-    fromAddress: string;
-    toAddress: string;
+    transfers: ITransferCommand[];
 }
 
 export interface ISuccessResponse {

@@ -25,14 +25,14 @@ import {
 import {
     CertificateService,
     CERTIFICATE_SERVICE_TOKEN,
-    IBatchClaimCommand
+    IClaimCommand
 } from '@energyweb/origin-247-certificate';
 
 import { omit } from 'lodash';
 
 export interface IClaimInput {
     algorithmFn: (input: IMatchingInput) => IMatchingOutput;
-    claimCustomizationFn: (input: IMatch<IConsumption, IGeneration>[]) => IBatchClaimCommand[];
+    claimCustomizationFn: (input: IMatch<IConsumption, IGeneration>[]) => IClaimCommand[];
     data: IMatchingInput;
     timeframe: ITimeFrame;
 }
@@ -63,9 +63,7 @@ export class ClaimService {
         const filteredMatchingResult = this.filterZeroVolumeMatches(matchingResult);
 
         const resultsForClaim = claimCustomizationFn(filteredMatchingResult.matches);
-        for (const claimBatch of resultsForClaim) {
-            await this.certificateService.batchClaim(claimBatch);
-        }
+        await this.certificateService.batchClaim(resultsForClaim);
 
         const raport = this.createRaport(filteredMatchingResult, timeframe);
         await this.createLogs(raport);
