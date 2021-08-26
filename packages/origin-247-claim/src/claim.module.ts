@@ -20,7 +20,7 @@ import { ClaimFacade } from './claim.facade';
             LeftoverConsumptionEntity,
             ExcessGenerationEntity
         ]),
-        CertificateModule.register()
+        CertificateModule
     ],
     providers: [
         ClaimService,
