@@ -61,7 +61,7 @@ export const bootstrapTestInstance: any = async () => {
                 logging: ['info'],
                 keepConnectionAlive: true
             }),
-            CertificateModule.register(),
+            CertificateModule,
             QueueingModule(),
             BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' })

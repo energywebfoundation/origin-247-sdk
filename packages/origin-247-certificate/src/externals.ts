@@ -1,1 +1,1 @@
-export { CertificatePersistedEvent, IssuerModuleOptions } from '@energyweb/issuer-api';
+export { CertificatePersistedEvent } from '@energyweb/issuer-api';
