@@ -1,24 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
-import { Repository, Connection, Between, In, createQueryBuilder } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository, Between, In } from 'typeorm';
 
-import { MatchResultEntity, tableName } from './MatchResult.entity';
-import {
-    FindOptions,
-    MatchResultRepository,
-    NewMatchResult,
-    GroupEntity,
-    MatchResultColumns,
-    GroupedMatchResults
-} from './MatchResult.repository';
+import { MatchResultEntity } from './MatchResult.entity';
+import { FindOptions, MatchResultRepository, NewMatchResult } from './MatchResult.repository';
 
 @Injectable()
 export class MatchResultPostgresRepository implements MatchResultRepository {
     constructor(
         @InjectRepository(MatchResultEntity)
-        private repository: Repository<MatchResultEntity>,
-        @InjectConnection()
-        private connection: Connection
+        private repository: Repository<MatchResultEntity>
     ) {}
 
     public async create(matchResult: NewMatchResult): Promise<MatchResultEntity> {
@@ -37,44 +28,5 @@ export class MatchResultPostgresRepository implements MatchResultRepository {
                 timestamp: Between(findOptions.from, findOptions.to)
             }
         });
-    }
-
-    public async findGrouped(
-        findOptions: FindOptions,
-        groupOptions: [GroupEntity] | [GroupEntity, GroupEntity]
-    ): Promise<GroupedMatchResults[]> {
-        const sanitized = this.sanitizeInput(groupOptions);
-        const queryRunner = this.connection.createQueryRunner();
-        const matchResultQuery = this.connection
-            .createQueryBuilder()
-            .select(sanitized)
-            .addSelect(`array_agg(row_to_json(${tableName})) as entries`)
-            .from(tableName, tableName)
-            .where(
-                `"${MatchResultColumns.ConsumerId}" IN (${this.sanitizeInput(
-                    findOptions.consumerIds,
-                    "'"
-                ).join(', ')})`
-            )
-            .andWhere(
-                `"${MatchResultColumns.GeneratorId}" IN (${this.sanitizeInput(
-                    findOptions.generatorIds,
-                    "'"
-                ).join(', ')})`
-            )
-            .andWhere(`"${MatchResultColumns.Timestamp}" between :dateFrom and :dateTo`, {
-                dateFrom: findOptions.from,
-                dateTo: findOptions.to
-            })
-            .groupBy(sanitized.join(', '))
-            .getQueryAndParameters();
-
-        const res = await queryRunner.query(matchResultQuery[0], matchResultQuery[1]);
-        return res;
-    }
-
-    private sanitizeInput(input: string[], token?: string): string[] {
-        const sanitizationToken = token ?? `"`;
-        return input.map((i) => `${sanitizationToken}${i}${sanitizationToken}`);
     }
 }

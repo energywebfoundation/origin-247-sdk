@@ -1,9 +1,6 @@
 import { bootstrapTestInstance } from './setup-e2e';
 import { INestApplication } from '@nestjs/common';
-import {
-    MatchResultRepository,
-    GroupEntity
-} from '../src/repositories/MatchResult/MatchResult.repository';
+import { MatchResultRepository } from '../src/repositories/MatchResult/MatchResult.repository';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 
 jest.setTimeout(60 * 1000);
@@ -51,72 +48,6 @@ describe('MatchResult - e2e', () => {
                 from: new Date('2021-08-01T10:00:00.000Z'),
                 to: new Date('2021-08-01T12:00:00.000Z')
             });
-            expect(res).toHaveLength(4);
-        });
-
-        it('should find matches results that satisfy findOptions', async () => {
-            const res = await matchResultRepository.findGrouped(
-                {
-                    consumerIds: ['consumerOne', 'consumerTwo'],
-                    generatorIds: ['generatorOne'],
-                    from: new Date('2021-08-01T11:00:00.000Z'),
-                    to: new Date('2021-08-01T12:00:00.000Z')
-                },
-                [GroupEntity.Consumer, GroupEntity.Generator]
-            );
-
-            expect(res).toHaveLength(2);
-        });
-
-        it('findGrouped() should group by single column', async () => {
-            const res = await matchResultRepository.findGrouped(
-                {
-                    consumerIds: ['consumerOne', 'consumerTwo'],
-                    generatorIds: ['generatorOne', 'generatorTwo'],
-                    from: new Date('2021-08-01T10:00:00.000Z'),
-                    to: new Date('2021-08-01T12:00:00.000Z')
-                },
-                [GroupEntity.Consumer]
-            );
-            expect(res).toHaveLength(2);
-        });
-
-        it('findGrouped() should group by single column - different order', async () => {
-            const res = await matchResultRepository.findGrouped(
-                {
-                    consumerIds: ['consumerOne', 'consumerTwo'],
-                    generatorIds: ['generatorOne', 'generatorTwo', 'generatorThree'],
-                    from: new Date('2021-08-01T10:00:00.000Z'),
-                    to: new Date('2021-08-01T12:00:00.000Z')
-                },
-                [GroupEntity.Generator]
-            );
-            expect(res).toHaveLength(3);
-        });
-
-        it('findGrouped() should group by two columns', async () => {
-            const res = await matchResultRepository.findGrouped(
-                {
-                    consumerIds: ['consumerOne', 'consumerTwo'],
-                    generatorIds: ['generatorOne', 'generatorTwo', 'generatorThree'],
-                    from: new Date('2021-08-01T10:00:00.000Z'),
-                    to: new Date('2021-08-01T12:00:00.000Z')
-                },
-                [GroupEntity.Consumer, GroupEntity.Generator]
-            );
-            expect(res).toHaveLength(4);
-        });
-
-        it('findGrouped() should group by two columns - different order', async () => {
-            const res = await matchResultRepository.findGrouped(
-                {
-                    consumerIds: ['consumerOne', 'consumerTwo'],
-                    generatorIds: ['generatorOne', 'generatorTwo', 'generatorThree'],
-                    from: new Date('2021-08-01T10:00:00.000Z'),
-                    to: new Date('2021-08-01T12:00:00.000Z')
-                },
-                [GroupEntity.Generator, GroupEntity.Consumer]
-            );
             expect(res).toHaveLength(4);
         });
     });
