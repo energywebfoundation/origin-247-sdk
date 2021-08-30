@@ -10,7 +10,8 @@ interface IAggregateCommand {
     end?: Date;
     method: AggregateMethod;
     window: Duration;
-    timezoneOffset: number /** in minutes */;
+    /** in minutes, typically result of new Date().getTimezoneOffset() */
+    timezoneOffset: number;
 }
 
 export interface IAggregateResult {
