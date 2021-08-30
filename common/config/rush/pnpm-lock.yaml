@@ -3,6 +3,7 @@ lockfileVersion: 5.3
 specifiers:
   '@energyweb/issuer': 3.2.1-alpha.1629812330.0
   '@energyweb/issuer-api': 0.2.1-alpha.1629812330.0
+  '@energyweb/origin-247-certificate': ^1.0.0
   '@energyweb/origin-backend-utils': 1.5.2-alpha.1629812330.0
   '@energyweb/utils-general': 11.0.3-alpha.1629812330.0
   '@nestjs/bull': 0.3.1
@@ -40,6 +41,7 @@ specifiers:
 dependencies:
   '@energyweb/issuer': 3.2.1-alpha.1629812330.0
   '@energyweb/issuer-api': 0.2.1-alpha.1629812330.0_eb9935bd4f97b23ab8881eee244eb1f7
+  '@energyweb/origin-247-certificate': 1.0.0_4a7c1de902aa3abe4479449f94eeec1c
   '@energyweb/origin-backend-utils': 1.5.2-alpha.1629812330.0_037dc7b7d2399f4623ff58161b27e748
   '@energyweb/utils-general': 11.0.3-alpha.1629812330.0
   '@nestjs/bull': 0.3.1_c86fa2ed7bc9e7a48760c2e5795b24d0
@@ -485,6 +487,40 @@ packages:
       winston: 3.3.3
     transitivePeerDependencies:
       - bufferutil
+      - utf-8-validate
+    dev: false
+
+  /@energyweb/origin-247-certificate/1.0.0_4a7c1de902aa3abe4479449f94eeec1c:
+    resolution: {integrity: sha512-urDQCwTP6ov4rjEx/3nz8y2nDiRVeTiHe14VTkJ+eAi9CDdSyk4xCtcslHjZ5IvtRZo1OgOHwB9b82oCCUdKLg==}
+    peerDependencies:
+      '@energyweb/issuer': 3.2.1-alpha.1626693085.0
+      '@energyweb/issuer-api': 0.2.1-alpha.1626693085.0
+    dependencies:
+      '@energyweb/issuer': 3.2.1-alpha.1629812330.0
+      '@energyweb/issuer-api': 0.2.1-alpha.1629812330.0_eb9935bd4f97b23ab8881eee244eb1f7
+      '@nestjs/bull': 0.3.1_c86fa2ed7bc9e7a48760c2e5795b24d0
+      '@nestjs/common': 7.6.18_627333fed432b1d33f7bbb38d1414b3e
+      '@nestjs/core': 7.6.18_ad4c55bf3f8a2d35d119f79a2f330104
+      '@nestjs/cqrs': 7.0.1_eaae4baca06cce15ae5ce8246f973f7f
+      '@nestjs/typeorm': 7.1.5_9594358be22bd70bf28ab38952108480
+      bull: 3.22.9
+      ethers: 5.3.1
+      passport: 0.4.1
+      pg: 8.6.0
+      typeorm: 0.2.34
+    transitivePeerDependencies:
+      - '@nestjs/microservices'
+      - '@nestjs/platform-express'
+      - '@nestjs/websockets'
+      - bufferutil
+      - cache-manager
+      - class-transformer
+      - class-validator
+      - debug
+      - pg-native
+      - reflect-metadata
+      - rxjs
+      - supports-color
       - utf-8-validate
     dev: false
 
@@ -4518,6 +4554,10 @@ packages:
       yallist: 4.0.0
     dev: false
 
+  /luxon/2.0.2:
+    resolution: {integrity: sha512-ZRioYLCgRHrtTORaZX1mx+jtxKtKuI5ZDvHNAmqpUzGqSrR+tL4FVLn/CUGMA3h0+AKD1MAxGI5GnCqR5txNqg==}
+    dev: false
+
   /make-dir/3.1.0:
     resolution: {integrity: sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==}
     engines: {node: '>=8'}
@@ -6406,7 +6446,7 @@ packages:
     dev: false
 
   file:projects/origin-247-claim.tgz_passport@0.4.1+rxjs@7.3.0:
-    resolution: {integrity: sha512-IizznEnmZQcdWyhRrIXW80JH7Kr76toqakA2Dhq+J5PQzr4lJVkagAWYfd7R4U+BhxSzyxB8L1q26G+9TNLYTQ==, tarball: file:projects/origin-247-claim.tgz}
+    resolution: {integrity: sha512-KXlKa78AR4X3rMLuQm88fsNCn9859v/hElezWO8vdm5LoouN+liUc+cdjBRjqgRj5owNMp5eM3mO2PKzS3JfKQ==, tarball: file:projects/origin-247-claim.tgz}
     id: file:projects/origin-247-claim.tgz
     name: '@rush-temp/origin-247-claim'
     version: 0.0.0
@@ -6433,6 +6473,7 @@ packages:
       ganache-cli: 6.12.2
       jest: 27.0.5_ts-node@9.1.1
       lodash: 4.17.21
+      luxon: 2.0.2
       pg: 8.6.0
       ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
       ts-node: 9.1.1_typescript@4.3.4
@@ -6461,7 +6502,7 @@ packages:
     dev: false
 
   file:projects/origin-247-transfer.tgz_passport@0.4.1:
-    resolution: {integrity: sha512-1nf8sYUNfaIgdzKLhabZpUR3Yjy/mJkK4NgJvNJJMfMriRPpSIVOQQe1Q5kmX4dnUN4cCnpaz9Gq5bJME8bwdQ==, tarball: file:projects/origin-247-transfer.tgz}
+    resolution: {integrity: sha512-CjqCADPcC0qab7Km16Fd/8LO+y2zKYA/R4CXL1AGFVpITTEY6bloIQ9FCd6G+cuOZwp5ckq+lJvinHrnK1IH7w==, tarball: file:projects/origin-247-transfer.tgz}
     id: file:projects/origin-247-transfer.tgz
     name: '@rush-temp/origin-247-transfer'
     version: 0.0.0

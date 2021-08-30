@@ -3,8 +3,7 @@ import { Injectable, Inject } from '@nestjs/common';
 import {
     MatchResultRepository,
     MATCH_RESULT_REPOSITORY,
-    FindOptions as FindMatchOptions,
-    GroupEntity
+    FindOptions as FindMatchOptions
 } from './repositories/MatchResult/MatchResult.repository';
 import {
     LeftoverConsumptionRepository,
@@ -43,12 +42,5 @@ export class ClaimFacade {
 
     public async findMatches(options: FindMatchOptions) {
         return await this.matchResultRepository.find(options);
-    }
-
-    public async findMatchesGrouped(
-        options: FindMatchOptions,
-        groupOptions: [GroupEntity] | [GroupEntity, GroupEntity]
-    ) {
-        return await this.matchResultRepository.findGrouped(options, groupOptions);
     }
 }

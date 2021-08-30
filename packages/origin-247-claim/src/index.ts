@@ -9,3 +9,7 @@ export const entities = [MatchResultEntity, LeftoverConsumptionEntity, ExcessGen
 
 export * from './claim.module';
 export * from './claim.facade';
+
+export * from './utils/aggregate';
+export * from './utils/bigNumber';
+export * from './utils/Duration';
