@@ -1,6 +1,6 @@
 {
     "name": "@energyweb/origin-247-claim",
-    "version": "2.0.1",
+    "version": "3.0.0",
     "main": "./dist/js/src/index.js",
     "types": "./dist/js/src/index.d.ts",
     "scripts": {
@@ -26,9 +26,9 @@
         "@nestjs/typeorm": "7.1.5",
         "ethers": "5.3.1",
         "lodash": "4.17.21",
+        "luxon": "2.0.2",
         "pg": "8.6.0",
-        "typeorm": "0.2.34",
-        "luxon": "2.0.2"
+        "typeorm": "0.2.34"
     },
     "peerDependencies": {
         "@energyweb/origin-247-certificate": "^1.0.0"

@@ -3,6 +3,27 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@2.0.1...@energyweb/origin-247-claim@3.0.0) (2021-08-30)
+
+
+### chore
+
+* **origin-247-claim:** remove findByGrouped method ([95dfbf1](https://github.com/energywebfoundation/origin-247-sdk/commit/95dfbf174bdfb8dab00faf745d987675b2c24990))
+
+
+### Features
+
+* **origin-247-claim:** export aggregate, Duration and bigNum utils ([a9c7f18](https://github.com/energywebfoundation/origin-247-sdk/commit/a9c7f1827c8034e54e0cf6a1addfa3ae6bbced59))
+
+
+### BREAKING CHANGES
+
+* **origin-247-claim:** findByGrouped is removed
+
+
+
+
+
 ## [2.0.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@2.0.0...@energyweb/origin-247-claim@2.0.1) (2021-08-26)
 
 **Note:** Version bump only for package @energyweb/origin-247-claim
