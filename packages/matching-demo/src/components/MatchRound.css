@@ -1,0 +1,9 @@
+.c-match-round {
+    margin-bottom: 2em;
+}
+
+.c-match-round_cell-value.is-updated {
+    color: #4caf50;
+    font-weight: bold;
+    text-decoration: underline;
+}

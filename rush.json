@@ -391,6 +391,10 @@
         {
             "packageName": "@energyweb/origin-247-claim",
             "projectFolder": "packages/origin-247-claim"
+        },
+        {
+            "packageName": "@energyweb/247-matching-demo",
+            "projectFolder": "packages/matching-demo"
         }
         // {
         //   /**
