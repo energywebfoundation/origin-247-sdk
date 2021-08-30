@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@3.0.0...@energyweb/origin-247-claim@3.0.1) (2021-08-30)
+
+**Note:** Version bump only for package @energyweb/origin-247-claim
+
+
+
+
+
 # [3.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@2.0.1...@energyweb/origin-247-claim@3.0.0) (2021-08-30)
 
 
