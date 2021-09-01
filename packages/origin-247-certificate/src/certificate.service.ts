@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
 import { IClaim } from '@energyweb/issuer';
-import { Queue } from 'bull';
+import { Queue, Job } from 'bull';
 import {
     ICertificate,
     IClaimCommand,
@@ -57,7 +57,7 @@ export class CertificateService<T = null> {
             jobOptions
         );
 
-        const result = await job.finished();
+        const result = await this.waitForJobResult(job);
 
         return this.mapCertificate(result);
     }
@@ -71,7 +71,7 @@ export class CertificateService<T = null> {
             jobOptions
         );
 
-        const result = await job.finished();
+        const result = await this.waitForJobResult(job);
 
         return result;
     }
@@ -85,7 +85,7 @@ export class CertificateService<T = null> {
             jobOptions
         );
 
-        const result = await job.finished();
+        const result = await this.waitForJobResult(job);
 
         return result;
     }
@@ -110,7 +110,7 @@ export class CertificateService<T = null> {
             jobOptions
         );
 
-        const result: number[] = await job.finished();
+        const result: number[] = await this.waitForJobResult(job);
 
         return result;
     }
@@ -126,7 +126,7 @@ export class CertificateService<T = null> {
             jobOptions
         );
 
-        const result = await job.finished();
+        const result = await this.waitForJobResult(job);
 
         return result;
     }
@@ -142,7 +142,7 @@ export class CertificateService<T = null> {
             jobOptions
         );
 
-        const result = await job.finished();
+        const result = await this.waitForJobResult(job);
 
         return result;
     }
@@ -156,5 +156,17 @@ export class CertificateService<T = null> {
             claims: certificate.claims ?? [],
             metadata: certificate.metadata !== '' ? JSON.parse(certificate.metadata) : null
         };
+    }
+
+    private async waitForJobResult(job: Job<BlockchainAction>): Promise<any> {
+        try {
+            return await job.finished();
+        } catch (e) {
+            const error = new Error(e.message);
+            error.stack =
+                '[Hidden job error stack trace]. Please refer to logger logs for error stacktrace';
+
+            throw error;
+        }
     }
 }
