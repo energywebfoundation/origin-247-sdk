@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export const bigNumSum = (values: BigNumber[]) =>
     values.reduce((sum, value) => sum.add(BigNumber.from(value)), BigNumber.from(0));

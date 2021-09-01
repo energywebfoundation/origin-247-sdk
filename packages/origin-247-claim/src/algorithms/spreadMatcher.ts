@@ -1,5 +1,5 @@
 import { omit, cloneDeep } from 'lodash';
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export namespace SpreadMatcher {
     /**

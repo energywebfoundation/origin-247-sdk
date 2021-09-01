@@ -10,7 +10,7 @@ import {
     IMatchingInput,
     IMatchingOutput
 } from '../src/interfaces';
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { CertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
 
 jest.setTimeout(60 * 1000);
