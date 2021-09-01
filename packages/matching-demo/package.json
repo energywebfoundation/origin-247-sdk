@@ -23,7 +23,7 @@
     "dependencies": {
         "react": "17.0.2",
         "react-dom": "17.0.2",
-        "@ethersproject/bignumber": "5.4.1",
+        "@ethersproject/bignumber": "5.3.0",
         "lodash": "4.17.21",
         "@material-ui/core": "v5.0.0-beta.4",
         "@emotion/react": "11.4.1",
