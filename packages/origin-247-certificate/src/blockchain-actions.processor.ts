@@ -21,22 +21,31 @@ export class BlockchainActionsProcessor {
 
     @Process({ concurrency: 1 })
     async handle(payload: Job<BlockchainAction>): Promise<unknown> {
-        const result = await this.process(payload);
+        try {
+            const result = await this.process(payload);
 
-        /**
-         * @HOTFIX 15.06.2021
-         *
-         * Sometimes we get conflicting nonce/gas price problem.
-         * This time --may-- fix this, but not necessarily will.
-         *
-         * If you, in the future, will find this, please check whether this error is still present.
-         * If not, maybe this really fixed this. If yes - just remove this await.
-         */
-        await new Promise((resolve) =>
-            setTimeout(resolve, Number(process.env.CERTIFICATE_QUEUE_DELAY ?? 10000))
-        );
+            /**
+             * @HOTFIX 15.06.2021
+             *
+             * Sometimes we get conflicting nonce/gas price problem.
+             * This time --may-- fix this, but not necessarily will.
+             *
+             * If you, in the future, will find this, please check whether this error is still present.
+             * If not, maybe this really fixed this. If yes - just remove this await.
+             */
+            await new Promise((resolve) =>
+                setTimeout(resolve, Number(process.env.CERTIFICATE_QUEUE_DELAY ?? 10000))
+            );
 
-        return result;
+            return result;
+        } catch (e) {
+            this.logger.error(
+                `Error on job ${JSON.stringify(payload.data)}: ${e.message}`,
+                e.stack
+            );
+
+            throw e;
+        }
     }
 
     async process({ data }: Job<BlockchainAction>): Promise<unknown> {
