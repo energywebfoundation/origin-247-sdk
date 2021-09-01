@@ -149,24 +149,22 @@ export namespace SpreadMatcher {
 
     /**
      * Given two set of entities it checks how much volume should be distributed in each match round.
-     * It's not optimal, but it's safe - it divides entity volumes over second entities count,
+     * It's not optimal, but it's safe - it divides entity volumes over entities count that are connect via route,
      * and that's easiest method to compute volume, that can be distributed without any errors in algorithm.
      */
     const computeSafeDistribution = <T extends Entity, P extends Entity>(
         entities1: T[],
-        entities2: P[]
+        entities2: P[],
+        routes: Route<T, P>[]
     ) => {
-        const computeDistributedVolume = (entities: (T | P)[], otherEntitiesLength: number) =>
+        const computeDistributedVolume = (entities: (T | P)[]) =>
             entities.map((entity) => ({
                 entity,
-                volume: entity.volume.div(otherEntitiesLength) // automatically rounded down
+                volume: entity.volume.div(getCompetingEntities(routes, entity).length)
             }));
 
         return bigNumMinBy(
-            [
-                ...computeDistributedVolume(entities1, entities2.length),
-                ...computeDistributedVolume(entities2, entities1.length)
-            ],
+            [...computeDistributedVolume(entities1), ...computeDistributedVolume(entities2)],
             (e) => e.volume
         );
     };
@@ -191,7 +189,11 @@ export namespace SpreadMatcher {
     const matchRound = <T extends Entity, P extends Entity>(
         input: RoundInput<T, P>
     ): Match<T, P>[] => {
-        const toDistribute = computeSafeDistribution(input.entityGroups[0], input.entityGroups[1]);
+        const toDistribute = computeSafeDistribution(
+            input.entityGroups[0],
+            input.entityGroups[1],
+            input.routes
+        );
 
         if (toDistribute.volume.eq(0)) {
             const competingEntities = getCompetingEntities(input.routes, toDistribute.entity);

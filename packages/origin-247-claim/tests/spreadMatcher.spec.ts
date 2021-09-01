@@ -1263,6 +1263,47 @@ describe('spreadMatcher', () => {
             expect(result.matches).toHaveLength(0);
         });
     });
+
+    it('Edge case - small distribution divided by not-competing consumers', () => {
+        // **Original problem**: first match is edge case, therefore A gets value from X
+        // and B gets nothing. In second round A again receives one energy AGAIN.
+        // If generators were not divided by all consumers, but only consumers from routes
+        // then first round would assign one energy to both A and B.
+        // This results also in many many more matching rounds done, due to unnecessary splits.
+
+        const result = SpreadMatcher.spreadMatcher({
+            groupPriority: [
+                [
+                    {
+                        id: 'consumerA',
+                        groupPriority: [[{ id: 'generatorX' }], [{ id: 'generatorY' }]]
+                    },
+                    { id: 'consumerB', groupPriority: [[{ id: 'generatorY' }]] }
+                ]
+            ],
+            entityGroups: [
+                [
+                    { id: 'consumerA', volume: BigNumber.from(10) },
+                    { id: 'consumerB', volume: BigNumber.from(10) }
+                ],
+                [
+                    { id: 'generatorX', volume: BigNumber.from(1) },
+                    { id: 'generatorY', volume: BigNumber.from(1) }
+                ]
+            ]
+        });
+
+        expect(result.matches).toHaveLength(2);
+
+        expect(result.matches[0]).toEqual({
+            entities: [{ id: 'consumerA' }, { id: 'generatorX' }],
+            volume: BigNumber.from(1)
+        });
+        expect(result.matches[1]).toEqual({
+            entities: [{ id: 'consumerB' }, { id: 'generatorY' }],
+            volume: BigNumber.from(1)
+        });
+    });
 });
 
 type Primitive = string | number | boolean | undefined | null;
