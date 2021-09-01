@@ -27,6 +27,7 @@
         "lodash": "4.17.21",
         "@material-ui/core": "v5.0.0-beta.4",
         "@emotion/react": "11.4.1",
-        "@emotion/styled": "11.3.0"
+        "@emotion/styled": "11.3.0",
+        "@energyweb/origin-247-claim": "3.0.1"
     }
 }
