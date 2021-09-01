@@ -28,6 +28,7 @@ export namespace SpreadMatcher {
 
     export interface Result<T extends Entity, P extends Entity> {
         matches: Match<T, P>[];
+        roundMatches: Match<T, P>[][];
         leftoverEntities: [T[], P[]];
     }
 
@@ -65,7 +66,7 @@ export namespace SpreadMatcher {
         originalData: Params<T, P>
     ): Result<T, P> => {
         const data = cloneDeep(originalData);
-        const matches = [] as Match<T, P>[][];
+        const allRoundMatches = [] as Match<T, P>[][];
 
         let i = 0;
         while ((i += 1)) {
@@ -105,11 +106,12 @@ export namespace SpreadMatcher {
                 entity2.volume = entity2.volume.sub(match.volume);
             });
 
-            matches.push(roundMatches);
+            allRoundMatches.push(roundMatches);
         }
 
         return {
-            matches: sumMatches(matches.flat()).map(omitMatchVolumes) as Match<T, P>[],
+            matches: sumMatches(allRoundMatches.flat()).map(omitMatchVolumes) as Match<T, P>[],
+            roundMatches: allRoundMatches,
             leftoverEntities: data.entityGroups
         };
     };
@@ -136,11 +138,19 @@ export namespace SpreadMatcher {
         };
 
         return matches.reduce((sum, match) => {
-            const existingMatch = sum.find((s) => areMatchesSame(s, match));
+            const existingMatchIndex = sum.findIndex((s) => areMatchesSame(s, match));
 
-            if (existingMatch) {
-                existingMatch.volume = existingMatch.volume.add(match.volume);
-                return sum;
+            if (existingMatchIndex >= 0) {
+                return sum.map((m, i) => {
+                    if (i === existingMatchIndex) {
+                        return {
+                            ...m,
+                            volume: m.volume.add(match.volume)
+                        };
+                    } else {
+                        return m;
+                    }
+                });
             }
 
             return [...sum, match];

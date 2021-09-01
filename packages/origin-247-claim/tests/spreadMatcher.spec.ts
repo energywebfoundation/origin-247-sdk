@@ -1338,6 +1338,12 @@ const integerMatcher = <T extends SpreadMatcher.Entity, P extends SpreadMatcher.
         matches: result.matches.map((m) => ({
             ...m,
             volume: m.volume.toNumber()
-        })) as any
+        })) as any,
+        roundMatches: result.roundMatches.map((round) =>
+            round.map((m) => ({
+                ...m,
+                volume: m.volume.toNumber()
+            }))
+        ) as any
     };
 };
