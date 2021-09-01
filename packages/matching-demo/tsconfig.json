@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "outDir": "./dist",
+        "target": "es2020",
+        "module": "es6",
+        "jsx": "react",
+        "strict": true,
+        "moduleResolution": "node",
+        "allowSyntheticDefaultImports": true
+    }
+}
