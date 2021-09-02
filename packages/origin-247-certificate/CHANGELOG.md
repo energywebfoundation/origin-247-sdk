@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.0.1...@energyweb/origin-247-certificate@2.1.0) (2021-09-02)
+
+
+### Features
+
+* **origin-247-certificate:** improve job stack trace ([b178e9b](https://github.com/energywebfoundation/origin-247-sdk/commit/b178e9b70556b4d65a1e2ab5b6e6d12becbde590))
+
+
+
+
+
 ## [2.0.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.0.0...@energyweb/origin-247-certificate@2.0.1) (2021-08-26)
 
 
