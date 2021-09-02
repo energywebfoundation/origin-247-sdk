@@ -159,7 +159,7 @@ export namespace SpreadMatcher {
 
     /**
      * Given two set of entities it checks how much volume should be distributed in each match round.
-     * It's not optimal, but it's safe - it divides entity volumes over entities count that are connect via route,
+     * It's not optimal, but it's safe - it divides entity volumes over entities count that are connected via route,
      * and that's easiest method to compute volume, that can be distributed without any errors in algorithm.
      */
     const computeSafeDistribution = <T extends Entity, P extends Entity>(
