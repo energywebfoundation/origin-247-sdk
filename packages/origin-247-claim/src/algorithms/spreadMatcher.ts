@@ -1,5 +1,5 @@
 import { omit, cloneDeep } from 'lodash';
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 
 export namespace SpreadMatcher {
     /**
@@ -28,6 +28,7 @@ export namespace SpreadMatcher {
 
     export interface Result<T extends Entity, P extends Entity> {
         matches: Match<T, P>[];
+        roundMatches: Match<T, P>[][];
         leftoverEntities: [T[], P[]];
     }
 
@@ -65,7 +66,7 @@ export namespace SpreadMatcher {
         originalData: Params<T, P>
     ): Result<T, P> => {
         const data = cloneDeep(originalData);
-        const matches = [] as Match<T, P>[][];
+        const allRoundMatches = [] as Match<T, P>[][];
 
         let i = 0;
         while ((i += 1)) {
@@ -105,11 +106,12 @@ export namespace SpreadMatcher {
                 entity2.volume = entity2.volume.sub(match.volume);
             });
 
-            matches.push(roundMatches);
+            allRoundMatches.push(roundMatches);
         }
 
         return {
-            matches: sumMatches(matches.flat()).map(omitMatchVolumes) as Match<T, P>[],
+            matches: sumMatches(allRoundMatches.flat()).map(omitMatchVolumes) as Match<T, P>[],
+            roundMatches: allRoundMatches,
             leftoverEntities: data.entityGroups
         };
     };
@@ -136,11 +138,19 @@ export namespace SpreadMatcher {
         };
 
         return matches.reduce((sum, match) => {
-            const existingMatch = sum.find((s) => areMatchesSame(s, match));
+            const existingMatchIndex = sum.findIndex((s) => areMatchesSame(s, match));
 
-            if (existingMatch) {
-                existingMatch.volume = existingMatch.volume.add(match.volume);
-                return sum;
+            if (existingMatchIndex >= 0) {
+                return sum.map((m, i) => {
+                    if (i === existingMatchIndex) {
+                        return {
+                            ...m,
+                            volume: m.volume.add(match.volume)
+                        };
+                    } else {
+                        return m;
+                    }
+                });
             }
 
             return [...sum, match];
@@ -149,24 +159,22 @@ export namespace SpreadMatcher {
 
     /**
      * Given two set of entities it checks how much volume should be distributed in each match round.
-     * It's not optimal, but it's safe - it divides entity volumes over second entities count,
+     * It's not optimal, but it's safe - it divides entity volumes over entities count that are connected via route,
      * and that's easiest method to compute volume, that can be distributed without any errors in algorithm.
      */
     const computeSafeDistribution = <T extends Entity, P extends Entity>(
         entities1: T[],
-        entities2: P[]
+        entities2: P[],
+        routes: Route<T, P>[]
     ) => {
-        const computeDistributedVolume = (entities: (T | P)[], otherEntitiesLength: number) =>
+        const computeDistributedVolume = (entities: (T | P)[]) =>
             entities.map((entity) => ({
                 entity,
-                volume: entity.volume.div(otherEntitiesLength) // automatically rounded down
+                volume: entity.volume.div(getCompetingEntities(routes, entity).length)
             }));
 
         return bigNumMinBy(
-            [
-                ...computeDistributedVolume(entities1, entities2.length),
-                ...computeDistributedVolume(entities2, entities1.length)
-            ],
+            [...computeDistributedVolume(entities1), ...computeDistributedVolume(entities2)],
             (e) => e.volume
         );
     };
@@ -191,7 +199,11 @@ export namespace SpreadMatcher {
     const matchRound = <T extends Entity, P extends Entity>(
         input: RoundInput<T, P>
     ): Match<T, P>[] => {
-        const toDistribute = computeSafeDistribution(input.entityGroups[0], input.entityGroups[1]);
+        const toDistribute = computeSafeDistribution(
+            input.entityGroups[0],
+            input.entityGroups[1],
+            input.routes
+        );
 
         if (toDistribute.volume.eq(0)) {
             const competingEntities = getCompetingEntities(input.routes, toDistribute.entity);

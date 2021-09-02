@@ -24,7 +24,7 @@
         "@nestjs/core": "7.6.18",
         "@nestjs/cqrs": "7.0.1",
         "@nestjs/typeorm": "7.1.5",
-        "ethers": "5.3.1",
+        "@ethersproject/bignumber": "5.3.0",
         "lodash": "4.17.21",
         "luxon": "2.0.2",
         "pg": "8.6.0",

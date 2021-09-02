@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { SpreadMatcher } from './algorithm/spreadMatcher';
+import { SpreadMatcher } from '@energyweb/origin-247-claim/dist/js/src/algorithms';
 import { BigNumber } from '@ethersproject/bignumber';
 import { MatchRound } from './components/MatchRound';
 import { EntityCreator } from './components/EntityCreator';

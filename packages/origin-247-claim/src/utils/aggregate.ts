@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@ethersproject/bignumber';
 import { first, last, orderBy } from 'lodash';
 import { Interval } from 'luxon';
 import { bigNumAvg, bigNumSum } from './bigNumber';

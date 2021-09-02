@@ -8,7 +8,6 @@ specifiers:
   '@energyweb/origin-247-certificate': ^1.0.0
   '@energyweb/origin-backend-utils': 1.5.2-alpha.1629812330.0
   '@energyweb/utils-general': 11.0.3-alpha.1629812330.0
-  '@ethersproject/bignumber': 5.4.1
   '@material-ui/core': v5.0.0-beta.4
   '@nestjs/bull': 0.3.1
   '@nestjs/common': 7.6.18
@@ -63,7 +62,6 @@ dependencies:
   '@energyweb/origin-247-certificate': 1.0.0_4a7c1de902aa3abe4479449f94eeec1c
   '@energyweb/origin-backend-utils': 1.5.2-alpha.1629812330.0_037dc7b7d2399f4623ff58161b27e748
   '@energyweb/utils-general': 11.0.3-alpha.1629812330.0
-  '@ethersproject/bignumber': 5.4.1
   '@material-ui/core': 5.0.0-beta.4_4b3229e895aa2d1f531244063c252253
   '@nestjs/bull': 0.3.1_c86fa2ed7bc9e7a48760c2e5795b24d0
   '@nestjs/common': 7.6.18_627333fed432b1d33f7bbb38d1414b3e
@@ -910,8 +908,8 @@ packages:
   /@ethersproject/bignumber/5.3.0:
     resolution: {integrity: sha512-5xguJ+Q1/zRMgHgDCaqAexx/8DwDVLRemw2i6uR8KyGjwGdXI8f32QZZ1cKGucBN6ekJvpUpHy6XAuQnTv0mPA==}
     dependencies:
-      '@ethersproject/bytes': 5.3.0
-      '@ethersproject/logger': 5.3.0
+      '@ethersproject/bytes': 5.4.0
+      '@ethersproject/logger': 5.4.1
       bn.js: 4.12.0
     dev: false
 
@@ -8191,7 +8189,7 @@ packages:
     dev: false
 
   file:projects/247-matching-demo.tgz:
-    resolution: {integrity: sha512-7LnOLhu0GKzEL2joVsSDfm3EJ+1LU27uydechcWNngxkVwGrudkwMIeR5QgfeKjKK2jrTbh5Md45RYzEwgeJiQ==, tarball: file:projects/247-matching-demo.tgz}
+    resolution: {integrity: sha512-/Hw+jq1UvniyGogZrCO/M40sgGb9eDpdiINHfUUTgw2ryeHUSVingaWD1bi6gVtYkkaW5tKNlkhMM9yJy4JWxA==, tarball: file:projects/247-matching-demo.tgz}
     name: '@rush-temp/247-matching-demo'
     version: 0.0.0
     dependencies:
@@ -8277,7 +8275,7 @@ packages:
     dev: false
 
   file:projects/origin-247-claim.tgz_passport@0.4.1+rxjs@7.3.0:
-    resolution: {integrity: sha512-KXlKa78AR4X3rMLuQm88fsNCn9859v/hElezWO8vdm5LoouN+liUc+cdjBRjqgRj5owNMp5eM3mO2PKzS3JfKQ==, tarball: file:projects/origin-247-claim.tgz}
+    resolution: {integrity: sha512-9Io4KfxPj6C99eenohNnM6hj4Zfqs6KNVvnX49nv4KjwnnXzBPhqpmmAdDQXtxsnE8Hpa9pNQhyK8LBNFTKZ7A==, tarball: file:projects/origin-247-claim.tgz}
     id: file:projects/origin-247-claim.tgz
     name: '@rush-temp/origin-247-claim'
     version: 0.0.0
@@ -8286,6 +8284,7 @@ packages:
       '@energyweb/issuer-api': 0.2.1-alpha.1629812330.0_eb9935bd4f97b23ab8881eee244eb1f7
       '@energyweb/origin-backend-utils': 1.5.2-alpha.1629812330.0_037dc7b7d2399f4623ff58161b27e748
       '@energyweb/utils-general': 11.0.3-alpha.1629812330.0
+      '@ethersproject/bignumber': 5.3.0
       '@nestjs/bull': 0.3.1_c86fa2ed7bc9e7a48760c2e5795b24d0
       '@nestjs/common': 7.6.18_627333fed432b1d33f7bbb38d1414b3e
       '@nestjs/core': 7.6.18_ad4c55bf3f8a2d35d119f79a2f330104
