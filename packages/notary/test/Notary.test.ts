@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import { utils } from 'ethers';
 import { ethers } from 'hardhat';
 import { getAllMeterReadings } from '../src';
-import { Notary, Notary__factory } from '../src/types';
+import { Notary, Notary__factory } from '../src/typechain';
 
 describe('Notary', () => {
     it('should store smart meter reading', async () => {

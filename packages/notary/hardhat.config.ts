@@ -17,7 +17,7 @@ task('accounts', 'Prints the list of accounts', async (args, hre) => {
 const config: HardhatUserConfig = {
     solidity: '0.8.4',
     typechain: {
-        outDir: 'src/types',
+        outDir: 'src/typechain',
         target: 'ethers-v5',
         alwaysGenerateOverloads: false,
         externalArtifacts: ['externalArtifacts/*.json']

@@ -1,5 +1,5 @@
 import { ContractTransaction, providers } from 'ethers';
-import { Notary as NotaryContract, Notary__factory } from './types';
+import { Notary as NotaryContract, Notary__factory } from './typechain';
 import { getEventsFromContract, IBlockchainEvent } from './util';
 
 export class Notary {

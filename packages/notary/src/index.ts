@@ -1,4 +1,4 @@
-import { Notary } from './types/Notary';
+import { Notary } from './typechain/Notary';
 import { getEventsFromContract } from './util';
 
 export const getAllMeterReadings = async (notaryContract: Notary) =>
