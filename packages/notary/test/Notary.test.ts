@@ -1,30 +1,39 @@
 import { expect } from 'chai';
 import { utils } from 'ethers';
 import { ethers } from 'hardhat';
-import { getAllMeterReadings } from '../src';
-import { Notary, Notary__factory } from '../src/typechain';
+import { Notary, PreciseProofUtils, Reading } from '../src';
+import { Notary as NotaryContract, Notary__factory } from '../src/typechain';
 
 describe('Notary', () => {
+    const meterReadings: Reading[] = [
+        {
+            timestamp: new Date().getTime() / 1000,
+            value: 100
+        }
+    ];
+
     it('should store smart meter reading', async () => {
         const [owner] = await ethers.getSigners();
-        const Notary: Notary__factory = await ethers.getContractFactory('Notary');
+        const notaryFactory: Notary__factory = await ethers.getContractFactory('Notary');
 
-        const notaryContract: Notary = await Notary.deploy();
+        const notaryContract: NotaryContract = await notaryFactory.deploy();
 
-        const events = await getAllMeterReadings(notaryContract);
+        const notary = new Notary(notaryContract.address, owner);
+
+        const events = await notary.getMeterReadings();
         expect(events).to.have.length(0);
 
-        const randomProof = utils.randomBytes(32);
-
-        const tx = await notaryContract.store(randomProof);
+        const tx = await notary.storeMeterReadings(meterReadings, ['testSalt']);
         await tx.wait();
 
-        const newEvents = await getAllMeterReadings(notaryContract);
+        const newEvents = await notary.getMeterReadings();
         expect(newEvents).to.have.length(1);
+
+        const { rootHash } = PreciseProofUtils.generateProofs(meterReadings, ['testSalt']);
 
         expect(newEvents[0]).to.deep.include({
             operator: owner.address,
-            proof: utils.hexlify(randomProof)
+            proof: rootHash
         });
     });
 });

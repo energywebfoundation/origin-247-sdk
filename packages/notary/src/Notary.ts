@@ -1,11 +1,13 @@
-import { ContractTransaction, providers } from 'ethers';
+import { ContractTransaction, providers, Signer } from 'ethers';
+import { PreciseProofUtils } from './proof';
+
 import { Notary as NotaryContract, Notary__factory } from './typechain';
-import { getEventsFromContract, IBlockchainEvent } from './util';
+import { getEventsFromContract, IBlockchainEvent, Reading } from './util';
 
 export class Notary {
     public contract: NotaryContract;
 
-    constructor(address: string, provider: providers.JsonRpcProvider) {
+    constructor(address: string, provider: providers.Provider | Signer) {
         this.contract = Notary__factory.connect(address, provider);
     }
 
@@ -16,7 +18,22 @@ export class Notary {
         );
     }
 
-    public async storeMeterReading(proof: string): Promise<ContractTransaction> {
-        return this.contract.store(proof);
+    public async storeMeterReadings(
+        readings: Reading[],
+        salts?: string[]
+    ): Promise<ContractTransaction> {
+        if (!this.contract.signer) {
+            throw new Error(`Please attach a signer in order to publish transactions`);
+        }
+
+        if (readings.length < 1) {
+            throw new Error(`Unable to write 0 readings to the blockchain`);
+        }
+
+        const proof = PreciseProofUtils.generateProofs(readings, salts);
+
+        // TO-DO: Store this proof somewhere
+
+        return this.contract.store(proof.rootHash);
     }
 }
