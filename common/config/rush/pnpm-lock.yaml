@@ -56,7 +56,7 @@ specifiers:
   luxon: 2.0.2
   passport: 0.4.1
   pg: 8.6.0
-  precise-proofs-js: ^1.2.0
+  precise-proofs-js: 1.2.0
   react: 17.0.2
   react-dom: 17.0.2
   rxjs: 7.3.0
@@ -100,7 +100,7 @@ dependencies:
   '@nomiclabs/hardhat-ethers': 2.0.2_ethers@5.3.1+hardhat@2.6.4
   '@nomiclabs/hardhat-waffle': 2.0.1_e287bdd856f41d76f4d514aeeec101d1
   '@rush-temp/247-matching-demo': file:projects/247-matching-demo.tgz
-  '@rush-temp/247-notary': file:projects/247-notary.tgz_lodash@4.17.21
+  '@rush-temp/247-notary': file:projects/247-notary.tgz_972b988024c0945d26946bfaad0229f5
   '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_f47ff317fed127205fed601cd0e932de
   '@rush-temp/origin-247-claim': file:projects/origin-247-claim.tgz_passport@0.4.1+rxjs@7.3.0
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.4.1
@@ -13254,34 +13254,62 @@ packages:
       - webpack-dev-server
     dev: false
 
-  file:projects/247-notary.tgz_lodash@4.17.21:
-    resolution: {integrity: sha512-ZdeJ3YmkQJli9FP3fqXtOaW5Fre7yRgSQtX5jSHpqIe2BMcn+WSg3SQ43og5UkhQWeuKXjExHW6iVxc45hDvGw==, tarball: file:projects/247-notary.tgz}
+  file:projects/247-notary.tgz_972b988024c0945d26946bfaad0229f5:
+    resolution: {integrity: sha512-lOi6g7goKcst2L7o15uN6qGEeEYNvJYBvlYSPnydy762USTOneHgWAKDr9dcbs4DcdD+AHjQM8akm5lGEzclJA==, tarball: file:projects/247-notary.tgz}
     id: file:projects/247-notary.tgz
     name: '@rush-temp/247-notary'
     version: 0.0.0
     dependencies:
+      '@energyweb/origin-backend-utils': 1.5.2-alpha.1629812330.0_037dc7b7d2399f4623ff58161b27e748
+      '@energyweb/utils-general': 11.0.3-alpha.1629812330.0
       '@ethersproject/abi': 5.3.1
       '@ethersproject/providers': 5.3.1
+      '@nestjs/common': 7.6.18_627333fed432b1d33f7bbb38d1414b3e
+      '@nestjs/core': 7.6.18_ad4c55bf3f8a2d35d119f79a2f330104
+      '@nestjs/cqrs': 7.0.1_eaae4baca06cce15ae5ce8246f973f7f
+      '@nestjs/passport': 7.1.5_fd45a09fcff1f973814c588ad08d33e0
+      '@nestjs/testing': 7.6.18_9cd0f963ae6f35bf288217e4f1c45cb4
+      '@nestjs/typeorm': 7.1.5_9594358be22bd70bf28ab38952108480
       '@nomiclabs/hardhat-ethers': 2.0.2_ethers@5.3.1+hardhat@2.6.4
       '@nomiclabs/hardhat-waffle': 2.0.1_e287bdd856f41d76f4d514aeeec101d1
       '@typechain/ethers-v5': 7.1.0_8e93b6e8d98cb9a74a36e053ec23ff7e
       '@typechain/hardhat': 2.3.0_512973f51e7672eecf86f542b17ea4fd
       '@types/chai': 4.2.21
+      '@types/jest': 26.0.23
       '@types/mocha': 9.0.0
       '@types/node': 15.12.4
       chai: 4.3.4
+      concurrently: 6.2.0
       ethereum-waffle: 3.4.0_typescript@4.3.4
       ethers: 5.3.1
+      ganache-cli: 6.12.2
       hardhat: 2.6.4
+      jest: 27.0.5_ts-node@9.1.1
       precise-proofs-js: 1.2.0
+      ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
       ts-node: 9.1.1_typescript@4.3.4
       typechain: 5.1.2_typescript@4.3.4
+      typeorm: 0.2.34
       typescript: 4.3.4
     transitivePeerDependencies:
       - '@ethersproject/bytes'
+      - '@nestjs/microservices'
+      - '@nestjs/platform-express'
+      - '@nestjs/websockets'
       - bufferutil
+      - cache-manager
+      - canvas
+      - class-transformer
+      - class-validator
+      - debug
+      - fastify-swagger
       - lodash
+      - node-notifier
+      - passport
+      - reflect-metadata
+      - rxjs
       - supports-color
+      - swagger-ui-express
       - utf-8-validate
     dev: false
 

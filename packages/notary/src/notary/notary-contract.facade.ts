@@ -1,10 +1,10 @@
 import { ContractTransaction, providers, Signer } from 'ethers';
-import { PreciseProofUtils } from './proof';
+import { IReadingsProof, PreciseProofUtils } from '../util/proof';
 
-import { Notary as NotaryContract, Notary__factory } from './typechain';
-import { getEventsFromContract, IBlockchainEvent, Reading } from './util';
+import { Notary as NotaryContract, Notary__factory } from '../typechain';
+import { getEventsFromContract, IBlockchainEvent, Reading } from '../util';
 
-export class Notary {
+export class NotaryContractFacade {
     public contract: NotaryContract;
 
     constructor(address: string, provider: providers.Provider | Signer) {
@@ -19,9 +19,11 @@ export class Notary {
     }
 
     public async storeMeterReadings(
-        readings: Reading[],
-        salts?: string[]
-    ): Promise<ContractTransaction> {
+        readings: Reading[]
+    ): Promise<{
+        proof: IReadingsProof;
+        tx: ContractTransaction;
+    }> {
         if (!this.contract.signer) {
             throw new Error(`Please attach a signer in order to publish transactions`);
         }
@@ -30,10 +32,11 @@ export class Notary {
             throw new Error(`Unable to write 0 readings to the blockchain`);
         }
 
-        const proof = PreciseProofUtils.generateProofs(readings, salts);
+        const proof = PreciseProofUtils.generateProofs(readings);
 
-        // TO-DO: Store this proof somewhere
-
-        return this.contract.store(proof.rootHash);
+        return {
+            proof,
+            tx: await this.contract.store(proof.rootHash)
+        };
     }
 }

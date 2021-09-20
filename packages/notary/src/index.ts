@@ -1,3 +1,6 @@
-export * from './Notary';
+import { NotaryContract, NotaryProof } from './notary';
+
+export * from './notary';
 export * from './util';
-export * from './proof';
+
+export const entities = [NotaryProof, NotaryContract];

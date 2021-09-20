@@ -1,5 +1,5 @@
 import { PreciseProofs } from 'precise-proofs-js';
-import { Reading } from './util';
+import { Reading } from '.';
 
 export interface IReadingsProof {
     readings: Reading[];
