@@ -395,6 +395,10 @@
         {
             "packageName": "@energyweb/247-matching-demo",
             "projectFolder": "packages/matching-demo"
+        },
+        {
+            "packageName": "@energyweb/247-notary",
+            "projectFolder": "packages/notary"
         }
         // {
         //   /**

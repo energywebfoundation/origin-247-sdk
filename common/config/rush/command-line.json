@@ -65,6 +65,15 @@
       "enableParallelism": false,
       "ignoreMissingScript": false,
       "allowWarningsInSuccessfulBuild": true
+    },
+    {
+        "commandKind": "bulk",
+        "name": "clean",
+        "summary": "Cleans the repo",
+        "safeForSimultaneousRushProcesses": false,
+        "enableParallelism": false,
+        "ignoreMissingScript": true,
+        "allowWarningsInSuccessfulBuild": true
     }
     // {
     //   /**
