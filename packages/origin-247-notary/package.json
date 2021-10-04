@@ -1,5 +1,5 @@
 {
-    "name": "@energyweb/247-notary",
+    "name": "@energyweb/origin-247-notary",
     "version": "0.0.1",
     "description": "Smart meter readings management contracts",
     "main": "index.js",
