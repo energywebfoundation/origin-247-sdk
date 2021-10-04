@@ -13364,7 +13364,7 @@ packages:
     dev: false
 
   file:projects/origin-247-notary.tgz_972b988024c0945d26946bfaad0229f5:
-    resolution: {integrity: sha512-2T8CAn8P5yOSLV4hmYSZ2UdNbElpebf2zvnwUtvBH+HmG+x5aXkWIOx7yF9PkffVHqzFuHGH9jk+AT9fnyvBdw==, tarball: file:projects/origin-247-notary.tgz}
+    resolution: {integrity: sha512-dRI6/ZXxIjG8BJNFYZzkDyxN98p/98WIcK/C28wvef+wo0LbFyC91nSSLb5Ou50Rkd1nvyh9oUPxRyFpbbIB+g==, tarball: file:projects/origin-247-notary.tgz}
     id: file:projects/origin-247-notary.tgz
     name: '@rush-temp/origin-247-notary'
     version: 0.0.0
@@ -13400,6 +13400,7 @@ packages:
       typechain: 5.1.2_typescript@4.3.4
       typeorm: 0.2.34
       typescript: 4.3.4
+      wait-on: 5.3.0
     transitivePeerDependencies:
       - '@ethersproject/bytes'
       - '@nestjs/microservices'
