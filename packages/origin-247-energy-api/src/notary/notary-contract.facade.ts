@@ -2,7 +2,8 @@ import { ContractTransaction, providers, Signer } from 'ethers';
 import { IReadingsProof, PreciseProofUtils } from '../util/proof';
 
 import { Notary as NotaryContract, Notary__factory } from '../typechain';
-import { getEventsFromContract, IBlockchainEvent, Reading } from '../util';
+import { Reading } from '../util';
+import { getEventsFromContract, IBlockchainEvent } from '../util/blockchain';
 
 export class NotaryContractFacade {
     public contract: NotaryContract;

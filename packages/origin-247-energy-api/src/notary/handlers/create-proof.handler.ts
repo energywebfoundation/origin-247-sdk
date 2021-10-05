@@ -26,14 +26,7 @@ export class CreateProofHandler implements ICommandHandler<CreateProofCommand> {
             deployerWallet
         );
 
-        const readingsWithUnixTimestamp = readings.map((r) => ({
-            ...r,
-            timestamp: Math.round(r.timestamp.getTime() / 1000)
-        }));
-
-        const { proof, tx } = await notaryContractFacade.storeMeterReadings(
-            readingsWithUnixTimestamp
-        );
+        const { proof, tx } = await notaryContractFacade.storeMeterReadings(readings);
 
         await tx.wait();
 

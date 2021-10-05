@@ -4,7 +4,10 @@ import { CommandBus, CqrsModule } from '@nestjs/cqrs';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { PassportModule } from '@nestjs/passport';
-import { entities, NotaryModule, NotaryService } from '../src';
+import { entities } from '../src';
+import { EnergyApi247Module } from '../src/energy-api.module';
+import { NotaryService } from '../src/notary/notary.service';
+import { EnergyApi247Facade } from '../src/energy-api.facade';
 
 const testLogger = new Logger('e2e');
 
@@ -25,7 +28,7 @@ export const bootstrapTestInstance = async () => {
                 logging: ['info'],
                 keepConnectionAlive: true
             }),
-            NotaryModule,
+            EnergyApi247Module,
             CqrsModule,
             PassportModule.register({ defaultStrategy: 'jwt' })
         ],
@@ -40,11 +43,13 @@ export const bootstrapTestInstance = async () => {
     const databaseService = await app.resolve<DatabaseService>(DatabaseService);
     const notaryService = await app.resolve<NotaryService>(NotaryService);
     const commandBus = await app.resolve<CommandBus>(CommandBus);
+    const facade = await app.resolve<EnergyApi247Facade>(EnergyApi247Facade);
 
     return {
         databaseService,
         app,
         notaryService,
-        commandBus
+        commandBus,
+        facade
     };
 };

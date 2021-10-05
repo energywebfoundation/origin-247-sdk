@@ -11,12 +11,15 @@ import { providers } from 'ethers';
 
 import { Notary, Notary__factory } from '~/typechain';
 import { NotaryContract } from './notary-contract.entity';
+import { NotaryProof } from './notary-proof.entity';
 
 @Injectable()
 export class NotaryService implements OnModuleInit {
     constructor(
         @InjectRepository(NotaryContract)
-        private readonly repository: Repository<NotaryContract>
+        private readonly contractRepository: Repository<NotaryContract>,
+        @InjectRepository(NotaryProof)
+        private readonly proofRepository: Repository<NotaryProof>
     ) {}
 
     async onModuleInit(): Promise<void> {
@@ -33,13 +36,17 @@ export class NotaryService implements OnModuleInit {
     }
 
     async getNotaryContract(): Promise<NotaryContract> {
-        const contracts = await this.repository.find();
+        const contracts = await this.contractRepository.find();
 
         if (contracts.length < 1) {
             throw new NotFoundException(`Notary contract not deployed`);
         }
 
         return contracts[0];
+    }
+
+    async getAllProofs(): Promise<NotaryProof[]> {
+        return await this.proofRepository.find();
     }
 
     async deploy(): Promise<NotaryContract> {
@@ -61,7 +68,7 @@ export class NotaryService implements OnModuleInit {
 
         const notaryContract: Notary = await notaryFactory.deploy();
 
-        return await this.repository.save({
+        return await this.contractRepository.save({
             address: notaryContract.address,
             networkId: provider.network.chainId,
             deployerPrivateKey: adminPK,

@@ -393,8 +393,8 @@
             "projectFolder": "packages/origin-247-claim"
         },
         {
-            "packageName": "@energyweb/origin-247-notary",
-            "projectFolder": "packages/origin-247-notary"
+            "packageName": "@energyweb/origin-247-energy-api",
+            "projectFolder": "packages/origin-247-energy-api"
         },
         {
             "packageName": "@energyweb/247-matching-demo",
