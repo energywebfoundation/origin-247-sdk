@@ -29,13 +29,13 @@ describe('Notary module - e2e', () => {
     });
 
     it('stores a smart meter reading proof on-chain', async () => {
-        const readings: Reading[] = [
+        const readings = [
             {
-                timestamp: Math.round(new Date('2021-09-21T08:00:00.000Z').getTime() / 1000),
+                timestamp: new Date('2021-09-21T08:00:00.000Z'),
                 value: 123
             },
             {
-                timestamp: Math.round(new Date('2021-09-21T09:00:00.000Z').getTime() / 1000),
+                timestamp: new Date('2021-09-21T09:00:00.000Z'),
                 value: 456
             }
         ];
@@ -44,7 +44,13 @@ describe('Notary module - e2e', () => {
             new CreateProofCommand('deviceId123', readings)
         );
 
-        const calculatedProof = PreciseProofUtils.generateProofs(readings, proof.salts);
+        const calculatedProof = PreciseProofUtils.generateProofs(
+            readings.map((r) => ({
+                ...r,
+                timestamp: Math.round(r.timestamp.getTime() / 1000)
+            })),
+            proof.salts
+        );
 
         expect(proof.rootHash).to.equal(calculatedProof.rootHash);
     });
