@@ -1,11 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, EventBus } from '@nestjs/cqrs';
 import { Reading } from '..';
 import { NotaryProof } from '../notary';
 import { CreateProofCommand } from '../notary/commands/create-proof.command';
 import { READ_SERVICE } from '../reads/const';
 import { ReadsService } from '../reads/reads.service';
 import { queueThrottle } from '../util/queueThrottle';
+import { ReadingProofProcessedEvent } from './ReadingProofProcessed.event';
 import { ProofRequestsRepository } from './repositories/proof-request.repository';
 
 export interface RequestReadingProofPayload {
@@ -21,6 +22,7 @@ export class ProofRequestService {
     constructor(
         private repository: ProofRequestsRepository,
         private commandBus: CommandBus,
+        private eventBus: EventBus,
         @Inject(READ_SERVICE)
         private readService: ReadsService
     ) {}
@@ -50,11 +52,16 @@ export class ProofRequestService {
         const deviceId = requests[0].deviceId;
         const requestIds = requests.map((r) => r.id);
         const readings = requests.map((r) => r.reading);
+        const readingsWithDate = readings.map((r) => ({
+            timestamp: new Date(r.timestamp),
+            value: r.value
+        }));
         const readingsWithDateAndInt = readings.map((r) => ({
             timestamp: new Date(r.timestamp),
             value: Number(r.value)
         }));
         const createProofCommand = new CreateProofCommand(deviceId, readings);
+        const processedEvent = new ReadingProofProcessedEvent(deviceId, readingsWithDate);
 
         try {
             await this.repository.startProcessing(requestIds);
@@ -64,6 +71,8 @@ export class ProofRequestService {
             await this.readService.storeWithProof(deviceId, readingsWithDateAndInt, proof.rootHash);
 
             await this.repository.finishProcessing(requestIds);
+
+            this.eventBus.publish(processedEvent);
         } catch (e) {
             console.error(e);
 
