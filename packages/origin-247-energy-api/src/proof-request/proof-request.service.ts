@@ -53,11 +53,11 @@ export class ProofRequestService {
         const requestIds = requests.map((r) => r.id);
         const readings = requests.map((r) => r.reading);
         const readingsWithDate = readings.map((r) => ({
-            timestamp: new Date(r.timestamp),
+            timestamp: new Date(r.timestamp * 1000),
             value: r.value
         }));
         const readingsWithDateAndInt = readings.map((r) => ({
-            timestamp: new Date(r.timestamp),
+            timestamp: new Date(r.timestamp * 1000),
             value: Number(r.value)
         }));
         const createProofCommand = new CreateProofCommand(deviceId, readings);

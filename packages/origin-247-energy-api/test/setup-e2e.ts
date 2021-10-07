@@ -8,6 +8,8 @@ import { entities } from '../src';
 import { EnergyApi247Module } from '../src/energy-api.module';
 import { NotaryService } from '../src/notary/notary.service';
 import { EnergyApi247Facade } from '../src/energy-api.facade';
+import { ReadsService } from '../src/reads/reads.service';
+import { READ_SERVICE } from '../src/reads/const';
 
 const testLogger = new Logger('e2e');
 
@@ -44,12 +46,14 @@ export const bootstrapTestInstance = async () => {
     const notaryService = await app.resolve<NotaryService>(NotaryService);
     const commandBus = await app.resolve<CommandBus>(CommandBus);
     const facade = await app.resolve<EnergyApi247Facade>(EnergyApi247Facade);
+    const readService = await app.resolve<ReadsService>(READ_SERVICE);
 
     return {
         databaseService,
         app,
         notaryService,
         commandBus,
-        facade
+        facade,
+        readService
     };
 };

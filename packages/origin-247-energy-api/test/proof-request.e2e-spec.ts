@@ -5,6 +5,7 @@ import { bootstrapTestInstance } from './setup-e2e';
 import { EnergyApi247Facade } from '../src/energy-api.facade';
 import { RequestReadingProofPayload } from '../src';
 import { NotaryService } from '../src/notary/notary.service';
+import { ReadsService } from '../src/reads/reads.service';
 
 jest.setTimeout(50000);
 
@@ -13,9 +14,16 @@ describe('Notary module - e2e', () => {
     let facade: EnergyApi247Facade;
     let notaryService: NotaryService;
     let databaseService: DatabaseService;
+    let readService: ReadsService;
 
     beforeAll(async () => {
-        ({ app, facade, databaseService, notaryService } = await bootstrapTestInstance());
+        ({
+            app,
+            facade,
+            databaseService,
+            notaryService,
+            readService
+        } = await bootstrapTestInstance());
 
         await app.init();
     });
@@ -35,6 +43,16 @@ describe('Notary module - e2e', () => {
         await new Promise((resolve) => setTimeout(resolve, 15000));
 
         const proofs = await notaryService.getAllProofs();
+        const deviceFilter = {
+            start: new Date(0).toISOString(),
+            end: new Date().toISOString(),
+            limit: 100,
+            offset: 0
+        };
+        const readings = [
+            await readService.findWithProof(devices[0], deviceFilter),
+            await readService.findWithProof(devices[1], deviceFilter)
+        ];
 
         expect(proofs).toHaveLength(2);
 
@@ -49,6 +67,14 @@ describe('Notary module - e2e', () => {
         expect(proofs[1].readings[0]).toHaveProperty('value', '1');
         expect(proofs[1].readings[1]).toHaveProperty('value', '2');
         expect(proofs[1].readings[2]).toHaveProperty('value', '3');
+
+        expect(readings[0][0]).toHaveProperty('proofRootHash', proofs[0].rootHash);
+        expect(readings[0][1]).toHaveProperty('proofRootHash', proofs[0].rootHash);
+        expect(readings[0][2]).toHaveProperty('proofRootHash', proofs[0].rootHash);
+
+        expect(readings[1][0]).toHaveProperty('proofRootHash', proofs[1].rootHash);
+        expect(readings[1][1]).toHaveProperty('proofRootHash', proofs[1].rootHash);
+        expect(readings[1][2]).toHaveProperty('proofRootHash', proofs[1].rootHash);
     });
 });
 

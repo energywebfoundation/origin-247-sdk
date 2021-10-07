@@ -1,11 +1,5 @@
-import {
-    AggregatedReadDTO,
-    FilterDTO,
-    MeasurementDTO,
-    ReadDTO,
-    AggregateFilterDTO
-} from '@energyweb/energy-api-influxdb';
-import { ReadsService } from './reads.service';
+import { AggregatedReadDTO, FilterDTO } from '@energyweb/energy-api-influxdb';
+import { ReadDTO, ReadsService } from './reads.service';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
 
@@ -16,34 +10,10 @@ type PublicPart<T> = { [K in keyof T]: T[K] };
 export class BaseReadServiceForCI implements PublicPart<ReadsService> {
     private readings: { meterId: string; readings: ReadDTO[]; proofRootHash: string }[] = [];
 
-    public async aggregate(
-        meterId: string,
-        filter: AggregateFilterDTO
-    ): Promise<AggregatedReadDTO[]> {
-        const readings = this.readings
-            .filter((r) => r.meterId === meterId)
-            .flatMap((r) => r.readings)
-            .filter(
-                (r) => r.timestamp >= new Date(filter.start) && r.timestamp <= new Date(filter.end)
-            );
+    public async aggregate(): Promise<AggregatedReadDTO[]> {
+        throw new Error('Not implemented.');
 
-        return [
-            {
-                start: new Date(),
-                stop: new Date(),
-                value: readings.reduce((sum, r) => sum + r.value, 0)
-            }
-        ];
-    }
-
-    public async find(meterId: string, filter: FilterDTO): Promise<ReadDTO[]> {
-        return this.readings
-            .filter((r) => r.meterId === meterId)
-            .flatMap((r) => r.readings)
-            .filter(
-                (r) => r.timestamp >= new Date(filter.start) && r.timestamp <= new Date(filter.end)
-            )
-            .slice(filter.offset, filter.offset + filter.limit);
+        return [];
     }
 
     public async onModuleInit(): Promise<void> {
@@ -61,11 +31,27 @@ export class BaseReadServiceForCI implements PublicPart<ReadsService> {
         });
     }
 
+    public async findWithProof(meterId: string, filter: FilterDTO): Promise<ReadDTO[]> {
+        return this.readings
+            .filter((r) => r.meterId === meterId)
+            .flatMap((e) => e.readings.map((r) => ({ ...r, proofRootHash: e.proofRootHash })))
+            .filter(
+                (r) => r.timestamp >= new Date(filter.start) && r.timestamp <= new Date(filter.end)
+            )
+            .slice(filter.offset, filter.offset + filter.limit);
+    }
+
     public async findDifference(): Promise<ReadDTO[]> {
         throw new Error('Not implemented.');
     }
 
-    public async store(meterId: string, measurement: MeasurementDTO): Promise<void> {
+    public async find() {
+        throw new Error('Not implemented. Use `findWithProof`');
+
+        return [];
+    }
+
+    public async store(): Promise<void> {
         throw new Error('Not implemented. Use `storeWithProof`');
     }
 
