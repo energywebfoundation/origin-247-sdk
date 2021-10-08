@@ -20,6 +20,7 @@ export class ReadDTO extends OriginalReadDTO {
  * This is super hacky, may fail in the future if energy-api gets changed,
  * but it's all for the sake of not changing energy-api.
  */
+// @ts-ignore
 export class ReadsService extends OriginalReadsService {
     public async store() {
         throw new Error('Not implemented. Use `storeWithProof`');
@@ -63,5 +64,16 @@ export class ReadsService extends OriginalReadsService {
             this.logger.error(e.message);
             throw e;
         }
+    }
+
+    private async execute(query: string): Promise<ReadDTO[]> {
+        // @ts-ignore
+        const data = await this.dbReader.collectRows(query);
+
+        return data.map((record) => ({
+            timestamp: new Date(record._time),
+            value: Number(record._value),
+            proofRootHash: record.proofRootHash
+        }));
     }
 }

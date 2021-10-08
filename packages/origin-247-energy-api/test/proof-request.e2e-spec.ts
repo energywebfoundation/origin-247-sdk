@@ -78,7 +78,6 @@ describe('Notary module - e2e', () => {
     });
 });
 
-const now = new Date();
 const devices = ['d1', 'd2'];
 
 const input = devices.reduce((acc, deviceId) => {
@@ -87,7 +86,10 @@ const input = devices.reduce((acc, deviceId) => {
     for (let i = 0; i < 3; i += 1) {
         readings.push({
             deviceId,
-            reading: { timestamp: now, value: (i + 1).toString() }
+            reading: {
+                timestamp: new Date(new Date().getTime() - 1000 * (3 - i)),
+                value: (i + 1).toString()
+            }
         });
     }
 
