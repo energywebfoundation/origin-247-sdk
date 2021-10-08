@@ -9,7 +9,7 @@ import { CreateProofCommand } from '../src/notary/commands/create-proof.command'
 import { PreciseProofUtils } from '../src/util/proof';
 import { NotaryProof } from '../src';
 
-describe.skip('Notary module - e2e', () => {
+describe('Notary module - e2e', () => {
     let app: INestApplication;
     let notaryService: NotaryService;
     let databaseService: DatabaseService;

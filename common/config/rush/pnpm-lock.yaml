@@ -32,7 +32,7 @@ specifiers:
   '@rush-temp/247-matching-demo': file:./projects/247-matching-demo.tgz
   '@rush-temp/origin-247-certificate': file:./projects/origin-247-certificate.tgz
   '@rush-temp/origin-247-claim': file:./projects/origin-247-claim.tgz
-  '@rush-temp/origin-247-notary': file:./projects/origin-247-notary.tgz
+  '@rush-temp/origin-247-energy-api': file:./projects/origin-247-energy-api.tgz
   '@rush-temp/origin-247-transfer': file:./projects/origin-247-transfer.tgz
   '@typechain/ethers-v5': 7.1.0
   '@typechain/hardhat': 2.3.0
@@ -108,7 +108,7 @@ dependencies:
   '@rush-temp/247-matching-demo': file:projects/247-matching-demo.tgz
   '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_f47ff317fed127205fed601cd0e932de
   '@rush-temp/origin-247-claim': file:projects/origin-247-claim.tgz_passport@0.4.1+rxjs@7.3.0
-  '@rush-temp/origin-247-notary': file:projects/origin-247-notary.tgz_8da431137b560d1627527e266b246312
+  '@rush-temp/origin-247-energy-api': file:projects/origin-247-energy-api.tgz_8da431137b560d1627527e266b246312
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.4.1
   '@typechain/ethers-v5': 7.1.0_8e93b6e8d98cb9a74a36e053ec23ff7e
   '@typechain/hardhat': 2.3.0_512973f51e7672eecf86f542b17ea4fd
@@ -13568,10 +13568,10 @@ packages:
       - utf-8-validate
     dev: false
 
-  file:projects/origin-247-notary.tgz_8da431137b560d1627527e266b246312:
-    resolution: {integrity: sha512-/2S432quWKSZqRiTDX2yDRLUeKaCQyJk8ilxkgO/ijhT99ZbiNR9R4c5VHrMfsgXAzn9ve/e/TQ/fjlBDacpjw==, tarball: file:projects/origin-247-notary.tgz}
-    id: file:projects/origin-247-notary.tgz
-    name: '@rush-temp/origin-247-notary'
+  file:projects/origin-247-energy-api.tgz_8da431137b560d1627527e266b246312:
+    resolution: {integrity: sha512-l/b6hPjW2kgLZHRtt7lKGlzFvD2BKBzY7SOSWHcOv2xbNyvEQzh1G4kjEjudpRVJRTzhnafdxoyESIlgvjgXuw==, tarball: file:projects/origin-247-energy-api.tgz}
+    id: file:projects/origin-247-energy-api.tgz
+    name: '@rush-temp/origin-247-energy-api'
     version: 0.0.0
     dependencies:
       '@energyweb/energy-api-influxdb': 0.8.0_@nestjs+platform-express@7.6.18

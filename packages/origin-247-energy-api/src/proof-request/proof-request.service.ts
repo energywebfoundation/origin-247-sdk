@@ -61,7 +61,6 @@ export class ProofRequestService {
             value: Number(r.value)
         }));
         const createProofCommand = new CreateProofCommand(deviceId, readings);
-        const processedEvent = new ReadingProofProcessedEvent(deviceId, readingsWithDate);
 
         try {
             await this.repository.startProcessing(requestIds);
@@ -71,6 +70,12 @@ export class ProofRequestService {
             await this.readService.storeWithProof(deviceId, readingsWithDateAndInt, proof.rootHash);
 
             await this.repository.finishProcessing(requestIds);
+
+            const processedEvent = new ReadingProofProcessedEvent(
+                deviceId,
+                proof.rootHash,
+                readingsWithDate
+            );
 
             this.eventBus.publish(processedEvent);
         } catch (e) {

@@ -6,10 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { ethers } from 'hardhat';
-import { providers } from 'ethers';
+import { providers, Wallet } from 'ethers';
 
-import { Notary, Notary__factory } from '~/typechain';
+import { Notary, Notary__factory } from '../typechain';
 import { NotaryContract } from './notary-contract.entity';
 import { NotaryProof } from './notary-proof.entity';
 
@@ -63,8 +62,9 @@ export class NotaryService implements OnModuleInit {
         const deployKey = process.env.DEPLOY_KEY;
 
         const adminPK = deployKey.startsWith('0x') ? deployKey : `0x${deployKey}`;
+        const wallet = new Wallet(adminPK, provider);
 
-        const notaryFactory: Notary__factory = await ethers.getContractFactory('Notary');
+        const notaryFactory: Notary__factory = new Notary__factory(wallet);
 
         const notaryContract: Notary = await notaryFactory.deploy();
 
