@@ -39,14 +39,14 @@ export class ProofRequestsRepository {
         );
     }
 
-    public async startProcessing(requestIds: number[]): Promise<void> {
+    public async markRequestsAsProcessing(requestIds: number[]): Promise<void> {
         await this.repository.update(
             { id: In(requestIds) },
             { state: ProofRequestState.Processing }
         );
     }
 
-    public async finishProcessing(requestIds: number[]): Promise<void> {
+    public async removeRequests(requestIds: number[]): Promise<void> {
         await this.repository.delete({ id: In(requestIds) });
     }
 

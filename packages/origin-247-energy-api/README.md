@@ -77,3 +77,9 @@ DEPLOY_KEY=0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 1. Import module (as in installation step)
 2. Inject `EnergyApi247Facade` into your service, and use it to store readings and access readings or proofs.
 3. Using `ReadingProofProcessedEvent` (from [NestJS CQRS](https://docs.nestjs.com/recipes/cqrs) event bus) you can listen to reading batch being processed and react on that.
+
+### Configuration
+
+Environment variables
+
+1. `ENERGY_REQUEST_PROCESS_AGGREGATE_SECONDS` - default 10 - how long application should wait to aggregate as many readings into batch as possible

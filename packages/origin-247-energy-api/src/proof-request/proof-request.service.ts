@@ -27,7 +27,10 @@ export class ProofRequestService {
         private readService: ReadsService
     ) {}
 
-    private processRequestsTrigger = queueThrottle(() => this.processRequests(), 10);
+    private processRequestsTrigger = queueThrottle(
+        () => this.processRequests(),
+        Number(process.env.ENERGY_REQUEST_PROCESS_AGGREGATE_SECONDS ?? 10)
+    );
 
     public async requestReadingProof(...payload: RequestReadingProofPayload[]) {
         const withUnixTimestamp = payload.map((p) => ({
@@ -63,13 +66,13 @@ export class ProofRequestService {
         const createProofCommand = new CreateProofCommand(deviceId, readings);
 
         try {
-            await this.repository.startProcessing(requestIds);
+            await this.repository.markRequestsAsProcessing(requestIds);
 
             const proof: NotaryProof = await this.commandBus.execute(createProofCommand);
 
             await this.readService.storeWithProof(deviceId, readingsWithDateAndInt, proof.rootHash);
 
-            await this.repository.finishProcessing(requestIds);
+            await this.repository.removeRequests(requestIds);
 
             const processedEvent = new ReadingProofProcessedEvent(
                 deviceId,
