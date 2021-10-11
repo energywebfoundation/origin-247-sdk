@@ -114,7 +114,7 @@ export class EnergyTransferRequest {
     }
 
     public issuanceError(error: string) {
-        this.nextState(State.IssuanceInProgress, State.IssuanceError);
+        this.attrs.state = State.IssuanceError;
         this.attrs.processError = error;
     }
 
@@ -150,7 +150,7 @@ export class EnergyTransferRequest {
     }
 
     public validationError(error: string) {
-        this.nextState(State.ValidationInProgress, State.ValidationError);
+        this.attrs.state = State.ValidationError;
         this.attrs.processError = error;
     }
 
@@ -198,7 +198,7 @@ export class EnergyTransferRequest {
     }
 
     public transferError(error: string) {
-        this.nextState(State.TransferInProgress, State.TransferError);
+        this.attrs.state = State.TransferError;
         this.attrs.processError = error;
     }
 
