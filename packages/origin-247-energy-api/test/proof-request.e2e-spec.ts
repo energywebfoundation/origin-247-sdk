@@ -40,7 +40,7 @@ describe('Notary module - e2e', () => {
 
         await facade.requestReadingProof(...input.d1.slice(2), ...input.d2.slice(2));
 
-        await new Promise((resolve) => setTimeout(resolve, 15000));
+        await new Promise((resolve) => setTimeout(resolve, 25000));
 
         const proofs = await notaryService.getAllProofs();
         const deviceFilter = {
