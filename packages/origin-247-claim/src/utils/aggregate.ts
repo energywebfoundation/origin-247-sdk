@@ -89,26 +89,30 @@ export const aggregate = ({
         end,
         timezoneOffset
     });
-    const intervals = buildAggregateFrames(offsettedCommand);
 
-    return intervals
-        .map((interval, intervalN) => {
-            const resultsInInterval = offsettedCommand.data.filter(
-                (r, dataN) =>
-                    (r.time > interval.start && r.time <= interval.end) ||
-                    // because of `>` condition first value in dataset won't be included
-                    // even if first interval `start` was generated out of this value time
-                    (start === undefined && intervalN === 0 && dataN === 0)
-            );
-            return {
-                start: interval.start,
-                end: interval.end,
-                results: resultsInInterval.map((r) => r.value)
-            };
-        })
-        .map((e) => ({
-            start: e.start,
-            end: e.end,
-            value: aggregateFunction(e.results)
-        }));
+    const groupedByInterval = new Map<string, BigNumber[]>();
+    offsettedCommand.data.forEach((d) => {
+        const roundedDate = new Date(window.roundDateUp(d.time));
+        const exists = groupedByInterval.get(roundedDate.toISOString());
+        exists
+            ? groupedByInterval.set(roundedDate.toISOString(), [...exists, d.value])
+            : groupedByInterval.set(roundedDate.toISOString(), [d.value]);
+    });
+
+    const intervals = buildAggregateFrames(offsettedCommand);
+    const result = intervals.map((interval) => {
+        const dateKey =
+            window.getDurationUnit() === 'mo'
+                ? interval.end
+                : new Date(window.roundDateUp(interval.end));
+        const exists = groupedByInterval.get(dateKey.toISOString());
+        const value = exists ? aggregateFunction(exists) : BigNumber.from(0);
+        return {
+            start: interval.start,
+            end: interval.end,
+            value: value
+        };
+    });
+
+    return result;
 };
