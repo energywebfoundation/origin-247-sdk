@@ -58,12 +58,38 @@ export class Duration {
         }
     }
 
+    public getDurationUnit() {
+        return this.durationUnit;
+    }
+
+    public roundDateUp(dateToRound: Date): number {
+        switch (this.durationUnit) {
+            case 'mo':
+                return DateTime.fromJSDate(dateToRound)
+                    .startOf('month')
+                    .plus({ month: 1 })
+                    .toMillis();
+            case 'y':
+                return DateTime.fromJSDate(dateToRound)
+                    .startOf('year')
+                    .plus({ year: 1 })
+                    .toMillis();
+            default:
+                return this.roundToClosestUpper(dateToRound);
+        }
+    }
+
     public static readonly durationValidationRegex = /(^(\d+)(m|h|d|w)$)|(^(1)(mo|y)$)/;
     private static readonly durationRegex = /^(?<value>\d+)(?<unit>m|h|d|w|mo|y)$/;
 
     private roundToClosestLower(dateToRound: Date): number {
         const toClosest = this.getMilliSeconds();
         return Math.floor(dateToRound.getTime() / toClosest) * toClosest;
+    }
+
+    private roundToClosestUpper(dateToRound: Date): number {
+        const toClosest = this.getMilliSeconds();
+        return Math.ceil(dateToRound.getTime() / toClosest) * toClosest;
     }
 }
 
