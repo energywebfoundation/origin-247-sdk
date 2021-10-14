@@ -32,6 +32,14 @@ export class ProofRequestService {
         Number(process.env.ENERGY_REQUEST_PROCESS_AGGREGATE_SECONDS ?? 10)
     );
 
+    public onApplicationBootstrap() {
+        this.processRequestsTrigger.trigger();
+    }
+
+    public onModuleDestroy() {
+        this.processRequestsTrigger.unsubscribe();
+    }
+
     public async requestReadingProof(...payload: RequestReadingProofPayload[]) {
         const withUnixTimestamp = payload.map((p) => ({
             ...p,
@@ -42,7 +50,7 @@ export class ProofRequestService {
         }));
         await this.repository.createNewRequest(...withUnixTimestamp);
 
-        this.processRequestsTrigger(null);
+        this.processRequestsTrigger.trigger();
     }
 
     private async processRequests() {
@@ -91,6 +99,6 @@ export class ProofRequestService {
         }
 
         // This loop is necessary because only one device group is processed at once
-        this.processRequestsTrigger(null);
+        this.processRequestsTrigger.trigger();
     }
 }

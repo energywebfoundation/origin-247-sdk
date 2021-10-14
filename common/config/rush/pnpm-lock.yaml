@@ -108,7 +108,7 @@ dependencies:
   '@rush-temp/247-matching-demo': file:projects/247-matching-demo.tgz
   '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_f47ff317fed127205fed601cd0e932de
   '@rush-temp/origin-247-claim': file:projects/origin-247-claim.tgz_passport@0.4.1+rxjs@7.3.0
-  '@rush-temp/origin-247-energy-api': file:projects/origin-247-energy-api.tgz_8da431137b560d1627527e266b246312
+  '@rush-temp/origin-247-energy-api': file:projects/origin-247-energy-api.tgz_eb9935bd4f97b23ab8881eee244eb1f7
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.4.1
   '@typechain/ethers-v5': 7.1.0_8e93b6e8d98cb9a74a36e053ec23ff7e
   '@typechain/hardhat': 2.3.0_512973f51e7672eecf86f542b17ea4fd
@@ -13568,8 +13568,8 @@ packages:
       - utf-8-validate
     dev: false
 
-  file:projects/origin-247-energy-api.tgz_8da431137b560d1627527e266b246312:
-    resolution: {integrity: sha512-l/b6hPjW2kgLZHRtt7lKGlzFvD2BKBzY7SOSWHcOv2xbNyvEQzh1G4kjEjudpRVJRTzhnafdxoyESIlgvjgXuw==, tarball: file:projects/origin-247-energy-api.tgz}
+  file:projects/origin-247-energy-api.tgz_eb9935bd4f97b23ab8881eee244eb1f7:
+    resolution: {integrity: sha512-PLPh3IM0XhOAftJSwgsXUU05GjzKrLGvk7LKEyMRFwUrMEEVAuVpL2WcGpwhfzzSghCnzuqOigpb63Td6NpYSg==, tarball: file:projects/origin-247-energy-api.tgz}
     id: file:projects/origin-247-energy-api.tgz
     name: '@rush-temp/origin-247-energy-api'
     version: 0.0.0
@@ -13593,6 +13593,7 @@ packages:
       '@typechain/hardhat': 2.3.0_512973f51e7672eecf86f542b17ea4fd
       '@types/chai': 4.2.21
       '@types/jest': 26.0.23
+      '@types/lodash': 4.14.171
       '@types/mocha': 9.0.0
       '@types/node': 15.12.4
       chai: 4.3.4
@@ -13602,6 +13603,7 @@ packages:
       ganache-cli: 6.12.2
       hardhat: 2.6.4
       jest: 27.0.5_ts-node@9.1.1
+      lodash: 4.17.21
       precise-proofs-js: 1.2.0
       rxjs: 7.3.0
       ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
@@ -13622,7 +13624,6 @@ packages:
       - class-validator
       - debug
       - fastify-swagger
-      - lodash
       - node-notifier
       - passport
       - reflect-metadata

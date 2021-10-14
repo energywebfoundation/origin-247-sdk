@@ -1,4 +1,5 @@
 import { Subject, throttleTime, asyncScheduler, concatMap, from, tap, startWith } from 'rxjs';
+import { debounce } from 'lodash';
 
 /**
  * Ignore all calls for @time, then proceed (and repeat) - at least one call will happen after @time.
@@ -12,23 +13,23 @@ import { Subject, throttleTime, asyncScheduler, concatMap, from, tap, startWith 
  * @param throttleSeconds - throttling time in seconds
  * @returns - function to call to "add to queue"
  */
-export const queueThrottle = <T>(cb: () => Promise<unknown>, throttleSeconds: number) => {
-    const subject = new Subject<T>();
+export const queueThrottle = (cb: () => Promise<unknown>, throttleSeconds: number) => {
+    const subject = new Subject();
 
-    subject
+    // throttling part
+    const debounced = debounce(() => subject.next(null), throttleSeconds * 1000, {
+        maxWait: throttleSeconds * 1000
+    });
+
+    const sub = subject
         .pipe(
-            // Initializing part
-            startWith(true),
-            // Ignoring part
-            // This will also ensure, that batch size is at least of @throttleSeconds large
-            throttleTime(throttleSeconds * 1000, asyncScheduler, {
-                leading: false,
-                trailing: true
-            }),
             // Queueing part
             concatMap(() => from(cb()))
         )
         .subscribe();
 
-    return (value: T) => subject.next(value);
+    return {
+        trigger: () => debounced(),
+        unsubscribe: () => sub.unsubscribe()
+    };
 };

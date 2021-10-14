@@ -41,6 +41,7 @@
         "@types/jest": "26.0.23",
         "@types/mocha": "9.0.0",
         "@types/node": "15.12.4",
+        "@types/lodash": "4.14.171",
         "chai": "4.3.4",
         "concurrently": "6.2.0",
         "ethereum-waffle": "3.4.0",
@@ -60,6 +61,7 @@
         "@energyweb/energy-api-influxdb": "0.8.0",
         "@nestjs/config": "0.6.3",
         "rxjs": "7.3.0",
+        "lodash": "4.17.21",
         "@influxdata/influxdb-client": "1.18.0"
     },
     "jest": {
