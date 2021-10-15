@@ -1,4 +1,5 @@
 import { DateTime, Duration as luxDuration, DurationObject } from 'luxon';
+import { start } from 'repl';
 
 /**
  * Treats month as 30 days
@@ -64,11 +65,12 @@ export class Duration {
 
     public roundDateUp(dateToRound: Date): number {
         switch (this.durationUnit) {
-            case 'mo':
-                return DateTime.fromJSDate(dateToRound)
-                    .startOf('month')
-                    .plus({ month: 1 })
-                    .toMillis();
+            case 'mo': {
+                const luxonDate = DateTime.fromJSDate(dateToRound);
+                return luxonDate.equals(luxonDate.startOf('month'))
+                    ? luxonDate.toMillis()
+                    : DateTime.fromJSDate(dateToRound).endOf('month').toMillis() + 1;
+            }
             case 'y':
                 return DateTime.fromJSDate(dateToRound)
                     .startOf('year')
