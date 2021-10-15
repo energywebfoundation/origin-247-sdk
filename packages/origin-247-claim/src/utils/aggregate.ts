@@ -89,9 +89,12 @@ export const aggregate = ({
         end,
         timezoneOffset
     });
+    const dataset = start
+        ? offsettedCommand.data.filter((d) => d.time > offsettedCommand.start!)
+        : offsettedCommand.data;
 
     const groupedByInterval = new Map<string, BigNumber[]>();
-    offsettedCommand.data.forEach((d) => {
+    dataset.forEach((d) => {
         const roundedDate = new Date(window.roundDateUp(d.time));
         const exists = groupedByInterval.get(roundedDate.toISOString());
         exists
@@ -101,10 +104,7 @@ export const aggregate = ({
 
     const intervals = buildAggregateFrames(offsettedCommand);
     const result = intervals.map((interval) => {
-        const dateKey =
-            window.getDurationUnit() === 'mo'
-                ? interval.end
-                : new Date(window.roundDateUp(interval.end));
+        const dateKey = new Date(window.roundDateUp(interval.end));
         const exists = groupedByInterval.get(dateKey.toISOString());
         const value = exists ? aggregateFunction(exists) : BigNumber.from(0);
         return {
@@ -113,6 +113,5 @@ export const aggregate = ({
             value: value
         };
     });
-
     return result;
 };
