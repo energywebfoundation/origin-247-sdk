@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.4](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.3...@energyweb/origin-247-transfer@1.0.4) (2021-10-15)
+
+
+### Bug Fixes
+
+* **origin-247-sdk:** fix how ETR handles error ([5208391](https://github.com/energywebfoundation/origin-247-sdk/commit/520839106741c9b438cc2fbd50c4ccf7d4ab020c))
+* **origin-247-transfer:** use better batching system ([bc99e13](https://github.com/energywebfoundation/origin-247-sdk/commit/bc99e132c28adb7e9065895f7f92d9787b7c705f))
+
+
+
+
+
 ## [1.0.3](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.2...@energyweb/origin-247-transfer@1.0.3) (2021-09-02)
 
 **Note:** Version bump only for package @energyweb/origin-247-transfer
