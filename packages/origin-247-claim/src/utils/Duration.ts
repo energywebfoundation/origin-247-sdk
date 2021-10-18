@@ -64,11 +64,16 @@ export class Duration {
 
     public roundDateUp(dateToRound: Date): number {
         switch (this.durationUnit) {
+            // in case of month, we don't want to increment if it happens to be the beggining of the month
+            // otherwise, we want to take the start of next month
             case 'mo': {
                 const luxonDate = DateTime.fromJSDate(dateToRound);
                 return luxonDate.equals(luxonDate.startOf('month'))
                     ? luxonDate.toMillis()
-                    : DateTime.fromJSDate(dateToRound).endOf('month').toMillis() + 1;
+                    : DateTime.fromJSDate(dateToRound)
+                          .plus({ month: 1 })
+                          .startOf('month')
+                          .toMillis();
             }
             case 'y':
                 return DateTime.fromJSDate(dateToRound)
