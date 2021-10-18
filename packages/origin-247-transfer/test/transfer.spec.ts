@@ -58,6 +58,7 @@ describe('Transfer module', () => {
                 }
             },
             (etr) => {
+                expect(etr.state).toEqual(State.ValidationInvalid);
                 expect(etr.validationStatusRecord).toEqual({
                     Command1: TransferValidationStatus.Valid,
                     Command2: TransferValidationStatus.Invalid

@@ -1,10 +1,11 @@
 import { CertificatePersistedEvent } from '@energyweb/issuer-api';
-import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import { EventBus, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import { AwaitingValidationEvent } from '../batch/validate.batch';
 import { PersistanceService } from '../persistance.service';
 
 @EventsHandler(CertificatePersistedEvent)
 export class CertificatePersistedHandler implements IEventHandler<CertificatePersistedEvent> {
-    constructor(private persistanceService: PersistanceService) {}
+    constructor(private persistanceService: PersistanceService, private eventBus: EventBus) {}
 
     async handle(event: CertificatePersistedEvent) {
         const certificateId = event.certificateId;
@@ -14,6 +15,7 @@ export class CertificatePersistedHandler implements IEventHandler<CertificatePer
 
         if (isTemporarilyPersisted) {
             await this.persistanceService.markEtrPersisted(certificateId);
+            this.eventBus.publish(new AwaitingValidationEvent());
         } else {
             await this.persistanceService.markTemporarilyPersisted(certificateId);
         }
