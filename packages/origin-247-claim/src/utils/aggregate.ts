@@ -93,19 +93,20 @@ export const aggregate = ({
         ? offsettedCommand.data.filter((d) => d.time > offsettedCommand.start!)
         : offsettedCommand.data;
 
-    const groupedByInterval = new Map<string, BigNumber[]>();
+    const groupedByInterval: Record<string, BigNumber[]> = {};
     dataset.forEach((d) => {
         const roundedDate = new Date(window.roundDateUp(d.time));
-        const exists = groupedByInterval.get(roundedDate.toISOString());
+        const stringifiedDate = roundedDate.toISOString();
+        const exists = groupedByInterval[stringifiedDate];
         exists
-            ? groupedByInterval.set(roundedDate.toISOString(), [...exists, d.value])
-            : groupedByInterval.set(roundedDate.toISOString(), [d.value]);
+            ? (groupedByInterval[stringifiedDate] = [...exists, d.value])
+            : (groupedByInterval[stringifiedDate] = [d.value]);
     });
 
     const intervals = buildAggregateFrames(offsettedCommand);
     const result = intervals.map((interval) => {
         const dateKey = new Date(window.roundDateUp(interval.end));
-        const exists = groupedByInterval.get(dateKey.toISOString());
+        const exists = groupedByInterval[dateKey.toISOString()];
         const value = exists ? aggregateFunction(exists) : BigNumber.from(0);
         return {
             start: interval.start,
