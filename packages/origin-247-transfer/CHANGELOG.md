@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.5](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.4...@energyweb/origin-247-transfer@1.0.5) (2021-10-18)
+
+
+### Bug Fixes
+
+* **origin-247-transfer:** fix certificate persisted race condition ([af0607a](https://github.com/energywebfoundation/origin-247-sdk/commit/af0607a608a997f0430a05a87ef7ed5795a81b42))
+* **origin-247-transfer:** properly emit validation awaiting after persistance ([8928bc7](https://github.com/energywebfoundation/origin-247-sdk/commit/8928bc7bd06a78caa5fa87b4dc85777c47af5f97))
+
+
+
+
+
 ## [1.0.4](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.3...@energyweb/origin-247-transfer@1.0.4) (2021-10-15)
 
 

@@ -1,6 +1,6 @@
 {
     "name": "@energyweb/origin-247-transfer",
-    "version": "1.0.4",
+    "version": "1.0.5",
     "main": "./dist/js/src/index.js",
     "types": "./dist/js/src/index.d.ts",
     "scripts": {
@@ -24,12 +24,12 @@
         "@nestjs/core": "7.6.18",
         "@nestjs/cqrs": "7.0.1",
         "@nestjs/typeorm": "7.1.5",
+        "cache-manager": "3.4.4",
         "ethers": "5.3.1",
         "lodash": "4.17.21",
         "pg": "8.6.0",
         "rxjs": "7.3.0",
-        "typeorm": "0.2.34",
-        "cache-manager": "3.4.4"
+        "typeorm": "0.2.34"
     },
     "peerDependencies": {
         "@energyweb/origin-247-certificate": "^2.0.0"
@@ -37,17 +37,20 @@
     "devDependencies": {
         "@energyweb/issuer": "4.1.1-alpha.1634225870.0",
         "@energyweb/issuer-api": "0.4.1-alpha.1634225870.0",
-        "@energyweb/origin-247-certificate": "2.1.1",
+        "@energyweb/origin-247-certificate": "2.1.2",
         "@energyweb/origin-backend-utils": "1.6.2-alpha.1634225870.0",
         "@energyweb/utils-general": "11.0.5-alpha.1634225870.0",
         "@nestjs/bull": "0.3.1",
         "@nestjs/passport": "7.1.5",
         "@nestjs/platform-express": "7.6.18",
         "@nestjs/testing": "7.6.18",
+        "@types/cache-manager": "3.4.2",
+        "@types/cache-manager-ioredis": "2.0.2",
         "@types/jest": "26.0.23",
         "@types/lodash": "4.14.171",
         "@types/node": "15.12.4",
         "bull": "3.22.9",
+        "cache-manager-ioredis": "2.1.0",
         "class-transformer": "0.4.0",
         "concurrently": "6.2.0",
         "ganache-cli": "6.12.2",
@@ -56,10 +59,7 @@
         "ts-node": "9.1.1",
         "tsconfig-paths": "3.10.1",
         "typescript": "4.3.4",
-        "wait-on": "5.3.0",
-        "@types/cache-manager": "3.4.2",
-        "cache-manager-ioredis": "2.1.0",
-        "@types/cache-manager-ioredis": "2.0.2"
+        "wait-on": "5.3.0"
     },
     "jest": {
         "moduleFileExtensions": [
