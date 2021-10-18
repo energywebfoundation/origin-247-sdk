@@ -151,3 +151,11 @@ TransferModule.register({
 ```
 
 7. Call `GenerationReadingStoredEvent` created in step 1. that triggers whole transfer process. You may also want to consult test `setup` files in this repository, that although complex, may give a hint in case of any problems.
+
+## Notes
+
+`origin-247-transfer` module makes use of caching, for some purposes. [Official NestJS technique](https://docs.nestjs.com/techniques/caching) is used for that.
+By default it uses in-memory cache, but for production use it is best to actually use persistent store for that, otherwise some ETRs may hang on `PersistanceAwaiting` state.
+
+To use Redis as cache storage for this module, configure `REDIS_URL` variable, and install `"cache-manager-ioredis": "2.1.0"` as dependency in your application.
+If those two things are present Redis will be used automatically as storage.
