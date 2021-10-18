@@ -1,18 +1,18 @@
 import { defaults } from 'lodash';
 import { parse as urllibParse } from 'url';
 
-/**
- * We support only REDIS_URL env variable,
- * and we want to use io-redis cache manager,
- * therefore https://github.com/dabroek/node-cache-manager-ioredis/pull/1
- * and https://github.com/luin/ioredis/blob/4680211fe853831f9ff3a3eb69f16d5db6bfbabd/lib/utils/index.ts
- */
-
 function isInt(value): value is string {
     const x = parseFloat(value);
     return !isNaN(value) && (x | 0) === x;
 }
 
+/**
+ * We support only REDIS_URL env variable,
+ * and we want to use io-redis cache manager.
+ *
+ * @see https://github.com/dabroek/node-cache-manager-ioredis/pull/1
+ * @see https://github.com/luin/ioredis/blob/4680211fe853831f9ff3a3eb69f16d5db6bfbabd/lib/utils/index.ts#L243-L292
+ */
 export function parseRedisUrl(url) {
     if (isInt(url)) {
         return { port: url };
