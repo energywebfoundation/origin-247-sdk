@@ -86,7 +86,7 @@ export class TransferModule {
                         if (redisUrl && importedModule) {
                             return {
                                 store: importedModule,
-                                ...parseRedisUrl
+                                ...parseRedisUrl(redisUrl)
                             };
                         }
 
