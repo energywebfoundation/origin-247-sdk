@@ -58,12 +58,44 @@ export class Duration {
         }
     }
 
+    public getDurationUnit() {
+        return this.durationUnit;
+    }
+
+    public roundDateUp(dateToRound: Date): number {
+        switch (this.durationUnit) {
+            // in case of month, we don't want to increment if it happens to be the beggining of the month
+            // otherwise, we want to take the start of next month
+            case 'mo': {
+                const luxonDate = DateTime.fromJSDate(dateToRound);
+                return luxonDate.equals(luxonDate.startOf('month'))
+                    ? luxonDate.toMillis()
+                    : DateTime.fromJSDate(dateToRound)
+                          .plus({ month: 1 })
+                          .startOf('month')
+                          .toMillis();
+            }
+            case 'y':
+                return DateTime.fromJSDate(dateToRound)
+                    .startOf('year')
+                    .plus({ year: 1 })
+                    .toMillis();
+            default:
+                return this.roundToClosestUpper(dateToRound);
+        }
+    }
+
     public static readonly durationValidationRegex = /(^(\d+)(m|h|d|w)$)|(^(1)(mo|y)$)/;
     private static readonly durationRegex = /^(?<value>\d+)(?<unit>m|h|d|w|mo|y)$/;
 
     private roundToClosestLower(dateToRound: Date): number {
         const toClosest = this.getMilliSeconds();
         return Math.floor(dateToRound.getTime() / toClosest) * toClosest;
+    }
+
+    private roundToClosestUpper(dateToRound: Date): number {
+        const toClosest = this.getMilliSeconds();
+        return Math.ceil(dateToRound.getTime() / toClosest) * toClosest;
     }
 }
 

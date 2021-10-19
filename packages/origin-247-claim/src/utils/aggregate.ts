@@ -89,26 +89,30 @@ export const aggregate = ({
         end,
         timezoneOffset
     });
-    const intervals = buildAggregateFrames(offsettedCommand);
+    const dataset = start
+        ? offsettedCommand.data.filter((d) => d.time > offsettedCommand.start!)
+        : offsettedCommand.data;
 
-    return intervals
-        .map((interval, intervalN) => {
-            const resultsInInterval = offsettedCommand.data.filter(
-                (r, dataN) =>
-                    (r.time > interval.start && r.time <= interval.end) ||
-                    // because of `>` condition first value in dataset won't be included
-                    // even if first interval `start` was generated out of this value time
-                    (start === undefined && intervalN === 0 && dataN === 0)
-            );
-            return {
-                start: interval.start,
-                end: interval.end,
-                results: resultsInInterval.map((r) => r.value)
-            };
-        })
-        .map((e) => ({
-            start: e.start,
-            end: e.end,
-            value: aggregateFunction(e.results)
-        }));
+    const groupedByInterval: Record<string, BigNumber[]> = {};
+    dataset.forEach((d) => {
+        const roundedDate = new Date(window.roundDateUp(d.time));
+        const stringifiedDate = roundedDate.toISOString();
+        const exists = groupedByInterval[stringifiedDate];
+        exists
+            ? (groupedByInterval[stringifiedDate] = [...exists, d.value])
+            : (groupedByInterval[stringifiedDate] = [d.value]);
+    });
+
+    const intervals = buildAggregateFrames(offsettedCommand);
+    const result = intervals.map((interval) => {
+        const dateKey = new Date(window.roundDateUp(interval.end));
+        const exists = groupedByInterval[dateKey.toISOString()];
+        const value = exists ? aggregateFunction(exists) : BigNumber.from(0);
+        return {
+            start: interval.start,
+            end: interval.end,
+            value: value
+        };
+    });
+    return result;
 };

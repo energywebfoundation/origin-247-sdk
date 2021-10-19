@@ -95,7 +95,7 @@ describe('aggregate function', () => {
             start: new Date('2021-05-13T08:00:00.000Z'),
             end: new Date('2021-07-15T10:00:00.000Z'),
             method: AggregateMethod.Sum,
-            window: new Duration('30d'),
+            window: new Duration('1mo'),
             timezoneOffset: 0
         };
         const aggregated = aggregate({
