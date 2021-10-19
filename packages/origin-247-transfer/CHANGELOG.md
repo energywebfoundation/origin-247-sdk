@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.6](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.5...@energyweb/origin-247-transfer@1.0.6) (2021-10-19)
+
+
+### Bug Fixes
+
+* **origin-247-transfer:** parse redis url ([7908e15](https://github.com/energywebfoundation/origin-247-sdk/commit/7908e153ec3f6b80fda93a2001f6b916f7a0891b))
+
+
+
+
+
 ## [1.0.5](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.4...@energyweb/origin-247-transfer@1.0.5) (2021-10-18)
 
 
