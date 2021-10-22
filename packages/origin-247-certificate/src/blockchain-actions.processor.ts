@@ -73,7 +73,7 @@ export class BlockchainActionsProcessor {
                 const transferParams = data.payload;
                 this.logger.debug(`Triggering transfer for: ${JSON.stringify(transferParams)}`);
 
-                return await this.commandBus.execute(
+                const transferTx = await this.commandBus.execute(
                     new TransferCertificateCommand(
                         transferParams.certificateId,
                         transferParams.fromAddress,
@@ -82,11 +82,13 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
+                return await this.transactionPoll.waitForTransaction(transferTx.hash);
+
             case BlockchainActionType.Claim:
                 const claimParams = data.payload;
                 this.logger.debug(`Triggering claim for: ${JSON.stringify(claimParams)}`);
 
-                return await this.commandBus.execute(
+                const claimTx = await this.commandBus.execute(
                     new ClaimCertificateCommand(
                         claimParams.certificateId,
                         claimParams.claimData,
@@ -94,6 +96,8 @@ export class BlockchainActionsProcessor {
                         claimParams.energyValue ? claimParams.energyValue.toString() : undefined
                     )
                 );
+
+                return await this.transactionPoll.waitForTransaction(claimTx.hash);
 
             case BlockchainActionType.BatchIssuance:
                 const batchIssuanceParams = data.payload;
@@ -131,7 +135,7 @@ export class BlockchainActionsProcessor {
                     `Triggering batch transfer for: ${JSON.stringify(batchTransferParams)}`
                 );
 
-                return await this.commandBus.execute(
+                const batchTransferTx = await this.commandBus.execute(
                     new BatchTransferCertificatesCommand(
                         batchTransferParams.transfers.map((t) => ({
                             id: t.certificateId,
@@ -142,13 +146,15 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
+                return await this.transactionPoll.waitForTransaction(batchTransferTx.hash);
+
             case BlockchainActionType.BatchClaim:
                 const batchClaimParams = data.payload;
                 this.logger.debug(
                     `Triggering batch claim for: ${JSON.stringify(batchClaimParams)}`
                 );
 
-                return await this.commandBus.execute(
+                const batchClaimTx = await this.commandBus.execute(
                     new BatchClaimCertificatesCommand(
                         batchClaimParams.claims.map((c) => ({
                             id: c.certificateId,
@@ -158,6 +164,8 @@ export class BlockchainActionsProcessor {
                         }))
                     )
                 );
+
+                return await this.transactionPoll.waitForTransaction(batchClaimTx.hash);
         }
     }
 }

@@ -13507,7 +13507,7 @@ packages:
     dev: false
 
   file:projects/origin-247-certificate.tgz_63d06b51a1e8ca27b2a47da6c1fc41f0:
-    resolution: {integrity: sha512-VvF6mbsLxiVxGGcpfqT6h8H48zCggBiGmUWix4Acr/PY1sG7T/KAW1KeFpFBqZWG9EPCi44QJc3t7S4b2QyZEQ==, tarball: file:projects/origin-247-certificate.tgz}
+    resolution: {integrity: sha512-hzQgGrAs7mNEs1n11X7zu9fkbCjkMDIXqzkuH6BDys4o5dy5gXL9WfZUWDg7K/26gWWuhAUl0l+piJfEhT6f5g==, tarball: file:projects/origin-247-certificate.tgz}
     id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
@@ -13528,6 +13528,7 @@ packages:
       '@types/jest': 26.0.23
       '@types/node': 16.11.3
       bull: 3.29.3
+      cache-manager-ioredis: 2.1.0
       concurrently: 6.3.0
       ethers: 5.3.1
       ganache-cli: 6.12.2

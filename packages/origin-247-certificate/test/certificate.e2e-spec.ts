@@ -6,8 +6,6 @@ import { CertificateService } from '../src';
 jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
-const transactionTime = () => new Promise((resolve) => setTimeout(resolve, 10000));
-
 describe('Certificate service', () => {
     let app: INestApplication;
     let databaseService: DatabaseService;
@@ -73,8 +71,6 @@ describe('Certificate service', () => {
             energyValue: '50'
         });
 
-        await transactionTime();
-
         const claimedCertificate = await certificateService.getById(certificate.id);
 
         expect(claimedCertificate?.owners).toEqual({
@@ -103,8 +99,6 @@ describe('Certificate service', () => {
             toAddress: user2Wallet.address,
             energyValue: '50'
         });
-
-        await transactionTime();
 
         const transferedCertificate = await certificateService.getById(certificate.id);
 
@@ -136,8 +130,6 @@ describe('Certificate service', () => {
             }
         ]);
 
-        await transactionTime();
-
         await certificateService.batchClaim([
             {
                 certificateId,
@@ -153,8 +145,6 @@ describe('Certificate service', () => {
                 energyValue: '50'
             }
         ]);
-
-        await transactionTime();
 
         const certificate = await certificateService.getById(certificateId);
 
