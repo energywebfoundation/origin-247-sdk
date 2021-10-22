@@ -40,20 +40,12 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
         expect(result).toEqual(
             expect.objectContaining({
                 deviceId: 'd1',
-                energy: expect.objectContaining({ publicVolume: '100' })
+                owners: expect.objectContaining({ [userWallet.address]: '100' })
             })
         );
-
-        const cert = await certificateService.getById(result.id);
-
-        expect(cert?.owners).toEqual({
-            [userWallet.address]: '100'
-        });
     });
 
     it('allows to claim certificate', async () => {
@@ -67,9 +59,7 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
-        const result = await certificateService.claim({
+        await certificateService.claim({
             certificateId: certificate.id,
             claimData: {
                 beneficiary: '',
@@ -84,12 +74,6 @@ describe('Certificate service', () => {
         });
 
         await transactionTime();
-
-        expect(result).toEqual(
-            expect.objectContaining({
-                success: true
-            })
-        );
 
         const claimedCertificate = await certificateService.getById(certificate.id);
 
@@ -113,9 +97,7 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
-        const result = await certificateService.transfer({
+        await certificateService.transfer({
             certificateId: certificate.id,
             fromAddress: userWallet.address,
             toAddress: user2Wallet.address,
@@ -123,12 +105,6 @@ describe('Certificate service', () => {
         });
 
         await transactionTime();
-
-        expect(result).toEqual(
-            expect.objectContaining({
-                success: true
-            })
-        );
 
         const transferedCertificate = await certificateService.getById(certificate.id);
 
@@ -150,8 +126,6 @@ describe('Certificate service', () => {
                 userId: userWallet.address
             }
         ]);
-
-        await transactionTime();
 
         await certificateService.batchTransfer([
             {
@@ -208,10 +182,6 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
-        const issuedCertificate = await certificateService.getById(certificate.id);
-
-        expect(issuedCertificate?.metadata).toEqual({ custom: 'data' });
+        expect(certificate.metadata).toEqual({ custom: 'data' });
     });
 });

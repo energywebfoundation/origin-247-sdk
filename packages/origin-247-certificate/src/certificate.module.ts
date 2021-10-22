@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bull';
 import { IssuerModule } from '@energyweb/issuer-api';
+import { TransactionPollService } from './transaction-poll.service';
 
 import { CertificateService } from './certificate.service';
 import { BlockchainActionsProcessor } from './blockchain-actions.processor';
@@ -13,7 +14,7 @@ const serviceProvider = {
 };
 
 @Module({
-    providers: [serviceProvider, BlockchainActionsProcessor],
+    providers: [serviceProvider, BlockchainActionsProcessor, TransactionPollService],
     exports: [serviceProvider],
     imports: [
         IssuerModule.register({

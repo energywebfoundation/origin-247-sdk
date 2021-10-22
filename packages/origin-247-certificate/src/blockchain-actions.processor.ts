@@ -12,12 +12,13 @@ import {
     BatchIssueCertificatesCommand,
     BatchTransferCertificatesCommand
 } from '@energyweb/issuer-api';
+import { TransactionPollService } from './transaction-poll.service';
 
 @Processor('blockchain-actions')
 export class BlockchainActionsProcessor {
     private readonly logger = new Logger(BlockchainActionsProcessor.name);
 
-    constructor(private readonly commandBus: CommandBus) {}
+    constructor(private commandBus: CommandBus, private transactionPoll: TransactionPollService) {}
 
     @Process({ concurrency: 1 })
     async handle(payload: Job<BlockchainAction>): Promise<unknown> {
@@ -25,13 +26,8 @@ export class BlockchainActionsProcessor {
             const result = await this.process(payload);
 
             /**
-             * @HOTFIX 15.06.2021
-             *
              * Sometimes we get conflicting nonce/gas price problem.
-             * This time --may-- fix this, but not necessarily will.
-             *
-             * If you, in the future, will find this, please check whether this error is still present.
-             * If not, maybe this really fixed this. If yes - just remove this await.
+             * Therefore we need to give some time to process everything.
              */
             await new Promise((resolve) =>
                 setTimeout(resolve, Number(process.env.CERTIFICATE_QUEUE_DELAY ?? 10000))
@@ -54,7 +50,7 @@ export class BlockchainActionsProcessor {
                 const issuanceParams = data.payload;
                 this.logger.debug(`Triggering issuance for: ${JSON.stringify(issuanceParams)}`);
 
-                return await this.commandBus.execute(
+                const issuanceTx = await this.commandBus.execute(
                     new IssueCertificateCommand(
                         issuanceParams.toAddress,
                         issuanceParams.energyValue,
@@ -66,6 +62,12 @@ export class BlockchainActionsProcessor {
                         JSON.stringify(issuanceParams.metadata)
                     )
                 );
+
+                const issuanceCertificates = await this.transactionPoll.waitForNewCertificates(
+                    issuanceTx.hash
+                );
+
+                return issuanceCertificates[0];
 
             case BlockchainActionType.Transfer:
                 const transferParams = data.payload;
@@ -99,7 +101,7 @@ export class BlockchainActionsProcessor {
                     `Triggering batch issuance for: ${JSON.stringify(batchIssuanceParams)}`
                 );
 
-                return await this.commandBus.execute(
+                const batchIssuanceTx = await this.commandBus.execute(
                     new BatchIssueCertificatesCommand(
                         batchIssuanceParams.certificates.map((certificate) => ({
                             to: certificate.toAddress,
@@ -111,6 +113,17 @@ export class BlockchainActionsProcessor {
                         }))
                     )
                 );
+
+                /**
+                 * @BUG
+                 *
+                 * Original certificate order is lost here
+                 */
+                const batchIssuanceCertificates = await this.transactionPoll.waitForNewCertificates(
+                    batchIssuanceTx.hash
+                );
+
+                return batchIssuanceCertificates.map((c) => c.id);
 
             case BlockchainActionType.BatchTransfer:
                 const batchTransferParams = data.payload;
