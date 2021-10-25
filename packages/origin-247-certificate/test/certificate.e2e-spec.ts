@@ -6,8 +6,6 @@ import { CertificateService } from '../src';
 jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
-const transactionTime = () => new Promise((resolve) => setTimeout(resolve, 10000));
-
 describe('Certificate service', () => {
     let app: INestApplication;
     let databaseService: DatabaseService;
@@ -40,20 +38,12 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
         expect(result).toEqual(
             expect.objectContaining({
                 deviceId: 'd1',
-                energy: expect.objectContaining({ publicVolume: '100' })
+                owners: expect.objectContaining({ [userWallet.address]: '100' })
             })
         );
-
-        const cert = await certificateService.getById(result.id);
-
-        expect(cert?.owners).toEqual({
-            [userWallet.address]: '100'
-        });
     });
 
     it('allows to claim certificate', async () => {
@@ -67,9 +57,7 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
-        const result = await certificateService.claim({
+        await certificateService.claim({
             certificateId: certificate.id,
             claimData: {
                 beneficiary: '',
@@ -82,14 +70,6 @@ describe('Certificate service', () => {
             forAddress: userWallet.address,
             energyValue: '50'
         });
-
-        await transactionTime();
-
-        expect(result).toEqual(
-            expect.objectContaining({
-                success: true
-            })
-        );
 
         const claimedCertificate = await certificateService.getById(certificate.id);
 
@@ -113,22 +93,12 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
-        const result = await certificateService.transfer({
+        await certificateService.transfer({
             certificateId: certificate.id,
             fromAddress: userWallet.address,
             toAddress: user2Wallet.address,
             energyValue: '50'
         });
-
-        await transactionTime();
-
-        expect(result).toEqual(
-            expect.objectContaining({
-                success: true
-            })
-        );
 
         const transferedCertificate = await certificateService.getById(certificate.id);
 
@@ -151,8 +121,6 @@ describe('Certificate service', () => {
             }
         ]);
 
-        await transactionTime();
-
         await certificateService.batchTransfer([
             {
                 certificateId,
@@ -161,8 +129,6 @@ describe('Certificate service', () => {
                 energyValue: '50'
             }
         ]);
-
-        await transactionTime();
 
         await certificateService.batchClaim([
             {
@@ -179,8 +145,6 @@ describe('Certificate service', () => {
                 energyValue: '50'
             }
         ]);
-
-        await transactionTime();
 
         const certificate = await certificateService.getById(certificateId);
 
@@ -208,10 +172,6 @@ describe('Certificate service', () => {
             userId: userWallet.address
         });
 
-        await transactionTime();
-
-        const issuedCertificate = await certificateService.getById(certificate.id);
-
-        expect(issuedCertificate?.metadata).toEqual({ custom: 'data' });
+        expect(certificate.metadata).toEqual({ custom: 'data' });
     });
 });

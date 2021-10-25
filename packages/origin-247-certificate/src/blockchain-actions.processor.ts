@@ -12,12 +12,13 @@ import {
     BatchIssueCertificatesCommand,
     BatchTransferCertificatesCommand
 } from '@energyweb/issuer-api';
+import { TransactionPollService } from './transaction-poll.service';
 
 @Processor('blockchain-actions')
 export class BlockchainActionsProcessor {
     private readonly logger = new Logger(BlockchainActionsProcessor.name);
 
-    constructor(private readonly commandBus: CommandBus) {}
+    constructor(private commandBus: CommandBus, private transactionPoll: TransactionPollService) {}
 
     @Process({ concurrency: 1 })
     async handle(payload: Job<BlockchainAction>): Promise<unknown> {
@@ -25,13 +26,8 @@ export class BlockchainActionsProcessor {
             const result = await this.process(payload);
 
             /**
-             * @HOTFIX 15.06.2021
-             *
              * Sometimes we get conflicting nonce/gas price problem.
-             * This time --may-- fix this, but not necessarily will.
-             *
-             * If you, in the future, will find this, please check whether this error is still present.
-             * If not, maybe this really fixed this. If yes - just remove this await.
+             * Therefore we need to give some time to process everything.
              */
             await new Promise((resolve) =>
                 setTimeout(resolve, Number(process.env.CERTIFICATE_QUEUE_DELAY ?? 10000))
@@ -54,7 +50,7 @@ export class BlockchainActionsProcessor {
                 const issuanceParams = data.payload;
                 this.logger.debug(`Triggering issuance for: ${JSON.stringify(issuanceParams)}`);
 
-                return await this.commandBus.execute(
+                const issuanceTx = await this.commandBus.execute(
                     new IssueCertificateCommand(
                         issuanceParams.toAddress,
                         issuanceParams.energyValue,
@@ -67,11 +63,17 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
+                const issuanceCertificates = await this.transactionPoll.waitForNewCertificates(
+                    issuanceTx.hash
+                );
+
+                return issuanceCertificates[0];
+
             case BlockchainActionType.Transfer:
                 const transferParams = data.payload;
                 this.logger.debug(`Triggering transfer for: ${JSON.stringify(transferParams)}`);
 
-                return await this.commandBus.execute(
+                const transferTx = await this.commandBus.execute(
                     new TransferCertificateCommand(
                         transferParams.certificateId,
                         transferParams.fromAddress,
@@ -80,11 +82,13 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
+                return await this.transactionPoll.waitForTransaction(transferTx.hash);
+
             case BlockchainActionType.Claim:
                 const claimParams = data.payload;
                 this.logger.debug(`Triggering claim for: ${JSON.stringify(claimParams)}`);
 
-                return await this.commandBus.execute(
+                const claimTx = await this.commandBus.execute(
                     new ClaimCertificateCommand(
                         claimParams.certificateId,
                         claimParams.claimData,
@@ -93,13 +97,15 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
+                return await this.transactionPoll.waitForTransaction(claimTx.hash);
+
             case BlockchainActionType.BatchIssuance:
                 const batchIssuanceParams = data.payload;
                 this.logger.debug(
                     `Triggering batch issuance for: ${JSON.stringify(batchIssuanceParams)}`
                 );
 
-                return await this.commandBus.execute(
+                const batchIssuanceTx = await this.commandBus.execute(
                     new BatchIssueCertificatesCommand(
                         batchIssuanceParams.certificates.map((certificate) => ({
                             to: certificate.toAddress,
@@ -112,13 +118,24 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
+                const batchIssuanceCertificates = await this.transactionPoll.waitForNewCertificates(
+                    batchIssuanceTx.hash
+                );
+
+                /**
+                 * Certificates should have id in exactly the same order they were issued
+                 *
+                 * @see https://github.com/energywebfoundation/origin/blob/bfaa326a3d77337504424d58b45fe7acae7e0581/packages/traceability/issuer-api/test/certificate.e2e-spec.ts#L209
+                 */
+                return batchIssuanceCertificates.map((c) => c.id).sort((a, b) => a - b);
+
             case BlockchainActionType.BatchTransfer:
                 const batchTransferParams = data.payload;
                 this.logger.debug(
                     `Triggering batch transfer for: ${JSON.stringify(batchTransferParams)}`
                 );
 
-                return await this.commandBus.execute(
+                const batchTransferTx = await this.commandBus.execute(
                     new BatchTransferCertificatesCommand(
                         batchTransferParams.transfers.map((t) => ({
                             id: t.certificateId,
@@ -129,13 +146,15 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
+                return await this.transactionPoll.waitForTransaction(batchTransferTx.hash);
+
             case BlockchainActionType.BatchClaim:
                 const batchClaimParams = data.payload;
                 this.logger.debug(
                     `Triggering batch claim for: ${JSON.stringify(batchClaimParams)}`
                 );
 
-                return await this.commandBus.execute(
+                const batchClaimTx = await this.commandBus.execute(
                     new BatchClaimCertificatesCommand(
                         batchClaimParams.claims.map((c) => ({
                             id: c.certificateId,
@@ -145,6 +164,8 @@ export class BlockchainActionsProcessor {
                         }))
                     )
                 );
+
+                return await this.transactionPoll.waitForTransaction(batchClaimTx.hash);
         }
     }
 }
