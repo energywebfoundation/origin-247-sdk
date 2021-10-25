@@ -15,7 +15,7 @@ export class TransactionPollService {
      * 2. issuer-api allows to call to check if transaction was processed
      * then on application startup we could see if we still await some transactions.
      *
-     * This may not be required, since if application fails (so the startup happens),
+     * This may not be possible at this point, since if application fails (so the startup happens),
      * then the job will not be awaited on the client side, so the result would not matter anyway.
      */
     private processedTransactions: Record<string, true> = {};
@@ -29,7 +29,7 @@ export class TransactionPollService {
             );
 
             if (result.length === 0) {
-                throw new Error('Could not find certificate');
+                return new Error('Could not find certificate');
             }
 
             return result;
@@ -43,7 +43,7 @@ export class TransactionPollService {
             if (isPresent) {
                 delete this.processedTransactions[hash];
             } else {
-                throw new Error('Transaction was not registered');
+                return new Error('Transaction was not registered');
             }
         });
     }
@@ -54,15 +54,17 @@ export class TransactionPollService {
 
     private async poll<T>(
         txHash: string,
-        cb: (txHash: string) => Promise<T>,
+        cb: (txHash: string) => Promise<T | Error>,
         tryCount = 0
     ): Promise<T> {
-        try {
-            return await cb(txHash);
-        } catch (e) {
-            if (tryCount === 100) {
+        const result = await cb(txHash);
+
+        if (result instanceof Error) {
+            if (tryCount === maxRetries) {
                 throw new Error(
-                    `Unable to query for transaction ${txHash} for ${maxRetries * pollDelay}ms`
+                    `Unable to query for transaction ${txHash} for ${
+                        maxRetries * pollDelay
+                    }ms. Latest reason: ${result.message}`
                 );
             }
 
@@ -70,5 +72,7 @@ export class TransactionPollService {
 
             return this.poll(txHash, cb, tryCount + 1);
         }
+
+        return result;
     }
 }

@@ -118,16 +118,16 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
-                /**
-                 * @BUG
-                 *
-                 * Original certificate order is lost here
-                 */
                 const batchIssuanceCertificates = await this.transactionPoll.waitForNewCertificates(
                     batchIssuanceTx.hash
                 );
 
-                return batchIssuanceCertificates.map((c) => c.id);
+                /**
+                 * Certificates should have id in exactly the same order they were issued
+                 *
+                 * @see https://github.com/energywebfoundation/origin/blob/bfaa326a3d77337504424d58b45fe7acae7e0581/packages/traceability/issuer-api/test/certificate.e2e-spec.ts#L209
+                 */
+                return batchIssuanceCertificates.map((c) => c.id).sort((a, b) => a - b);
 
             case BlockchainActionType.BatchTransfer:
                 const batchTransferParams = data.payload;
