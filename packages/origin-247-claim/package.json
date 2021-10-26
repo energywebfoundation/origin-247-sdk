@@ -21,19 +21,23 @@
     },
     "dependencies": {
         "@ethersproject/bignumber": "5.3.0",
-        "@nestjs/common": "8.1.1",
-        "@nestjs/core": "8.1.1",
-        "@nestjs/cqrs": "8.0.0",
-        "@nestjs/typeorm": "8.0.2",
         "lodash": "4.17.21",
         "luxon": "2.0.2",
         "pg": "8.7.1",
         "typeorm": "0.2.34"
     },
     "peerDependencies": {
+        "@nestjs/common": "8.1.1",
+        "@nestjs/core": "8.1.1",
+        "@nestjs/cqrs": "8.0.0",
+        "@nestjs/typeorm": "8.0.2",
         "@energyweb/origin-247-certificate": "^1.0.0"
     },
     "devDependencies": {
+        "@nestjs/common": "8.1.1",
+        "@nestjs/core": "8.1.1",
+        "@nestjs/cqrs": "8.0.0",
+        "@nestjs/typeorm": "8.0.2",
         "@energyweb/issuer": "4.1.1-alpha.1635152195.0",
         "@energyweb/issuer-api": "0.4.1-alpha.1635152195.0",
         "@energyweb/origin-247-certificate": "2.1.2",
