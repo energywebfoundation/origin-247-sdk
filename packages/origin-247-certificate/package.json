@@ -17,10 +17,6 @@
     },
     "dependencies": {
         "@nestjs/bull": "0.4.2",
-        "@nestjs/common": "8.1.1",
-        "@nestjs/core": "8.1.1",
-        "@nestjs/cqrs": "8.0.0",
-        "@nestjs/typeorm": "8.0.2",
         "bull": "3.29.3",
         "ethers": "5.3.1",
         "passport": "0.5.0",
@@ -29,10 +25,14 @@
         "cache-manager-ioredis": "2.1.0"
     },
     "devDependencies": {
-        "@energyweb/issuer": "4.1.1-alpha.1635152195.0",
-        "@energyweb/issuer-api": "0.4.1-alpha.1635152195.0",
-        "@energyweb/origin-backend-utils": "1.6.2-alpha.1635152195.0",
-        "@energyweb/utils-general": "11.0.5-alpha.1635152195.0",
+        "@energyweb/issuer": "4.1.1-alpha.1635328054.0",
+        "@energyweb/issuer-api": "0.4.1-alpha.1635328054.0",
+        "@energyweb/origin-backend-utils": "1.6.2-alpha.1635328054.0",
+        "@energyweb/utils-general": "11.0.5-alpha.1635328054.0",
+        "@nestjs/common": "8.1.1",
+        "@nestjs/core": "8.1.1",
+        "@nestjs/cqrs": "8.0.0",
+        "@nestjs/typeorm": "8.0.2",
         "@nestjs/passport": "8.0.1",
         "@nestjs/platform-express": "8.1.1",
         "@nestjs/testing": "8.1.1",
@@ -47,8 +47,12 @@
         "wait-on": "6.0.0"
     },
     "peerDependencies": {
-        "@energyweb/issuer": "4.1.1-alpha.1635152195.0",
-        "@energyweb/issuer-api": "0.4.1-alpha.1635152195.0"
+        "@nestjs/common": "8.1.1",
+        "@nestjs/core": "8.1.1",
+        "@nestjs/cqrs": "8.0.0",
+        "@nestjs/typeorm": "8.0.2",
+        "@energyweb/issuer": "4.1.1-alpha.1635328054.0",
+        "@energyweb/issuer-api": "0.4.1-alpha.1635328054.0"
     },
     "jest": {
         "moduleFileExtensions": [
