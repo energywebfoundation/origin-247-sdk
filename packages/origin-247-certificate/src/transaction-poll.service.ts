@@ -22,14 +22,19 @@ export class TransactionPollService {
 
     constructor(private queryBus: QueryBus) {}
 
-    public async waitForNewCertificates(txHash: string): Promise<Certificate[]> {
+    public async waitForNewCertificates(
+        txHash: string,
+        expectedCount: number
+    ): Promise<Certificate[]> {
         return await this.poll(txHash, async (hash) => {
             const result: Certificate[] = await this.queryBus.execute(
                 new GetCertificateByTxHashQuery(hash)
             );
 
-            if (result.length === 0) {
-                return new Error('Could not find certificate');
+            if (result.length !== expectedCount) {
+                return new Error(
+                    `Found ${result.length} certificates but expected ${expectedCount} for ${txHash}`
+                );
             }
 
             return result;
@@ -43,7 +48,7 @@ export class TransactionPollService {
             if (isPresent) {
                 delete this.processedTransactions[hash];
             } else {
-                return new Error('Transaction was not registered');
+                return new Error(`Transaction ${txHash} was not registered`);
             }
         });
     }

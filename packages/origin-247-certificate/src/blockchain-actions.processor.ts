@@ -64,7 +64,8 @@ export class BlockchainActionsProcessor {
                 );
 
                 const issuanceCertificates = await this.transactionPoll.waitForNewCertificates(
-                    issuanceTx.hash
+                    issuanceTx.hash,
+                    1
                 );
 
                 return issuanceCertificates[0];
@@ -119,7 +120,8 @@ export class BlockchainActionsProcessor {
                 );
 
                 const batchIssuanceCertificates = await this.transactionPoll.waitForNewCertificates(
-                    batchIssuanceTx.hash
+                    batchIssuanceTx.hash,
+                    batchIssuanceParams.certificates.length
                 );
 
                 return batchIssuanceCertificates.map((c) => c.id);
