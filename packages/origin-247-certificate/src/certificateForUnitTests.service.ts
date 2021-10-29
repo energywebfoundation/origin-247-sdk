@@ -122,6 +122,10 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
+        if (originalCertificates.length === 0) {
+            return [];
+        }
+
         const result = await Promise.all(
             originalCertificates.map((certificate) => this.issue(certificate))
         );
@@ -130,6 +134,12 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
     }
 
     public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
+        if (command.length === 0) {
+            return {
+                success: true
+            };
+        }
+
         const result = await Promise.all(command.map((claim) => this.claim(claim)));
 
         return {
@@ -138,6 +148,12 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
     }
 
     public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
+        if (command.length === 0) {
+            return {
+                success: true
+            };
+        }
+
         const result = await Promise.all(command.map((transfer) => this.transfer(transfer)));
 
         return {

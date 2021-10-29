@@ -91,6 +91,10 @@ export class CertificateService<T = null> {
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
+        if (originalCertificates.length === 0) {
+            return [];
+        }
+
         const certificates = originalCertificates.map(
             (certificate) =>
                 ({
@@ -116,6 +120,12 @@ export class CertificateService<T = null> {
     }
 
     public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
+        if (command.length === 0) {
+            return {
+                success: true
+            };
+        }
+
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: {
@@ -132,6 +142,12 @@ export class CertificateService<T = null> {
     }
 
     public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
+        if (command.length === 0) {
+            return {
+                success: true
+            };
+        }
+
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: {
