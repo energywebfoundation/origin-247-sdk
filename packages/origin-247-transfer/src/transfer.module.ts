@@ -2,7 +2,7 @@ import {
     CertificateModule,
     CertificateForUnitTestsModule
 } from '@energyweb/origin-247-certificate';
-import { Module, DynamicModule, CacheModule } from '@nestjs/common';
+import { Module, DynamicModule } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GenerationReadingStoredEventHandler } from './handlers/GenerationReadingStoredEvent.handler';
@@ -23,15 +23,12 @@ import { IssueService } from './issue.service';
 import { AwaitingValidationEventHandler } from './batch/validate.batch';
 import { AwaitingTransferEventHandler } from './batch/transfer.batch';
 import { AwaitingIssuanceEventHandler } from './batch/issue.batch';
-import { PersistanceService } from './persistance.service';
-import { parseRedisUrl } from './utils/parseRedisUrl';
 import {
     BatchConfiguration,
     BATCH_CONFIGURATION_TOKEN,
     defaultBatchConfiguration
 } from './batch/configuration';
 import { defaults } from 'lodash';
-import { CertificatePersistedHandler } from './handlers/CertificatePersisted.handler';
 
 export interface ITransferModuleParams {
     validateCommands: ValidateTransferCommandCtor[];
@@ -46,11 +43,10 @@ const batchHandlers = [
 
 const integrationHandlers = [
     GenerationReadingStoredEventHandler,
-    UpdateTransferValidationCommandHandler,
-    CertificatePersistedHandler
+    UpdateTransferValidationCommandHandler
 ];
 
-const services = [TransferService, IssueService, ValidateService, PersistanceService];
+const services = [TransferService, IssueService, ValidateService];
 
 @Module({})
 export class TransferModule {
@@ -77,22 +73,7 @@ export class TransferModule {
             imports: [
                 TypeOrmModule.forFeature([EnergyTransferRequestEntity]),
                 CqrsModule,
-                CertificateModule,
-                CacheModule.registerAsync({
-                    useFactory: async () => {
-                        const importedModule = await import('cache-manager-ioredis');
-                        const redisUrl = process.env.REDIS_URL;
-
-                        if (redisUrl && importedModule) {
-                            return {
-                                store: importedModule,
-                                ...parseRedisUrl(redisUrl)
-                            };
-                        }
-
-                        return {};
-                    }
-                })
+                CertificateModule
             ]
         };
     }
@@ -120,7 +101,7 @@ export class TransferModuleForUnitTest {
                     useValue: defaults(params.batchConfiguration ?? {}, defaultBatchConfiguration)
                 }
             ],
-            imports: [CqrsModule, CertificateForUnitTestsModule, CacheModule.register()]
+            imports: [CqrsModule, CertificateForUnitTestsModule]
         };
     }
 }

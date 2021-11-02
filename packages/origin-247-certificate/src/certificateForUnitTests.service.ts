@@ -7,21 +7,15 @@ import {
     ITransferCommand,
     ISuccessResponse,
     IIssuedCertificate,
-    IIssueCommandParams,
-    IBatchClaimCommand,
-    IBatchTransferCommand
+    IIssueCommandParams
 } from './types';
 import { Injectable } from '@nestjs/common';
-import { CertificatePersistedEvent } from './externals';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
-
 @Injectable()
 export class CertificateForUnitTestsService<T> implements PublicPart<CertificateService<T>> {
     private serial = 0;
     private db: ICertificate<T>[] = [];
-
-    constructor(private readonly eventBus: EventBus) {}
 
     public async getAll(): Promise<ICertificate<T>[]> {
         return [...this.db];
@@ -50,10 +44,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
             }
         };
 
-        setTimeout(() => {
-            this.db.push(certificate);
-            this.eventBus.publish(new CertificatePersistedEvent(certificate.id));
-        }, 2000);
+        this.db.push(certificate);
 
         return {
             ...certificate,

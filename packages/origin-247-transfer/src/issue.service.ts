@@ -9,7 +9,6 @@ import { EnergyTransferRequest, State } from './EnergyTransferRequest';
 import { chunk } from 'lodash';
 import { AwaitingValidationEvent } from './batch/validate.batch';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
-import { PersistanceService } from './persistance.service';
 
 @Injectable()
 export class IssueService {
@@ -20,8 +19,7 @@ export class IssueService {
         private etrRepository: EnergyTransferRequestRepository,
         @Inject(BATCH_CONFIGURATION_TOKEN)
         private batchConfiguration: BatchConfiguration,
-        private eventBus: EventBus,
-        private persistanceService: PersistanceService
+        private eventBus: EventBus
     ) {}
 
     public async issueTask() {
@@ -56,8 +54,7 @@ export class IssueService {
             );
 
             etrs.forEach((etr, index) => etr.issuanceFinished(results[index]));
-
-            await this.eventuallyPersistEtrs(etrs);
+            etrs.forEach((etr) => etr.persisted());
 
             await this.etrRepository.saveManyInTransaction(etrs);
 
@@ -66,27 +63,5 @@ export class IssueService {
             etrs.forEach((etr) => etr.issuanceError(e.message));
             await this.etrRepository.saveManyInTransaction(etrs);
         }
-    }
-
-    /**
-     * This function solves a problem of race condition between response from batchIssue and actual
-     * persistance in issuer-api.
-     */
-    private async eventuallyPersistEtrs(etrs: EnergyTransferRequest[]): Promise<void> {
-        const promises = etrs.map(async (e) => {
-            if (e.certificateId) {
-                const isTemporarilyPersisted = await this.persistanceService.isTemporarilyPersisted(
-                    e.certificateId
-                );
-
-                if (isTemporarilyPersisted) {
-                    e.persisted();
-                } else {
-                    await this.persistanceService.markTemporarilyPersisted(e.certificateId);
-                }
-            }
-        });
-
-        await Promise.all(promises);
     }
 }
