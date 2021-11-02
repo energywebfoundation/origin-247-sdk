@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.3](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.1.2...@energyweb/origin-247-certificate@2.1.3) (2021-11-02)
+
+
+### Bug Fixes
+
+* **origin-247-certificate:** properly process empty batches ([2914606](https://github.com/energywebfoundation/origin-247-sdk/commit/29146062fcd3d88cd8c2482e0a73a9ebb107ab73))
+
+
+
+
+
 ## [2.1.2](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.1.1...@energyweb/origin-247-certificate@2.1.2) (2021-10-18)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.7](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.6...@energyweb/origin-247-transfer@1.0.7) (2021-11-02)
+
+
+### Reverts
+
+* Revert "fix(origin-247-transfer): fix certificate persisted race condition" ([e9ab9ec](https://github.com/energywebfoundation/origin-247-sdk/commit/e9ab9ec9c514880bebdc0c41392fdb49cfcae129))
+
+
+
+
+
 ## [1.0.6](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.5...@energyweb/origin-247-transfer@1.0.6) (2021-10-19)
 
 
