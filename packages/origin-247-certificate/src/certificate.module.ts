@@ -8,6 +8,7 @@ import { CertificateService } from './certificate.service';
 import { BlockchainActionsProcessor } from './blockchain-actions.processor';
 import { CERTIFICATE_SERVICE_TOKEN } from './types';
 import { CertificateUpdatedHandler } from './certificate-updated.handler';
+import { EventedCertificateModule } from './evented-certificate/evented-certificate.module';
 
 const serviceProvider = {
     provide: CERTIFICATE_SERVICE_TOKEN,
@@ -33,7 +34,8 @@ const serviceProvider = {
             settings: {
                 lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
             }
-        })
+        }),
+        EventedCertificateModule
     ]
 })
 export class CertificateModule {}
