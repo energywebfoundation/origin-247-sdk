@@ -9,7 +9,13 @@ import { CERTIFICATE_COMMAND_REPOSITORY } from './repositories/CertificateComman
 import { CertificateCommandPostgresRepository } from './repositories/CertificateCommand/CertificateCommandPostgres.repository';
 import { CERTIFICATE_EVENT_REPOSITORY } from './repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventPostgresRepository } from './repositories/CertificateEvent/CertificateEventPostgres.repository';
-import { OffchainCertificateFacade } from './certificate.facade';
+import { OffchainCertificateService } from './offchain-certificate.service';
+import { CERTIFICATE_SERVICE_TOKEN } from 'src/types';
+
+const serviceProvider = {
+    provide: CERTIFICATE_SERVICE_TOKEN,
+    useClass: OffchainCertificateService
+};
 
 @Module({
     providers: [
@@ -24,9 +30,9 @@ import { OffchainCertificateFacade } from './certificate.facade';
             provide: CERTIFICATE_EVENT_REPOSITORY,
             useClass: CertificateEventPostgresRepository
         },
-        OffchainCertificateFacade
+        OffchainCertificateService
     ],
-    exports: [OffchainCertificateFacade],
+    exports: [serviceProvider],
     imports: [CqrsModule, CertificateModule]
 })
 export class OffchainCertificateModule {}

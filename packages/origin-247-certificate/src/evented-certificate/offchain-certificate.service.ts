@@ -27,7 +27,7 @@ import { CertificateCommandEntity } from './repositories/CertificateCommand/Cert
 
 type CertificateCommand = IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
 @Injectable()
-export class OffchainCertificateFacade<T = null> {
+export class OffchainCertificateService<T = null> {
     constructor(
         @Inject(CERTIFICATE_COMMAND_REPOSITORY)
         private readonly certCommandRepo: CertificateCommandRepository,
