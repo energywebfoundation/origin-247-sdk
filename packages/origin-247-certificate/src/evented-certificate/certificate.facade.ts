@@ -20,8 +20,10 @@ import {
 import {
     CertificateIssuedEvent,
     CertificateTransferredEvent,
-    CertificateClaimedEvent
+    CertificateClaimedEvent,
+    ICertificateEvent
 } from './events/Certificate.events';
+import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 
 type CertificateCommand = IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
 @Injectable()
@@ -34,7 +36,7 @@ export class OffchainCertificateFacade<T = null> {
         private readonly eventBus: EventBus
     ) {}
 
-    public async issue(params: IIssueCommandParams<T>): Promise<IIssuedCertificate<T>> {
+    public async issue(params: IIssueCommandParams<T>): Promise<number> {
         const command = {
             ...params,
             fromTime: Math.round(params.fromTime.getTime() / 1000),
@@ -43,74 +45,31 @@ export class OffchainCertificateFacade<T = null> {
 
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command); // this will probably throw
+        const event = new CertificateIssuedEvent(this.generateInternalCertificateId(), command);
+        this.propagate(event, savedCommand);
 
-        const internalCertId = this.generateInternalCertificateId();
-        const event = new CertificateIssuedEvent(internalCertId, command);
-
-        this.eventBus.publish(event);
-        this.certEventRepo.create({
-            internalCertificateId: event.internalCertificateId,
-            commandId: savedCommand.id,
-            type: event.type,
-            version: event.version,
-            payload: event.payload
-        });
-
-        const certificate: IIssuedCertificate<T> = {
-            claims: [],
-            myClaims: [],
-            creationBlockHash: '',
-            creationTime: Math.floor(Date.now() / 1000),
-            deviceId: params.deviceId,
-            generationStartTime: Math.floor(params.fromTime.getTime() / 1000),
-            generationEndTime: Math.floor(params.toTime.getTime() / 1000),
-            id: internalCertId,
-            issuedPrivately: false,
-            isOwned: true,
-            isClaimed: false,
-            metadata: params.metadata,
-            energy: {
-                privateVolume: '0',
-                claimedVolume: '0',
-                publicVolume: params.energyValue
-            }
-        };
-        return certificate;
+        return event.internalCertificateId;
     }
 
     public async claim(command: IClaimCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
         const event = new CertificateClaimedEvent(command.certificateId, command);
-        this.eventBus.publish(event);
-        this.certEventRepo.create({
-            internalCertificateId: command.certificateId,
-            commandId: savedCommand.id,
-            type: event.type,
-            version: event.version,
-            payload: event.payload
-        });
+        this.propagate(event, savedCommand);
     }
 
     public async transfer(command: ITransferCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
         const event = new CertificateTransferredEvent(command.certificateId, command);
-        this.eventBus.publish(event);
-        this.certEventRepo.create({
-            internalCertificateId: command.certificateId,
-            commandId: savedCommand.id,
-            type: event.type,
-            version: event.version,
-            payload: event.payload
-        });
+        this.propagate(event, savedCommand);
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
         const certs = Promise.all(
             originalCertificates.map(async (cert: IIssueCommandParams<T>) => {
-                const certificate = await this.issue(cert);
-                return certificate.id;
+                const certificateId = await this.issue(cert);
+                return certificateId;
             })
         );
         return certs;
@@ -138,5 +97,13 @@ export class OffchainCertificateFacade<T = null> {
     // TODO: use uuid
     private generateInternalCertificateId(): number {
         return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+    }
+
+    private async propagate(
+        event: ICertificateEvent,
+        command: CertificateCommandEntity
+    ): Promise<void> {
+        this.eventBus.publish(event);
+        this.certEventRepo.save(event, command.id);
     }
 }
