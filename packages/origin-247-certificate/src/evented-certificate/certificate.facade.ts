@@ -29,8 +29,6 @@ import {
     CertificateClaimedEvent
 } from './events/Certificate.events';
 
-const CertificateEventVersion = 1;
-
 type CertificateCommand = IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
 @Injectable()
 export class CertificateFacade<T = null> {
@@ -55,7 +53,7 @@ export class CertificateFacade<T = null> {
         this.validateCommand(command); // this will probably throw
 
         const internalCertId = this.generateInternalCertificateId();
-        const event = new CertificateIssuedEvent(internalCertId, CertificateEventVersion, command);
+        const event = new CertificateIssuedEvent(internalCertId, command);
 
         this.eventBus.publish(event);
         this.certEventRepo.create({
@@ -92,11 +90,7 @@ export class CertificateFacade<T = null> {
     public async claim(command: IClaimCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
-        const event = new CertificateClaimedEvent(
-            command.certificateId,
-            CertificateEventVersion,
-            command
-        );
+        const event = new CertificateClaimedEvent(command.certificateId, command);
         this.eventBus.publish(event);
         this.certEventRepo.create({
             internalCertificateId: command.certificateId,
@@ -111,11 +105,7 @@ export class CertificateFacade<T = null> {
     public async transfer(command: ITransferCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
-        const event = new CertificateTransferredEvent(
-            command.certificateId,
-            CertificateEventVersion,
-            command
-        );
+        const event = new CertificateTransferredEvent(command.certificateId, command);
         this.eventBus.publish(event);
         this.certEventRepo.create({
             internalCertificateId: command.certificateId,
