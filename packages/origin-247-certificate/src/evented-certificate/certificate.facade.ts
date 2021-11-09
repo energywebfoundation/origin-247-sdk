@@ -7,22 +7,16 @@ import {
     CERTIFICATE_EVENT_REPOSITORY,
     CertificateEventRepository
 } from './repositories/CertificateEvent/CertificateEvent.repository';
-import { CertificateService } from '../certificate.service';
-import { QueryBus, EventBus } from '@nestjs/cqrs';
-import { GetAllCertificatesQuery, GetCertificateQuery } from '@energyweb/issuer-api';
-import { CertificateEventType } from './events/Certificate.events';
+import { EventBus } from '@nestjs/cqrs';
 
 import {
-    ICertificate,
     IClaimCommand,
     IIssueCommand,
     ITransferCommand,
-    ISuccessResponse,
-    BlockchainActionType,
-    BlockchainAction,
     IIssuedCertificate,
     IIssueCommandParams
 } from '../types';
+
 import {
     CertificateIssuedEvent,
     CertificateTransferredEvent,
@@ -31,14 +25,12 @@ import {
 
 type CertificateCommand = IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
 @Injectable()
-export class CertificateFacade<T = null> {
+export class OffchainCertificateFacade<T = null> {
     constructor(
         @Inject(CERTIFICATE_COMMAND_REPOSITORY)
         private readonly certCommandRepo: CertificateCommandRepository,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
-        private readonly certService: CertificateService,
-        private readonly queryBus: QueryBus,
         private readonly eventBus: EventBus
     ) {}
 
