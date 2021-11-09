@@ -1,4 +1,4 @@
-import { CreateDateColumn, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 import { IIssueCommand, ITransferCommand, IClaimCommand } from '../../../types';
 import { CertificateEventType } from '../../events/Certificate.events';
 
@@ -9,6 +9,7 @@ export class CertificateEventEntity {
     @PrimaryGeneratedColumn()
     id: number;
 
+    @Index()
     @Column({ nullable: false })
     internalCertificateId: number;
 
@@ -21,7 +22,7 @@ export class CertificateEventEntity {
     @Column({ nullable: false })
     commandId: number;
 
-    @Column()
+    @Column({ enum: CertificateEventType })
     type: CertificateEventType;
 
     @Column()
