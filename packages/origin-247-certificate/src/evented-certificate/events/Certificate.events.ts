@@ -12,6 +12,13 @@ export enum CertificateEventType {
     ClaimPersisted = 'ClaimPersisted'
 }
 
+export interface ICertificateEvent {
+    type: CertificateEventType;
+    version: number;
+    internalCertificateId: number;
+    payload: IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
+}
+
 export class CertificateIssuedEvent implements IEvent {
     public readonly type = CertificateEventType.Issued;
     public readonly version = version;
