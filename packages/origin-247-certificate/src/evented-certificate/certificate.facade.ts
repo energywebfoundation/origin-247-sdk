@@ -89,7 +89,7 @@ export class CertificateFacade<T = null> {
         return certificate;
     }
 
-    public async claim(command: IClaimCommand): Promise<ISuccessResponse> {
+    public async claim(command: IClaimCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
         const event = new CertificateClaimedEvent(
@@ -106,10 +106,9 @@ export class CertificateFacade<T = null> {
             version: event.version,
             payload: event.payload
         });
-        return { success: true };
     }
 
-    public async transfer(command: ITransferCommand): Promise<ISuccessResponse> {
+    public async transfer(command: ITransferCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
         const event = new CertificateTransferredEvent(
@@ -126,7 +125,6 @@ export class CertificateFacade<T = null> {
             version: event.version,
             payload: event.payload
         });
-        return { success: true };
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -139,22 +137,20 @@ export class CertificateFacade<T = null> {
         return certs;
     }
 
-    public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
+    public async batchClaim(command: IClaimCommand[]): Promise<void> {
         await Promise.all(
             command.map(async (c: IClaimCommand) => {
                 await this.claim(c);
             })
         );
-        return { success: true };
     }
 
-    public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
+    public async batchTransfer(command: ITransferCommand[]): Promise<void> {
         await Promise.all(
             command.map(async (c: ITransferCommand) => {
                 await this.transfer(c);
             })
         );
-        return { success: true };
     }
 
     // TODO: add actual validation
