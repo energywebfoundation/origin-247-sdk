@@ -50,7 +50,6 @@ export class OffchainCertificateFacade<T = null> {
         this.eventBus.publish(event);
         this.certEventRepo.create({
             internalCertificateId: event.internalCertificateId,
-            blockchainCertificateId: null,
             commandId: savedCommand.id,
             type: event.type,
             version: event.version,
@@ -86,7 +85,6 @@ export class OffchainCertificateFacade<T = null> {
         this.eventBus.publish(event);
         this.certEventRepo.create({
             internalCertificateId: command.certificateId,
-            blockchainCertificateId: null,
             commandId: savedCommand.id,
             type: event.type,
             version: event.version,
@@ -101,7 +99,6 @@ export class OffchainCertificateFacade<T = null> {
         this.eventBus.publish(event);
         this.certEventRepo.create({
             internalCertificateId: command.certificateId,
-            blockchainCertificateId: null,
             commandId: savedCommand.id,
             type: event.type,
             version: event.version,

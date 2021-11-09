@@ -1,4 +1,5 @@
 import { CertificateEventEntity } from './CertificateEvent.entity';
+import { ICertificateEvent } from '../../events/Certificate.events';
 
 export const CERTIFICATE_EVENT_REPOSITORY = Symbol.for('CERTIFICATE_EVENT_REPOSITORY');
 
@@ -10,7 +11,6 @@ export interface FindOptions {
 export enum CertificateEventColumns {
     Id = 'id',
     internalCertificateId = 'internalCertificateId',
-    blockchainCertificateId = 'blockchainCertificateId',
     CommandId = 'commandId',
     CreatedAt = 'createdAt',
     Type = 'type',

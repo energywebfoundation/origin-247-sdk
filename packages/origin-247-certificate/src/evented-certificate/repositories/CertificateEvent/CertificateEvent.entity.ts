@@ -13,9 +13,6 @@ export class CertificateEventEntity {
     @Column({ nullable: false })
     internalCertificateId: number;
 
-    @Column({ nullable: true })
-    blockchainCertificateId: number | null;
-
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
