@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, Between, In } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { CertificateCommandEntity } from './CertificateCommand.entity';
 import {
