@@ -30,19 +30,6 @@ import { CertificateFacade } from './certificate.facade';
         CertificateFacade
     ],
     exports: [CertificateFacade],
-    imports: [
-        IssuerModule.register({
-            enableCertificationRequest: false,
-            enableTransactionLogging: true
-        }),
-        CqrsModule,
-        BullModule.registerQueue({
-            name: 'blockchain-actions',
-            settings: {
-                lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
-            }
-        }),
-        CertificateModule
-    ]
+    imports: [CqrsModule, CertificateModule]
 })
 export class EventedCertificateModule {}
