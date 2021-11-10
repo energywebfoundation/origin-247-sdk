@@ -1,4 +1,8 @@
-import { GetAllCertificatesQuery, GetCertificateQuery } from '@energyweb/issuer-api';
+import {
+    GetAllCertificatesQuery,
+    GetCertificateQuery,
+    IGetAllCertificatesOptions
+} from '@energyweb/issuer-api';
 import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
@@ -30,8 +34,8 @@ export class CertificateService<T = null> {
         private readonly blockchainActionsQueue: Queue<BlockchainAction>
     ) {}
 
-    public async getAll(): Promise<ICertificate<T>[]> {
-        const certificates = await this.queryBus.execute(new GetAllCertificatesQuery());
+    public async getAll(options: IGetAllCertificatesOptions = {}): Promise<ICertificate<T>[]> {
+        const certificates = await this.queryBus.execute(new GetAllCertificatesQuery(options));
 
         return certificates.map((c) => this.mapCertificate(c));
     }
