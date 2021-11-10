@@ -12,10 +12,6 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         private repository: Repository<CertificateEventEntity>
     ) {}
 
-    public async create(generation: NewCertificateEvent): Promise<CertificateEventEntity> {
-        return await this.repository.save(generation);
-    }
-
     public async getAll(): Promise<CertificateEventEntity[]> {
         return await this.repository.find();
     }
