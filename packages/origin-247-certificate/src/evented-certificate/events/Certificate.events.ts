@@ -16,7 +16,7 @@ export interface ICertificateEvent {
     type: CertificateEventType;
     version: number;
     internalCertificateId: number;
-    payload: IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
+    payload: unknown;
 }
 
 export class CertificateIssuedEvent implements IEvent {
@@ -46,7 +46,6 @@ export class CertificateIssuancePersistedEvent implements IEvent {
 
     constructor(
         public internalCertificateId: number,
-        public blockchainCertificateId: number,
         public payload: { blockchainCertificateId: number }
     ) {}
 }
@@ -55,20 +54,12 @@ export class CertificateTransferPersistedEvent implements IEvent {
     public readonly type = CertificateEventType.TransferPersisted;
     public readonly version = version;
 
-    constructor(
-        public internalCertificateId: number,
-        public blockchainCertificateId: number,
-        public payload: {}
-    ) {}
+    constructor(public internalCertificateId: number, public payload: {}) {}
 }
 
 export class CertificateClaimPersistedEvent implements IEvent {
     public readonly type = CertificateEventType.ClaimPersisted;
     public readonly version = version;
 
-    constructor(
-        public internalCertificateId: number,
-        public blockchainCertificateId: number,
-        public payload: {}
-    ) {}
+    constructor(public internalCertificateId: number, public payload: {}) {}
 }

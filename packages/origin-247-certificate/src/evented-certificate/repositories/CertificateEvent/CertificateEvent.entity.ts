@@ -26,5 +26,5 @@ export class CertificateEventEntity {
     version: number;
 
     @Column({ type: 'simple-json' })
-    payload: IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
+    payload: unknown;
 }
