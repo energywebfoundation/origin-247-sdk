@@ -47,7 +47,7 @@ export class CertificateIssuancePersistedEvent implements IEvent {
     constructor(
         public internalCertificateId: number,
         public blockchainCertificateId: number,
-        public payload: IIssueCommand<unknown>
+        public payload: { blockchainCertificateId: number }
     ) {}
 }
 
@@ -58,7 +58,7 @@ export class CertificateTransferPersistedEvent implements IEvent {
     constructor(
         public internalCertificateId: number,
         public blockchainCertificateId: number,
-        public payload: ITransferCommand
+        public payload: {}
     ) {}
 }
 
@@ -69,6 +69,6 @@ export class CertificateClaimPersistedEvent implements IEvent {
     constructor(
         public internalCertificateId: number,
         public blockchainCertificateId: number,
-        public payload: IClaimCommand
+        public payload: {}
     ) {}
 }
