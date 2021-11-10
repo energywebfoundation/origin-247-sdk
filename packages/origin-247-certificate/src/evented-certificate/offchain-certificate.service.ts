@@ -46,7 +46,7 @@ export class OffchainCertificateService<T = null> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command); // this will probably throw
         const event = new CertificateIssuedEvent(this.generateInternalCertificateId(), command);
-        this.propagate(event, savedCommand);
+        await this.propagate(event, savedCommand);
 
         return event.internalCertificateId;
     }
@@ -55,14 +55,14 @@ export class OffchainCertificateService<T = null> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
         const event = new CertificateClaimedEvent(command.certificateId, command);
-        this.propagate(event, savedCommand);
+        await this.propagate(event, savedCommand);
     }
 
     public async transfer(command: ITransferCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.create({ payload: command });
         this.validateCommand(command);
         const event = new CertificateTransferredEvent(command.certificateId, command);
-        this.propagate(event, savedCommand);
+        await this.propagate(event, savedCommand);
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -103,7 +103,7 @@ export class OffchainCertificateService<T = null> {
         event: ICertificateEvent,
         command: CertificateCommandEntity
     ): Promise<void> {
-        this.eventBus.publish(event);
-        this.certEventRepo.save(event, command.id);
+        await this.eventBus.publish(event);
+        await this.certEventRepo.save(event, command.id);
     }
 }
