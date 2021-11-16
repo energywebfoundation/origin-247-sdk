@@ -9,13 +9,7 @@ import {
 } from './repositories/CertificateEvent/CertificateEvent.repository';
 import { EventBus } from '@nestjs/cqrs';
 
-import {
-    IClaimCommand,
-    IIssueCommand,
-    ITransferCommand,
-    IIssuedCertificate,
-    IIssueCommandParams
-} from '../types';
+import { IClaimCommand, IIssueCommand, ITransferCommand, IIssueCommandParams } from '../types';
 
 import {
     CertificateIssuedEvent,
@@ -23,9 +17,11 @@ import {
     CertificateClaimedEvent,
     ICertificateEvent
 } from './events/Certificate.events';
-import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 
-type CertificateCommand = IIssueCommand<unknown> | ITransferCommand | IClaimCommand;
+import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
+import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
+import { CertificateAggregate } from './certificate.aggregate';
+
 @Injectable()
 export class OffchainCertificateService<T = null> {
     constructor(
@@ -33,7 +29,8 @@ export class OffchainCertificateService<T = null> {
         private readonly certCommandRepo: CertificateCommandRepository,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
-        private readonly eventBus: EventBus
+        private readonly eventBus: EventBus,
+        private readonly readModelRepo: CertificateReadModelRepository
     ) {}
 
     public async issue(params: IIssueCommandParams<T>): Promise<number> {
@@ -43,26 +40,26 @@ export class OffchainCertificateService<T = null> {
             toTime: Math.round(params.toTime.getTime() / 1000)
         } as IIssueCommand<T>;
 
-        const savedCommand = await this.certCommandRepo.create({ payload: command });
-        this.validateCommand(command); // this will probably throw
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
         const event = new CertificateIssuedEvent(this.generateInternalCertificateId(), command);
-        await this.propagate(event, savedCommand);
+        const aggregate = await this.createAggregate(event);
+        await this.propagate(event, savedCommand, aggregate);
 
         return event.internalCertificateId;
     }
 
     public async claim(command: IClaimCommand): Promise<void> {
-        const savedCommand = await this.certCommandRepo.create({ payload: command });
-        this.validateCommand(command);
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
         const event = new CertificateClaimedEvent(command.certificateId, command);
-        await this.propagate(event, savedCommand);
+        const aggregate = await this.createAggregate(event);
+        await this.propagate(event, savedCommand, aggregate);
     }
 
     public async transfer(command: ITransferCommand): Promise<void> {
-        const savedCommand = await this.certCommandRepo.create({ payload: command });
-        this.validateCommand(command);
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
         const event = new CertificateTransferredEvent(command.certificateId, command);
-        await this.propagate(event, savedCommand);
+        const aggregate = await this.createAggregate(event);
+        await this.propagate(event, savedCommand, aggregate);
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -91,19 +88,33 @@ export class OffchainCertificateService<T = null> {
         );
     }
 
-    // TODO: add actual validation
-    private validateCommand(command: CertificateCommand): void {}
+    private async createAggregate(event: ICertificateEvent): Promise<CertificateAggregate> {
+        const readModel = await this.readModelRepo.getByInternalCertificateId(
+            event.internalCertificateId
+        );
+        const aggregate: CertificateAggregate = readModel
+            ? CertificateAggregate.fromReadModel(readModel)
+            : CertificateAggregate.fromEvents([
+                  ...(await this.certEventRepo.getByInternalCertificateId(
+                      event.internalCertificateId
+                  )),
+                  event
+              ]);
 
-    // TODO: use uuid
+        return aggregate;
+    }
+
     private generateInternalCertificateId(): number {
-        return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
+        return new Date().getTime();
     }
 
     private async propagate(
         event: ICertificateEvent,
-        command: CertificateCommandEntity
+        command: CertificateCommandEntity,
+        aggregate: CertificateAggregate
     ): Promise<void> {
         await this.eventBus.publish(event);
         await this.certEventRepo.save(event, command.id);
+        await this.readModelRepo.save(aggregate.getCertificate());
     }
 }

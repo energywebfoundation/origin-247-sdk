@@ -33,7 +33,7 @@ export class CertificateReadModelPostgresRepository implements CertificateReadMo
         return found ?? null;
     }
 
-    async getManyByInternalCertificateId(
+    async getManyByInternalCertificateIds(
         internalCertificateIds: number[]
     ): Promise<CertificateReadModelEntity[]> {
         return await this.repository.find({

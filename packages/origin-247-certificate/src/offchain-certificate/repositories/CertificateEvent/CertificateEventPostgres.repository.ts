@@ -16,15 +16,14 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         return await this.repository.find();
     }
 
-    public async findByInternalCertificate(
+    public async getByInternalCertificateId(
         internalCertId: number
-    ): Promise<CertificateEventEntity | null> {
-        const found = await this.repository.findOne({
+    ): Promise<CertificateEventEntity[]> {
+        return await this.repository.find({
             where: {
                 internalCertificateId: internalCertId
             }
         });
-        return found ?? null;
     }
 
     public async save(

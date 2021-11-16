@@ -53,18 +53,6 @@ export class CertificateReadModelEntity implements ICertificateReadModel {
     @Column({ type: 'simple-json' })
     metadata: unknown;
 
-    @Column()
-    isClaimed: boolean;
-
-    @Column()
-    isOwned: boolean;
-
-    @Column()
-    issuedPrivately: false;
-
-    @Column({ type: 'simple-json' })
-    energy: IVolumeDistribution;
-
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 }

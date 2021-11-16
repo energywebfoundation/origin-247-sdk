@@ -22,6 +22,8 @@ export type NewCertificateEvent = Omit<CertificateEventEntity, 'id' | 'createdAt
 
 export interface CertificateEventRepository {
     save(event: ICertificateEvent, commandId: number): Promise<CertificateEventEntity>;
+
+    getByInternalCertificateId(internalCertId: number): Promise<CertificateEventEntity[]>;
+
     getAll(): Promise<CertificateEventEntity[]>;
-    findByInternalCertificate(internalCertId: number): Promise<CertificateEventEntity | null>;
 }

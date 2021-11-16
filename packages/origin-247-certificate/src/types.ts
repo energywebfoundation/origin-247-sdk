@@ -45,11 +45,7 @@ export interface ICertificateReadModel {
     creationTime: number;
     metadata: unknown;
     creationBlockHash: string;
-    energy: IVolumeDistribution;
-    isClaimed: boolean;
-    isOwned: boolean;
     claims: IClaim[];
-    issuedPrivately: false;
     owners: Record<string, string>;
     claimers: Record<string, string> | null;
 }
