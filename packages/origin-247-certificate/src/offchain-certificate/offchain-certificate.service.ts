@@ -115,6 +115,6 @@ export class OffchainCertificateService<T = null> {
     ): Promise<void> {
         await this.eventBus.publish(event);
         await this.certEventRepo.save(event, command.id);
-        await this.readModelRepo.save(aggregate.getCertificate());
+        await this.readModelRepo.save(aggregate.getCertificate()!);
     }
 }

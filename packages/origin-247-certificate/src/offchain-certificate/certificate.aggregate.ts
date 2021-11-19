@@ -18,7 +18,7 @@ interface FromReadModel extends ConstructorParams {
     events: never;
 }
 export class CertificateAggregate {
-    private certificate: ICertificateReadModel;
+    private certificate: ICertificateReadModel | null = null;
 
     private constructor(params: FromEvents | FromReadModel) {
         if (params.events) {
@@ -46,7 +46,7 @@ export class CertificateAggregate {
         }
     }
 
-    public getCertificate(): ICertificateReadModel {
+    public getCertificate(): ICertificateReadModel | null {
         return this.certificate;
     }
 
@@ -88,31 +88,41 @@ export class CertificateAggregate {
 
         const { fromAddress, toAddress, energyValue } = event.payload;
 
-        const fromBalance = BigNumber.from(this.certificate.owners[fromAddress] ?? '0');
-        const toBalance = BigNumber.from(this.certificate.owners[toAddress] ?? '0');
+        const fromBalance = BigNumber.from(this.certificate!.owners[fromAddress] ?? '0');
+        const toBalance = BigNumber.from(this.certificate!.owners[toAddress] ?? '0');
 
         const transferVolume = BigNumber.from(energyValue ?? '0');
         const newFromBalance = fromBalance.sub(transferVolume);
         const newToBalance = toBalance.add(transferVolume);
 
-        this.certificate.owners[fromAddress] = newFromBalance.toString();
-        this.certificate.owners[toAddress] = newToBalance.toString();
+        this.certificate!.owners[fromAddress] = newFromBalance.toString();
+        this.certificate!.owners[toAddress] = newToBalance.toString();
     }
 
     private claim(event: CertificateClaimedEvent): void {
         this.validateClaim(event);
 
-        const { forAddress, energyValue } = event.payload;
+        const { forAddress, energyValue, claimData } = event.payload;
         // claims happen for same address
         const transferVolume = BigNumber.from(energyValue ?? '0');
-        const unclaimedBalance = BigNumber.from(this.certificate.owners[forAddress]);
-        const claimedBalance = BigNumber.from(this.certificate.claimers ? [forAddress] : '0');
+        const unclaimedBalance = BigNumber.from(this.certificate!.owners[forAddress]);
+        const claimedBalance = BigNumber.from(
+            this.certificate!.claimers![forAddress] ? this.certificate!.claimers![forAddress] : '0'
+        );
 
         const newUnclaimedBalance = unclaimedBalance.sub(transferVolume);
         const newClaimedBalance = claimedBalance.add(transferVolume);
 
-        this.certificate.owners[forAddress] = newUnclaimedBalance.toString();
-        this.certificate.claimers![forAddress] = newUnclaimedBalance.toString();
+        this.certificate!.owners[forAddress] = newUnclaimedBalance.toString();
+        this.certificate!.claimers![forAddress] = newClaimedBalance.toString();
+        this.certificate!.claims.push({
+            id: event.internalCertificateId,
+            from: forAddress,
+            to: forAddress,
+            topic: '',
+            value: energyValue ?? '0',
+            claimData: claimData
+        });
     }
 
     private validateTransfer(event: CertificateTransferredEvent): void {
@@ -161,7 +171,7 @@ export class CertificateAggregate {
     }
 
     private isIssued(): boolean {
-        return this.certificate.internalCertificateId !== undefined;
+        return this.certificate?.internalCertificateId !== undefined;
     }
 
     private isZeroAddress(address: string): boolean {
@@ -169,7 +179,10 @@ export class CertificateAggregate {
     }
 
     private hasEnoughBalance(address: string, volume: string): boolean {
-        const addressBalance = this.certificate.owners[address];
-        return !addressBalance || BigNumber.from(addressBalance).lt(BigNumber.from(volume));
+        const addressBalance = this.certificate?.owners[address];
+        return (
+            addressBalance !== undefined &&
+            BigNumber.from(addressBalance).gte(BigNumber.from(volume))
+        );
     }
 }
