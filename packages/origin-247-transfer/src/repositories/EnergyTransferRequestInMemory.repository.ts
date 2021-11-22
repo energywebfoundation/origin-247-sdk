@@ -36,8 +36,8 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
         return request ?? null;
     }
 
-    public async findByState(state: State): Promise<EnergyTransferRequest[]> {
-        return this.db.filter((e) => e.toAttrs().state === state);
+    public async findByState(state: State, limit: number): Promise<EnergyTransferRequest[]> {
+        return this.db.filter((e) => e.toAttrs().state === state).slice(0, limit);
     }
 
     public async findById(id: number): Promise<EnergyTransferRequest | null> {

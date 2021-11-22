@@ -7,7 +7,7 @@ export interface EnergyTransferRequestRepository {
     findByCertificateId(certificateId: number): Promise<EnergyTransferRequest | null>;
     findById(id: number): Promise<EnergyTransferRequest | null>;
     findAll(): Promise<EnergyTransferRequest[]>;
-    findByState(status: State): Promise<EnergyTransferRequest[]>;
+    findByState(status: State, limit: number): Promise<EnergyTransferRequest[]>;
     save(entity: EnergyTransferRequest): Promise<void>;
     saveManyInTransaction(entity: EnergyTransferRequest[]): Promise<void>;
     updateWithLock(id: number, cb: (entity: EnergyTransferRequest) => void): Promise<void>;

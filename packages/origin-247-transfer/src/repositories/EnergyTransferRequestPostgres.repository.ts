@@ -55,9 +55,10 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
         return request ? EnergyTransferRequest.fromAttrs(request) : null;
     }
 
-    public async findByState(state: State): Promise<EnergyTransferRequest[]> {
+    public async findByState(state: State, limit: number): Promise<EnergyTransferRequest[]> {
         const results = await this.repository.find({
-            state
+            where: { state },
+            take: limit
         });
 
         return results.map(EnergyTransferRequest.fromAttrs);
