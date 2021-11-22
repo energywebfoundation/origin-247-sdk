@@ -110,7 +110,7 @@ dependencies:
   '@nomiclabs/hardhat-ethers': 2.0.2_ethers@5.3.1+hardhat@2.6.4
   '@nomiclabs/hardhat-waffle': 2.0.1_e287bdd856f41d76f4d514aeeec101d1
   '@rush-temp/247-matching-demo': file:projects/247-matching-demo.tgz
-  '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_63d06b51a1e8ca27b2a47da6c1fc41f0
+  '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c
   '@rush-temp/origin-247-claim': file:projects/origin-247-claim.tgz_e1b6b095d9b08b2fe53e813c4c2c16ed
   '@rush-temp/origin-247-energy-api': file:projects/origin-247-energy-api.tgz_c70c36eb34bb288ea7f47d1c20b8c460
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.5.0
@@ -13598,8 +13598,8 @@ packages:
       - webpack-dev-server
     dev: false
 
-  file:projects/origin-247-certificate.tgz_63d06b51a1e8ca27b2a47da6c1fc41f0:
-    resolution: {integrity: sha512-ZVvU/6N8XitHRSwJv9cshkZKXnN3K6vvOeliJZeJAteRfDyBptgEaE8R42gIa0QzkJuiSP+KzS9I2V5SAWjfBQ==, tarball: file:projects/origin-247-certificate.tgz}
+  file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c:
+    resolution: {integrity: sha512-LRVYkdv0xt5Qb9jfISlG/uVhxN1Yj38gZ77r4IOK4VDrhqmvBmGkRLea+19dLy9lD21X81FsdYoOpkOOHPRyUg==, tarball: file:projects/origin-247-certificate.tgz}
     id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
@@ -13628,6 +13628,7 @@ packages:
       passport: 0.5.0
       pg: 8.7.1
       ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
+      ts-node: 9.1.1_typescript@4.3.4
       typeorm: 0.2.39_pg@8.7.1
       typescript: 4.3.4
       wait-on: 6.0.0
@@ -13660,7 +13661,6 @@ packages:
       - sqlite3
       - supports-color
       - swagger-ui-express
-      - ts-node
       - typeorm-aurora-data-api-driver
       - utf-8-validate
     dev: false

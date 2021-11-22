@@ -9,6 +9,27 @@ import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { CertificateModule, CertificateService, CERTIFICATE_SERVICE_TOKEN } from '../src';
 import { entities as IssuerEntities } from '@energyweb/issuer-api';
 import { PassportModule } from '@nestjs/passport';
+import {
+    CertificateEventRepository,
+    CERTIFICATE_EVENT_REPOSITORY
+} from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
+import {
+    CertificateReadModelRepository,
+    CERTIFICATE_READ_MODEL_REPOSITORY
+} from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
+import {
+    CertificateCommandRepository,
+    CERTIFICATE_COMMAND_REPOSITORY
+} from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.repository';
+
+import {
+    OffchainCertificateModule,
+    OffchainCertificateService,
+    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
+} from '../src';
+import { CertificateEventEntity } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.entity';
+import { CertificateReadModelEntity } from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
+import { CertificateCommandEntity } from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.entity';
 
 const testLogger = new Logger('e2e');
 
@@ -57,10 +78,16 @@ export const bootstrapTestInstance: any = async () => {
                 username: process.env.DB_USERNAME ?? 'postgres',
                 password: process.env.DB_PASSWORD ?? 'postgres',
                 database: process.env.DB_DATABASE ?? 'origin',
-                entities: IssuerEntities,
                 logging: ['info'],
-                keepConnectionAlive: true
+                keepConnectionAlive: true,
+                entities: [
+                    ...IssuerEntities,
+                    CertificateEventEntity,
+                    CertificateCommandEntity,
+                    CertificateReadModelEntity
+                ]
             }),
+            OffchainCertificateModule,
             CertificateModule,
             QueueingModule(),
             BlockchainPropertiesModule,
@@ -76,7 +103,18 @@ export const bootstrapTestInstance: any = async () => {
     const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(
         BlockchainPropertiesService
     );
-
+    const certificateEventRepository = await app.resolve<CertificateEventRepository>(
+        CERTIFICATE_EVENT_REPOSITORY
+    );
+    const certificateReadModelRepository = await app.resolve<CertificateReadModelRepository>(
+        CERTIFICATE_READ_MODEL_REPOSITORY
+    );
+    const offchainCertificateService = await app.resolve<OffchainCertificateService>(
+        OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
+    );
+    const certificateCommandRepository = await app.resolve<CertificateCommandRepository>(
+        CERTIFICATE_COMMAND_REPOSITORY
+    );
     const blockchainProperties = await blockchainPropertiesService.create(
         provider.network.chainId,
         registry.address,
@@ -101,6 +139,10 @@ export const bootstrapTestInstance: any = async () => {
     return {
         databaseService,
         certificateService,
+        certificateEventRepository,
+        certificateCommandRepository,
+        certificateReadModelRepository,
+        offchainCertificateService,
         app
     };
 };

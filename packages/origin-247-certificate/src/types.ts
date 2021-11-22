@@ -125,3 +125,4 @@ export type BlockchainAction =
     | IAction<BlockchainActionType.BatchClaim, IBatchClaimCommand>;
 
 export const CERTIFICATE_SERVICE_TOKEN = Symbol.for('CERTIFICATE_SERVICE_TOKEN');
+export const OFFCHAIN_CERTIFICATE_SERVICE_TOKEN = Symbol.for('OFFCHAIN_CERTIFICATE_SERVICE_TOKEN');

@@ -19,7 +19,10 @@ import {
 } from './events/Certificate.events';
 
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
-import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
+import {
+    CertificateReadModelRepository,
+    CERTIFICATE_READ_MODEL_REPOSITORY
+} from './repositories/CertificateReadModel/CertificateReadModel.repository';
 import { CertificateAggregate } from './certificate.aggregate';
 
 @Injectable()
@@ -30,6 +33,7 @@ export class OffchainCertificateService<T = null> {
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
         private readonly eventBus: EventBus,
+        @Inject(CERTIFICATE_READ_MODEL_REPOSITORY)
         private readonly readModelRepo: CertificateReadModelRepository
     ) {}
 
@@ -72,35 +76,36 @@ export class OffchainCertificateService<T = null> {
         return certs;
     }
 
-    public async batchClaim(command: IClaimCommand[]): Promise<void> {
-        await Promise.all(
-            command.map(async (c: IClaimCommand) => {
-                await this.claim(c);
-            })
-        );
+    public async batchClaim(commands: IClaimCommand[]): Promise<void> {
+        for (const command of commands) {
+            await this.claim(command);
+        }
     }
 
-    public async batchTransfer(command: ITransferCommand[]): Promise<void> {
-        await Promise.all(
-            command.map(async (c: ITransferCommand) => {
-                await this.transfer(c);
-            })
-        );
+    public async batchTransfer(commands: ITransferCommand[]): Promise<void> {
+        for (const command of commands) {
+            await this.transfer(command);
+        }
     }
 
     private async createAggregate(event: ICertificateEvent): Promise<CertificateAggregate> {
         const readModel = await this.readModelRepo.getByInternalCertificateId(
             event.internalCertificateId
         );
-        const aggregate: CertificateAggregate = readModel
-            ? CertificateAggregate.fromReadModel(readModel)
-            : CertificateAggregate.fromEvents([
-                  ...(await this.certEventRepo.getByInternalCertificateId(
-                      event.internalCertificateId
-                  )),
-                  event
-              ]);
 
+        let aggregate: CertificateAggregate;
+
+        if (readModel) {
+            aggregate = CertificateAggregate.fromReadModel(readModel);
+            aggregate.apply(event);
+        } else {
+            aggregate = CertificateAggregate.fromEvents([
+                ...(await this.certEventRepo.getByInternalCertificateId(
+                    event.internalCertificateId
+                )),
+                event
+            ]);
+        }
         return aggregate;
     }
 

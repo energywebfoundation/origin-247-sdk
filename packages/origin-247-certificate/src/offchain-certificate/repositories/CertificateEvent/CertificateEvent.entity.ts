@@ -1,6 +1,6 @@
 import { CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
-import { IIssueCommand, ITransferCommand, IClaimCommand } from '../../../types';
 import { CertificateEventType } from '../../events/Certificate.events';
+import { bigintTransformer } from '../utils';
 
 export const tableName = 'certificate_event';
 
@@ -10,7 +10,7 @@ export class CertificateEventEntity {
     id: number;
 
     @Index()
-    @Column({ nullable: false })
+    @Column({ nullable: false, type: 'bigint', transformer: bigintTransformer })
     internalCertificateId: number;
 
     @CreateDateColumn({ type: 'timestamptz' })
