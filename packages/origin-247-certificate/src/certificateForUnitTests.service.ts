@@ -30,10 +30,10 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
         return this.db.filter((entry) => {
             const isDateOk =
                 new Date(entry.generationStartTime * 1000) >= generationStartFrom &&
-                new Date(entry.generationStartTime * 1000) <= generationStartTo;
-            new Date(entry.generationEndTime * 1000) >= generationEndFrom &&
-                new Date(entry.generationEndTime * 1000) <= generationEndTo;
-            new Date(entry.creationTime * 1000) >= creationTimeFrom &&
+                new Date(entry.generationStartTime * 1000) <= generationStartTo &&
+                new Date(entry.generationEndTime * 1000) >= generationEndFrom &&
+                new Date(entry.generationEndTime * 1000) <= generationEndTo &&
+                new Date(entry.creationTime * 1000) >= creationTimeFrom &&
                 new Date(entry.creationTime * 1000) <= creationTimeTo;
 
             const isDeviceOk = deviceId ? entry.deviceId === entry.deviceId : true;
