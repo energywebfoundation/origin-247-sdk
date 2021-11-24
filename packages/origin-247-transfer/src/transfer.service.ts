@@ -22,10 +22,9 @@ export class TransferService {
     ) {}
 
     public async transferTask() {
-        const etrs = await this.etrRepository.findByState(
-            State.TransferAwaiting,
-            this.batchConfiguration.transferBatchSize
-        );
+        const etrs = await this.etrRepository.findByState(State.TransferAwaiting, {
+            limit: this.batchConfiguration.transferBatchSize
+        });
 
         await this.transferCertificates(etrs);
 

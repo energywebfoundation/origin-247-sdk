@@ -22,10 +22,9 @@ export class IssueService {
     ) {}
 
     public async issueTask() {
-        const etrs = await this.etrRepository.findByState(
-            State.IssuanceAwaiting,
-            this.batchConfiguration.issueBatchSize
-        );
+        const etrs = await this.etrRepository.findByState(State.IssuanceAwaiting, {
+            limit: this.batchConfiguration.issueBatchSize
+        });
 
         await this.issueCertificates(etrs);
 

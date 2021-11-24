@@ -3,8 +3,10 @@ import { InjectRepository, InjectConnection } from '@nestjs/typeorm';
 import { Repository, Connection } from 'typeorm';
 import { EnergyTransferRequest, NewAttributesParams, State } from '../EnergyTransferRequest';
 import { EnergyTransferRequestEntity, tableName } from './EnergyTransferRequest.entity';
-import { EnergyTransferRequestRepository } from './EnergyTransferRequest.repository';
-import { omit } from 'lodash';
+import {
+    EnergyTransferRequestRepository,
+    IFindByStateOptions
+} from './EnergyTransferRequest.repository';
 
 @Injectable()
 export class EnergyTransferRequestPostgresRepository implements EnergyTransferRequestRepository {
@@ -55,10 +57,13 @@ export class EnergyTransferRequestPostgresRepository implements EnergyTransferRe
         return request ? EnergyTransferRequest.fromAttrs(request) : null;
     }
 
-    public async findByState(state: State, limit: number): Promise<EnergyTransferRequest[]> {
+    public async findByState(
+        state: State,
+        options: IFindByStateOptions
+    ): Promise<EnergyTransferRequest[]> {
         const results = await this.repository.find({
             where: { state },
-            take: limit
+            take: options.limit
         });
 
         return results.map(EnergyTransferRequest.fromAttrs);

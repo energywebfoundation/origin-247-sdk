@@ -40,10 +40,9 @@ export class ValidateService {
     ) {}
 
     public async validateTask(): Promise<void> {
-        const etrs = await this.etrRepository.findByState(
-            State.ValidationAwaiting,
-            this.batchConfiguration.validateBatchSize
-        );
+        const etrs = await this.etrRepository.findByState(State.ValidationAwaiting, {
+            limit: this.batchConfiguration.validateBatchSize
+        });
 
         await this.startValidation(etrs);
 
