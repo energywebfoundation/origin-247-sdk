@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.2.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.1.3...@energyweb/origin-247-certificate@2.2.0) (2021-11-24)
+
+
+### Bug Fixes
+
+* **origin-247-certificate:** fix certificateForUnitTests filtering ([186d128](https://github.com/energywebfoundation/origin-247-sdk/commit/186d1282c951af9ec678e4ea178146893837f63d))
+* **origin-247-certificate:** handle getAll in certificate service for unit tests ([5cfaea4](https://github.com/energywebfoundation/origin-247-sdk/commit/5cfaea45155242ddef32fd196c49355265658a2c))
+
+
+### Features
+
+* **origin-247-certificate:** add support for certificates `getAll` query ([602e4f2](https://github.com/energywebfoundation/origin-247-sdk/commit/602e4f257b2af610cf56263b55cc43090085d7e3))
+
+
+
+
+
 ## [2.1.3](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.1.2...@energyweb/origin-247-certificate@2.1.3) (2021-11-02)
 
 

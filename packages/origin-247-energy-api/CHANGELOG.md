@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.2.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@0.1.2...@energyweb/origin-247-energy-api@0.2.0) (2021-11-24)
+
+
+### Features
+
+* **origin-247-certificate:** add support for certificates `getAll` query ([602e4f2](https://github.com/energywebfoundation/origin-247-sdk/commit/602e4f257b2af610cf56263b55cc43090085d7e3))
+
+
+
+
+
 ## [0.1.2](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@0.1.1...@energyweb/origin-247-energy-api@0.1.2) (2021-11-02)
 
 **Note:** Version bump only for package @energyweb/origin-247-energy-api
