@@ -7,29 +7,15 @@ import {
 import { IIssueCommand, ICertificateReadModel } from '../types';
 import { CertificateErrors } from './errors';
 import { BigNumber } from 'ethers';
+import { compareDates } from '../utils/date-utils';
 
-interface ConstructorParams {}
-interface FromEvents extends ConstructorParams {
-    events: ICertificateEvent[];
-    cert: never;
-}
-interface FromReadModel extends ConstructorParams {
-    cert: ICertificateReadModel;
-    events: never;
-}
 export class CertificateAggregate {
     private certificate: ICertificateReadModel | null = null;
 
-    private constructor(params: FromEvents | FromReadModel) {
-        if (params.events) {
-            params.events
-                .sort((first, second) => {
-                    return first.internalCertificateId - second.internalCertificateId;
-                })
-                .forEach((event) => this.apply(event));
-        } else {
-            this.certificate = params.cert;
-        }
+    private constructor(events: ICertificateEvent[]) {
+        events
+            .sort((first, second) => compareDates(first.createdAt, second.createdAt))
+            .forEach((event) => this.apply(event));
     }
 
     public apply(event: ICertificateEvent): void {
@@ -50,12 +36,8 @@ export class CertificateAggregate {
         return this.certificate;
     }
 
-    public static fromReadModel(certificate: ICertificateReadModel): CertificateAggregate {
-        return new CertificateAggregate({ cert: certificate } as FromReadModel);
-    }
-
     public static fromEvents(events: ICertificateEvent[]): CertificateAggregate {
-        return new CertificateAggregate({ events: events } as FromEvents);
+        return new CertificateAggregate(events);
     }
 
     private issue(event: ICertificateEvent): void {
@@ -91,7 +73,7 @@ export class CertificateAggregate {
         const fromBalance = BigNumber.from(this.certificate!.owners[fromAddress] ?? '0');
         const toBalance = BigNumber.from(this.certificate!.owners[toAddress] ?? '0');
 
-        const transferVolume = BigNumber.from(energyValue ?? '0');
+        const transferVolume = BigNumber.from(energyValue ?? fromBalance);
         const newFromBalance = fromBalance.sub(transferVolume);
         const newToBalance = toBalance.add(transferVolume);
 
@@ -104,11 +86,12 @@ export class CertificateAggregate {
 
         const { forAddress, energyValue, claimData } = event.payload;
         // claims happen for same address
-        const transferVolume = BigNumber.from(energyValue ?? '0');
+
         const unclaimedBalance = BigNumber.from(this.certificate!.owners[forAddress]);
         const claimedBalance = BigNumber.from(
             this.certificate!.claimers![forAddress] ? this.certificate!.claimers![forAddress] : '0'
         );
+        const transferVolume = BigNumber.from(energyValue ?? unclaimedBalance);
 
         const newUnclaimedBalance = unclaimedBalance.sub(transferVolume);
         const newClaimedBalance = claimedBalance.add(transferVolume);
@@ -120,7 +103,7 @@ export class CertificateAggregate {
             from: forAddress,
             to: forAddress,
             topic: '',
-            value: energyValue ?? '0',
+            value: transferVolume.toString(),
             claimData: claimData
         });
     }
@@ -143,7 +126,12 @@ export class CertificateAggregate {
             throw new CertificateErrors.Transfer.ToZeroAddress(internalCertificateId);
         }
 
-        if (!this.hasEnoughBalance(fromAddress, energyValue ?? '0')) {
+        if (
+            !this.hasEnoughBalance(
+                fromAddress,
+                energyValue ?? this.certificate!.owners[fromAddress]
+            )
+        ) {
             throw new CertificateErrors.Transfer.NotEnoughBalance(
                 internalCertificateId,
                 fromAddress
@@ -165,7 +153,9 @@ export class CertificateAggregate {
             throw new CertificateErrors.Claim.ForZeroAddress(internalCertificateId);
         }
 
-        if (!this.hasEnoughBalance(forAddress, energyValue ?? '0')) {
+        if (
+            !this.hasEnoughBalance(forAddress, energyValue ?? this.certificate!.owners[forAddress])
+        ) {
             throw new CertificateErrors.Claim.NotEnoughBalance(internalCertificateId, forAddress);
         }
     }

@@ -84,4 +84,46 @@ describe('CertificateEventRepository', () => {
 
         expect(certs).toHaveLength(2);
     });
+
+    it('should return the number of issued certificates', async () => {
+        let issuedCerts = await certificateEventRepository.getNumberOfCertificates();
+        expect(issuedCerts).toBe(0);
+
+        const event = new CertificateIssuedEvent(issuedCerts + 1, {
+            toAddress: '0x1',
+            toTime: new Date().getTime(),
+            fromTime: new Date().getTime(),
+            energyValue: '100',
+            userId: 'user1',
+            deviceId: 'asdf',
+            metadata: {}
+        });
+        await certificateEventRepository.save(event, 1);
+        issuedCerts = await certificateEventRepository.getNumberOfCertificates();
+        expect(issuedCerts).toBe(1);
+
+        const otherEvent = new CertificateTransferredEvent(1, {
+            toAddress: '0x1',
+            certificateId: 1,
+            energyValue: '100',
+            fromAddress: '0x2'
+        });
+        await certificateEventRepository.save(otherEvent, 2);
+
+        issuedCerts = await certificateEventRepository.getNumberOfCertificates();
+        expect(issuedCerts).toBe(1);
+
+        const anotherEvent = new CertificateIssuedEvent(issuedCerts + 1, {
+            toAddress: '0x1',
+            toTime: new Date().getTime(),
+            fromTime: new Date().getTime(),
+            energyValue: '100',
+            userId: 'user1',
+            deviceId: 'asdf',
+            metadata: {}
+        });
+        await certificateEventRepository.save(anotherEvent, 3);
+        issuedCerts = await certificateEventRepository.getNumberOfCertificates();
+        expect(issuedCerts).toBe(2);
+    });
 });

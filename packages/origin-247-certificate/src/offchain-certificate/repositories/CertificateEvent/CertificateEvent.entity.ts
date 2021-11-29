@@ -10,10 +10,10 @@ export class CertificateEventEntity {
     id: number;
 
     @Index()
-    @Column({ nullable: false, type: 'bigint', transformer: bigintTransformer })
+    @Column({ nullable: false })
     internalCertificateId: number;
 
-    @CreateDateColumn({ type: 'timestamptz' })
+    @Column({ type: 'timestamptz' })
     createdAt: Date;
 
     @Column({ nullable: false })

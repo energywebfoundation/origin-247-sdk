@@ -68,4 +68,10 @@ export namespace CertificateErrors {
             }
         }
     }
+
+    export class BatchError extends Error {
+        constructor(originError: Error) {
+            super(`Batch operation failed. Failing operation message: ${originError.message}`);
+        }
+    }
 }

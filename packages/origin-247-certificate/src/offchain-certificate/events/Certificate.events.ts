@@ -17,11 +17,13 @@ export interface ICertificateEvent {
     version: number;
     internalCertificateId: number;
     payload: unknown;
+    createdAt: Date;
 }
 
 export class CertificateIssuedEvent implements IEvent {
     public readonly type = CertificateEventType.Issued;
     public readonly version = version;
+    public readonly createdAt = new Date();
 
     constructor(public internalCertificateId: number, public payload: IIssueCommand<unknown>) {}
 }
@@ -29,6 +31,7 @@ export class CertificateIssuedEvent implements IEvent {
 export class CertificateTransferredEvent implements IEvent {
     public readonly type = CertificateEventType.Transferred;
     public readonly version = version;
+    public readonly createdAt = new Date();
 
     constructor(public internalCertificateId: number, public payload: ITransferCommand) {}
 }
@@ -36,6 +39,7 @@ export class CertificateTransferredEvent implements IEvent {
 export class CertificateClaimedEvent implements IEvent {
     public readonly type = CertificateEventType.Claimed;
     public readonly version = version;
+    public readonly createdAt = new Date();
 
     constructor(public internalCertificateId: number, public payload: IClaimCommand) {}
 }
@@ -43,6 +47,7 @@ export class CertificateClaimedEvent implements IEvent {
 export class CertificateIssuancePersistedEvent implements IEvent {
     public readonly type = CertificateEventType.IssuancePersisted;
     public readonly version = version;
+    public readonly createdAt = new Date();
 
     constructor(
         public internalCertificateId: number,
@@ -53,6 +58,7 @@ export class CertificateIssuancePersistedEvent implements IEvent {
 export class CertificateTransferPersistedEvent implements IEvent {
     public readonly type = CertificateEventType.TransferPersisted;
     public readonly version = version;
+    public readonly createdAt = new Date();
 
     constructor(public internalCertificateId: number, public payload: {}) {}
 }
@@ -60,6 +66,7 @@ export class CertificateTransferPersistedEvent implements IEvent {
 export class CertificateClaimPersistedEvent implements IEvent {
     public readonly type = CertificateEventType.ClaimPersisted;
     public readonly version = version;
+    public readonly createdAt = new Date();
 
     constructor(public internalCertificateId: number, public payload: {}) {}
 }

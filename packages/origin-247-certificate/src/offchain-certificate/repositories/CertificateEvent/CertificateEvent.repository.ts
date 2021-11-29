@@ -26,4 +26,6 @@ export interface CertificateEventRepository {
     getByInternalCertificateId(internalCertId: number): Promise<CertificateEventEntity[]>;
 
     getAll(): Promise<CertificateEventEntity[]>;
+
+    getNumberOfCertificates(): Promise<number>;
 }

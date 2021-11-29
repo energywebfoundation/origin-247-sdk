@@ -16,6 +16,7 @@ describe('CertificateReadModelRepository', () => {
         ({ app, databaseService, certificateReadModelRepository } = await bootstrapTestInstance());
 
         await app.init();
+        await databaseService.cleanUp();
     });
 
     afterAll(async () => {
@@ -49,6 +50,7 @@ describe('CertificateReadModelRepository', () => {
         };
         await certificateReadModelRepository.save(certificateReadModel);
         const saved = await certificateReadModelRepository.getByInternalCertificateId(1);
+
         expect(saved).toMatchObject(certificateReadModel);
     });
 
