@@ -7,6 +7,7 @@ export class ReadingProofProcessedEvent implements IEvent {
         public readings: {
             timestamp: Date;
             value: string;
+            proofLeafHash: string;
         }[]
     ) {}
 }
