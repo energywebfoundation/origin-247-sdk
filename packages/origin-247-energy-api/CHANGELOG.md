@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@0.3.0...@energyweb/origin-247-energy-api@0.3.1) (2021-12-02)
+
+
+### Bug Fixes
+
+* **origin-247-energy-api:** add leaf hash to ReadingProofProcessedEvent ([a655ee8](https://github.com/energywebfoundation/origin-247-sdk/commit/a655ee80c5f3cbfefa8534fddce299e768beb0af))
+
+
+
+
+
 # [0.3.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@0.2.0...@energyweb/origin-247-energy-api@0.3.0) (2021-12-02)
 
 
