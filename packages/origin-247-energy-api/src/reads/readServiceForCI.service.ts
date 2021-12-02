@@ -20,7 +20,7 @@ export class BaseReadServiceForCI implements PublicPart<ReadsService> {
         return undefined;
     }
 
-    public async storeWithProof(meterId: string, reads: ReadDTO[], proofRootHash: string) {
+    public async storeWithProof(meterId: string, proofRootHash: string, reads: ReadDTO[]) {
         this.readings.push({
             meterId,
             readings: reads.map((r) => ({

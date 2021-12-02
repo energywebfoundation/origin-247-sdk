@@ -7,6 +7,7 @@ import { Point } from '@influxdata/influxdb-client';
 
 export class ReadDTO extends OriginalReadDTO {
     proofRootHash: string;
+    proofLeafHash: string;
 }
 
 /**
@@ -28,13 +29,14 @@ export class ReadsService extends OriginalReadsService {
 
     public async storeWithProof(
         meterId: string,
-        reads: { value: number; timestamp: Date }[],
-        proofRootHash: string
+        proofRootHash: string,
+        reads: { value: number; timestamp: Date; proofLeafHash: string }[]
     ) {
         const points = reads.map((m) =>
             new Point('read')
                 .tag('meter', meterId)
                 .tag('proofRootHash', proofRootHash)
+                .tag('proofLeafHash', m.proofLeafHash)
                 .intField('read', m.value)
                 .timestamp(m.timestamp)
         );
