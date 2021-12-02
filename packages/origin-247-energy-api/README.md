@@ -60,13 +60,6 @@ INFLUXDB_TOKEN=admin:admin
 INFLUXDB_ORG=
 INFLUXDB_BUCKET=energy/autogen
 
-# Optional for influxdb-init.sh script
-INFLUXDB_DB=energy
-INFLUXDB_ADMIN_USER=admin
-INFLUXDB_ADMIN_PASSWORD=admin
-INFLUXDB_USER=api
-INFLUXDB_USER_PASSWORD=secretpassword
-
 # Blockchain - deploy key is used for managing proofs on blockchain
 WEB3=http://localhost:8545
 DEPLOY_KEY=0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
