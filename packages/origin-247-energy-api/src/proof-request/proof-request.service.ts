@@ -67,10 +67,6 @@ export class ProofRequestService {
             timestamp: new Date(r.timestamp * 1000),
             value: r.value
         }));
-        const readingsWithDateAndInt = readings.map((r) => ({
-            timestamp: new Date(r.timestamp * 1000),
-            value: Number(r.value)
-        }));
         const createProofCommand = new CreateProofCommand(deviceId, readings);
 
         try {
@@ -78,7 +74,22 @@ export class ProofRequestService {
 
             const proof: NotaryProof = await this.commandBus.execute(createProofCommand);
 
-            await this.readService.storeWithProof(deviceId, readingsWithDateAndInt, proof.rootHash);
+            await this.readService.storeWithProof(
+                deviceId,
+                proof.rootHash,
+                proof.leafs.map((leaf) => {
+                    const parsedValue = JSON.parse(leaf.value) as {
+                        timestamp: number;
+                        value: string;
+                    };
+
+                    return {
+                        value: Number(parsedValue.value),
+                        timestamp: new Date(parsedValue.timestamp * 1000),
+                        proofLeafHash: leaf.hash
+                    };
+                })
+            );
 
             await this.repository.removeRequests(requestIds);
 
