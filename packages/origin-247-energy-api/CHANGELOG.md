@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.3.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@0.2.0...@energyweb/origin-247-energy-api@0.3.0) (2021-12-02)
+
+
+### Features
+
+* **origin-247-energy-api:** store leaf hash ([113bdec](https://github.com/energywebfoundation/origin-247-sdk/commit/113bdec48a67f0bd69bf2052387f1811d346d970))
+
+
+
+
+
 # [0.2.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@0.1.2...@energyweb/origin-247-energy-api@0.2.0) (2021-11-24)
 
 
