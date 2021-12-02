@@ -4,7 +4,7 @@ import { Repository } from 'typeorm';
 
 import { CertificateEventEntity } from './CertificateEvent.entity';
 import { CertificateEventRepository, NewCertificateEvent } from './CertificateEvent.repository';
-import { ICertificateEvent } from '../../events/Certificate.events';
+import { ICertificateEvent, CertificateEventType } from '../../events/Certificate.events';
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {
     constructor(
@@ -16,15 +16,14 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         return await this.repository.find();
     }
 
-    public async findByInternalCertificate(
+    public async getByInternalCertificateId(
         internalCertId: number
-    ): Promise<CertificateEventEntity | null> {
-        const found = await this.repository.findOne({
+    ): Promise<CertificateEventEntity[]> {
+        return await this.repository.find({
             where: {
                 internalCertificateId: internalCertId
             }
         });
-        return found ?? null;
     }
 
     public async save(
@@ -36,7 +35,18 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
             type: event.type,
             version: event.version,
             payload: event.payload,
+            createdAt: event.createdAt,
             commandId: commandId
         });
+    }
+
+    public async getNumberOfCertificates(): Promise<number> {
+        const [certs, count] = await this.repository.findAndCount({
+            where: {
+                type: CertificateEventType.Issued
+            }
+        });
+
+        return count;
     }
 }

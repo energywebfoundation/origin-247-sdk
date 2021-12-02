@@ -1,9 +1,4 @@
 import { IClaimData, IClaim } from '@energyweb/issuer';
-import {
-    BatchCertificateClaim,
-    BatchCertificateTransfer
-} from '@energyweb/issuer/dist/js/src/blockchain-facade/CertificateBatchOperations';
-
 export type UnixTimestamp = number;
 
 export interface ICertificate<T = null> {
@@ -19,6 +14,11 @@ export interface ICertificate<T = null> {
     issuedPrivately: boolean;
     metadata: T;
 }
+export interface IVolumeDistribution {
+    publicVolume: string;
+    privateVolume: string;
+    claimedVolume: string;
+}
 
 export interface IIssuedCertificate<T = null> {
     id: number;
@@ -28,12 +28,26 @@ export interface IIssuedCertificate<T = null> {
     creationTime: number;
     metadata: T;
     creationBlockHash: string;
-    energy: { publicVolume: string; privateVolume: string; claimedVolume: string };
+    energy: IVolumeDistribution;
     isClaimed: boolean;
     isOwned: boolean;
     myClaims: IClaim[];
     claims: IClaim[];
     issuedPrivately: false;
+}
+
+export interface ICertificateReadModel {
+    internalCertificateId: number;
+    blockchainCertificateId: number | null;
+    deviceId: string;
+    generationStartTime: number;
+    generationEndTime: number;
+    creationTime: number;
+    metadata: unknown;
+    creationBlockHash: string;
+    claims: IClaim[];
+    owners: Record<string, string>;
+    claimers: Record<string, string> | null;
 }
 
 export interface IIssueCommandParams<T> {
@@ -111,3 +125,4 @@ export type BlockchainAction =
     | IAction<BlockchainActionType.BatchClaim, IBatchClaimCommand>;
 
 export const CERTIFICATE_SERVICE_TOKEN = Symbol.for('CERTIFICATE_SERVICE_TOKEN');
+export const OFFCHAIN_CERTIFICATE_SERVICE_TOKEN = Symbol.for('OFFCHAIN_CERTIFICATE_SERVICE_TOKEN');

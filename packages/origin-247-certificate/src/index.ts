@@ -5,3 +5,6 @@ export * from './blockchain-actions.processor';
 export * from './externals';
 export * from './certificateForUnitTests.module';
 export * from './certificateForUnitTests.service';
+export * from './offchain-certificate/offchain-certificate.module';
+export * from './offchain-certificate/offchain-certificate.service';
+export * from './offchain-certificate/certificate.aggregate';

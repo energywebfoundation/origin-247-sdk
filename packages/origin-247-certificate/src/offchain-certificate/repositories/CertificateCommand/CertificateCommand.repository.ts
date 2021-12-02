@@ -16,7 +16,9 @@ export enum CertificateCommandColumns {
 export type NewCertificateCommand = Omit<CertificateCommandEntity, 'id' | 'createdAt'>;
 
 export interface CertificateCommandRepository {
-    create(certificateCommand: NewCertificateCommand): Promise<CertificateCommandEntity>;
-    getAll(): Promise<CertificateCommandEntity[]>;
+    save(certificateCommand: NewCertificateCommand): Promise<CertificateCommandEntity>;
+
     getById(commandId: number): Promise<CertificateCommandEntity | null>;
+
+    getAll(): Promise<CertificateCommandEntity[]>;
 }
