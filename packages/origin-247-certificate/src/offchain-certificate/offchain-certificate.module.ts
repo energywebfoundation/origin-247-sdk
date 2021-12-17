@@ -1,9 +1,5 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { TransactionPollService } from '../transaction-poll.service';
-
-import { BlockchainActionsProcessor } from '../blockchain-actions.processor';
-import { CertificateUpdatedHandler } from '../certificate-updated.handler';
 // import { CertificateModule } from '../certificate.module';
 import { CERTIFICATE_COMMAND_REPOSITORY } from './repositories/CertificateCommand/CertificateCommand.repository';
 import { CertificateCommandPostgresRepository } from './repositories/CertificateCommand/CertificateCommandPostgres.repository';
@@ -17,6 +13,13 @@ import { CertificateEventEntity } from './repositories/CertificateEvent/Certific
 import { CertificateReadModelEntity } from './repositories/CertificateReadModel/CertificateReadModel.entity';
 import { CERTIFICATE_READ_MODEL_REPOSITORY } from './repositories/CertificateReadModel/CertificateReadModel.repository';
 import { CertificateReadModelPostgresRepository } from './repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
+import { BullModule } from '@nestjs/bull';
+import { blockchainQueueName } from '../blockchain-actions.processor';
+import { BlockchainSynchronizeService } from './synchronize/blockchain-synchronize.service';
+import {
+    blockchainSynchronizeQueueName,
+    BlockchainSynchronizeTask
+} from './synchronize/blockchain-synchronize.task';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -37,7 +40,9 @@ const serviceProvider = {
             provide: CERTIFICATE_READ_MODEL_REPOSITORY,
             useClass: CertificateReadModelPostgresRepository
         },
-        serviceProvider
+        serviceProvider,
+        BlockchainSynchronizeService,
+        BlockchainSynchronizeTask
     ],
     exports: [serviceProvider],
     imports: [
@@ -46,7 +51,19 @@ const serviceProvider = {
             CertificateEventEntity,
             CertificateCommandEntity,
             CertificateReadModelEntity
-        ])
+        ]),
+
+        BullModule.registerQueue(
+            {
+                name: blockchainSynchronizeQueueName
+            },
+            {
+                name: blockchainQueueName,
+                settings: {
+                    lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
+                }
+            }
+        )
     ]
 })
 export class OffchainCertificateModule {}

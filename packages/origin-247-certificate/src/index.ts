@@ -1,3 +1,7 @@
+import { CertificateEventEntity } from './offchain-certificate/repositories/CertificateEvent/CertificateEvent.entity';
+import { CertificateCommandEntity } from './offchain-certificate/repositories/CertificateCommand/CertificateCommand.entity';
+import { CertificateReadModelEntity } from './offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
+
 export * from './certificate.module';
 export * from './types';
 export * from './certificate.service';
@@ -8,3 +12,9 @@ export * from './certificateForUnitTests.service';
 export * from './offchain-certificate/offchain-certificate.module';
 export * from './offchain-certificate/offchain-certificate.service';
 export * from './offchain-certificate/certificate.aggregate';
+
+export const CertificateEntities = [
+    CertificateEventEntity,
+    CertificateCommandEntity,
+    CertificateReadModelEntity
+];

@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { CertificateEventRepository, NewCertificateEvent } from './CertificateEvent.repository';
-import { ICertificateEvent, CertificateEventType } from '../../events/Certificate.events';
+import { CertificateEventRepository } from './CertificateEvent.repository';
+import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
+
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {
     constructor(
@@ -38,6 +39,42 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
             createdAt: event.createdAt,
             commandId: commandId
         });
+    }
+
+    public async getAllNotProcessed(): Promise<CertificateEventEntity[]> {
+        return await this.repository.find({
+            where: {
+                synchronized: false,
+                synchronizeError: IsNull()
+            }
+        });
+    }
+
+    public async markAsSynchronized(eventId: number): Promise<CertificateEventEntity> {
+        await this.repository.update(eventId, { synchronized: true });
+
+        return this.getOne(eventId);
+    }
+
+    public async saveProcessingError(
+        eventId: number,
+        error: string
+    ): Promise<CertificateEventEntity> {
+        await this.repository.update(eventId, {
+            synchronizeError: error
+        });
+
+        return this.getOne(eventId);
+    }
+
+    public async getOne(eventId: number): Promise<CertificateEventEntity> {
+        const event = await this.repository.findOne(eventId);
+
+        if (!event) {
+            throw new NotFoundException();
+        }
+
+        return event;
     }
 
     public async getNumberOfCertificates(): Promise<number> {

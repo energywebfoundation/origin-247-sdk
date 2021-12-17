@@ -1,35 +1,37 @@
-import { Contracts, CertificateUtils } from '@energyweb/issuer';
-import { BlockchainPropertiesService, BlockchainPropertiesModule } from '@energyweb/issuer-api';
+import { CertificateUtils, Contracts } from '@energyweb/issuer';
+import {
+    BlockchainPropertiesModule,
+    BlockchainPropertiesService,
+    entities as IssuerEntities
+} from '@energyweb/issuer-api';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { CertificateModule, CertificateService, CERTIFICATE_SERVICE_TOKEN } from '../src';
-import { entities as IssuerEntities } from '@energyweb/issuer-api';
+import {
+    CERTIFICATE_SERVICE_TOKEN,
+    CertificateEntities,
+    CertificateModule,
+    CertificateService,
+    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    OffchainCertificateModule,
+    OffchainCertificateService
+} from '../src';
 import { PassportModule } from '@nestjs/passport';
 import {
-    CertificateEventRepository,
-    CERTIFICATE_EVENT_REPOSITORY
+    CERTIFICATE_EVENT_REPOSITORY,
+    CertificateEventRepository
 } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 import {
-    CertificateReadModelRepository,
-    CERTIFICATE_READ_MODEL_REPOSITORY
+    CERTIFICATE_READ_MODEL_REPOSITORY,
+    CertificateReadModelRepository
 } from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
 import {
-    CertificateCommandRepository,
-    CERTIFICATE_COMMAND_REPOSITORY
+    CERTIFICATE_COMMAND_REPOSITORY,
+    CertificateCommandRepository
 } from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.repository';
-
-import {
-    OffchainCertificateModule,
-    OffchainCertificateService,
-    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
-} from '../src';
-import { CertificateEventEntity } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.entity';
-import { CertificateReadModelEntity } from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
-import { CertificateCommandEntity } from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.entity';
 
 const testLogger = new Logger('e2e');
 
@@ -80,12 +82,7 @@ export const bootstrapTestInstance: any = async () => {
                 database: process.env.DB_DATABASE ?? 'origin',
                 logging: ['info'],
                 keepConnectionAlive: true,
-                entities: [
-                    ...IssuerEntities,
-                    CertificateEventEntity,
-                    CertificateCommandEntity,
-                    CertificateReadModelEntity
-                ]
+                entities: [...IssuerEntities, ...CertificateEntities]
             }),
             OffchainCertificateModule,
             CertificateModule,

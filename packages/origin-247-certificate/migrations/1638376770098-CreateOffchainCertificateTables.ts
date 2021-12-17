@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from 'typeorm';
 
-export class createOffchainCertificateTables1638376770098 implements MigrationInterface {
-    name = 'createOffchainCertificateTables1638376770098';
+export class CreateOffchainCertificateTables1638376770098 implements MigrationInterface {
+    name = 'CreateOffchainCertificateTables1638376770098';
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(

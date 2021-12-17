@@ -5,7 +5,7 @@ import { IssuerModule } from '@energyweb/issuer-api';
 import { TransactionPollService } from './transaction-poll.service';
 
 import { CertificateService } from './certificate.service';
-import { BlockchainActionsProcessor } from './blockchain-actions.processor';
+import { BlockchainActionsProcessor, blockchainQueueName } from './blockchain-actions.processor';
 import { CERTIFICATE_SERVICE_TOKEN } from './types';
 import { CertificateUpdatedHandler } from './certificate-updated.handler';
 
@@ -29,7 +29,7 @@ const serviceProvider = {
         }),
         CqrsModule,
         BullModule.registerQueue({
-            name: 'blockchain-actions',
+            name: blockchainQueueName,
             settings: {
                 lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
             }

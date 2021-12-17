@@ -1,18 +1,21 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CertificateService, CERTIFICATE_SERVICE_TOKEN } from '@energyweb/origin-247-certificate';
 import {
-    EnergyTransferRequestRepository,
-    ENERGY_TRANSFER_REQUEST_REPOSITORY
+    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    OffchainCertificateService
+} from '@energyweb/origin-247-certificate';
+import {
+    ENERGY_TRANSFER_REQUEST_REPOSITORY,
+    EnergyTransferRequestRepository
 } from './repositories/EnergyTransferRequest.repository';
 import { EnergyTransferRequest, State } from './EnergyTransferRequest';
 import { chunk } from 'lodash';
-import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
+import { BATCH_CONFIGURATION_TOKEN, BatchConfiguration } from './batch/configuration';
 
 @Injectable()
 export class TransferService {
     constructor(
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
-        private certificateService: CertificateService<unknown>,
+        @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
+        private certificateService: OffchainCertificateService,
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private etrRepository: EnergyTransferRequestRepository,
         @Inject(BATCH_CONFIGURATION_TOKEN)
