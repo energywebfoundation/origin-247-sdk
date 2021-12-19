@@ -20,6 +20,8 @@ import {
     blockchainSynchronizeQueueName,
     BlockchainSynchronizeTask
 } from './synchronize/blockchain-synchronize.task';
+import { SYNCHRONIZE_STRATEGY } from './synchronize/strategies/synchronize.strategy';
+import { SerialSynchronizeStrategy } from './synchronize/strategies/serial-synchronize.strategy';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -39,6 +41,10 @@ const serviceProvider = {
         {
             provide: CERTIFICATE_READ_MODEL_REPOSITORY,
             useClass: CertificateReadModelPostgresRepository
+        },
+        {
+            provide: SYNCHRONIZE_STRATEGY,
+            useClass: SerialSynchronizeStrategy
         },
         serviceProvider,
         BlockchainSynchronizeService,

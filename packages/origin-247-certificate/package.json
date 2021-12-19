@@ -71,7 +71,8 @@
         },
         "coverageDirectory": "../coverage",
         "testEnvironment": "node",
-        "forceExit": true
+        "forceExit": true,
+        "resetMocks": true
     },
     "gitHead": "db832fe23c9df632c676274f3ec1f5f60567e62c"
 }

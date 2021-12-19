@@ -1,5 +1,5 @@
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { ICertificateEvent } from '../../events/Certificate.events';
+import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 
 export const CERTIFICATE_EVENT_REPOSITORY = Symbol.for('CERTIFICATE_EVENT_REPOSITORY');
 
@@ -20,6 +20,13 @@ export enum CertificateEventColumns {
 
 export type NewCertificateEvent = Omit<CertificateEventEntity, 'id' | 'createdAt'>;
 
+type ProcessableEventType =
+    | CertificateEventType.Issued
+    | CertificateEventType.Transferred
+    | CertificateEventType.Claimed;
+
+export type ProcessableEvent = CertificateEventEntity & { type: ProcessableEventType };
+
 export interface CertificateEventRepository {
     save(event: ICertificateEvent, commandId: number): Promise<CertificateEventEntity>;
 
@@ -33,5 +40,5 @@ export interface CertificateEventRepository {
 
     getNumberOfCertificates(): Promise<number>;
 
-    getAllNotProcessed(): Promise<CertificateEventEntity[]>;
+    getAllNotProcessed(): Promise<ProcessableEvent[]>;
 }

@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { CertificateEventRepository } from './CertificateEvent.repository';
+import { CertificateEventRepository, ProcessableEvent } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 
 @Injectable()
@@ -41,13 +41,18 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         });
     }
 
-    public async getAllNotProcessed(): Promise<CertificateEventEntity[]> {
-        return await this.repository.find({
+    public async getAllNotProcessed(): Promise<ProcessableEvent[]> {
+        return (await this.repository.find({
             where: {
                 synchronized: false,
-                synchronizeError: IsNull()
+                synchronizeError: IsNull(),
+                type: In([
+                    CertificateEventType.Transferred,
+                    CertificateEventType.Issued,
+                    CertificateEventType.Claimed
+                ])
             }
-        });
+        })) as ProcessableEvent[];
     }
 
     public async markAsSynchronized(eventId: number): Promise<CertificateEventEntity> {
