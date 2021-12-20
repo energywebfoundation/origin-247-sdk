@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 
 import { CertificateCommandEntity } from './CertificateCommand.entity';
 import {
@@ -30,5 +30,13 @@ export class CertificateCommandPostgresRepository implements CertificateCommandR
             }
         });
         return found ?? null;
+    }
+
+    public async getByIds(commandIds: number[]): Promise<CertificateCommandEntity[]> {
+        return await this.repository.find({
+            where: {
+                id: In(commandIds)
+            }
+        });
     }
 }

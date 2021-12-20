@@ -37,4 +37,28 @@ export class IssuancePersistHandler implements PersistHandler {
         });
         await this.certEventRepo.markAsSynchronized(event.id);
     }
+
+    async handleBatch(
+        events: CertificateEventEntity[],
+        commands: CertificateCommandEntity[]
+    ): Promise<void> {
+        const certificateIds = await this.certificateService.batchIssue(
+            commands
+                .map((command) => command.payload as IIssueCommand<any>)
+                .map((payload) => ({
+                    ...payload,
+                    fromTime: new Date(payload.fromTime),
+                    toTime: new Date(payload.toTime)
+                }))
+        );
+
+        await Promise.all(
+            events.map(async (event, index) => {
+                await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
+                    blockchainCertificateId: certificateIds[index]
+                });
+                await this.certEventRepo.markAsSynchronized(event.id);
+            })
+        );
+    }
 }

@@ -29,4 +29,22 @@ export class TransferPersistHandler implements PersistHandler {
 
         await this.offchainCertificateService.transferPersisted(event.internalCertificateId, {});
     }
+
+    async handleBatch(
+        events: CertificateEventEntity[],
+        commands: CertificateCommandEntity[]
+    ): Promise<void> {
+        await this.certificateService.batchTransfer(
+            commands.map((c) => c.payload) as ITransferCommand[]
+        );
+
+        await Promise.all(
+            events.map(async (event) => {
+                await this.offchainCertificateService.transferPersisted(
+                    event.internalCertificateId,
+                    {}
+                );
+            })
+        );
+    }
 }

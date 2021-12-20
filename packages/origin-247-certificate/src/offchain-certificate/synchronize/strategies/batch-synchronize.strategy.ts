@@ -10,10 +10,10 @@ import {
     CERTIFICATE_EVENT_REPOSITORY
 } from '../../repositories/repository.keys';
 import { PersistProcessor } from '../handlers/persist.handler';
-import { cannoFindCorrespondingCommandErrorMessage } from './synchronize.errors';
+import { CertificateEventType } from '../../events/Certificate.events';
 
 @Injectable()
-export class SerialSynchronizeStrategy implements SynchronizeStrategy {
+export class BatchSynchronizeStrategy implements SynchronizeStrategy {
     constructor(
         @Inject(CERTIFICATE_COMMAND_REPOSITORY)
         private readonly certCommandRepo: CertificateCommandRepository,
@@ -23,21 +23,15 @@ export class SerialSynchronizeStrategy implements SynchronizeStrategy {
     ) {}
 
     async synchronize(events: ProcessableEvent[]): Promise<void> {
-        const sortedEvents = events.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+        const commands = await this.certCommandRepo.getByIds(events.map((e) => e.commandId));
 
-        for (const event of sortedEvents) {
-            const command = await this.certCommandRepo.getById(event.commandId);
+        const issueEvents = events.filter((e) => e.type === CertificateEventType.Issued);
+        await this.persistProcessor.handleBatch(issueEvents, commands);
 
-            if (!command) {
-                await this.certEventRepo.saveProcessingError(
-                    event.id,
-                    cannoFindCorrespondingCommandErrorMessage(event)
-                );
+        const claimEvents = events.filter((e) => e.type === CertificateEventType.Claimed);
+        await this.persistProcessor.handleBatch(claimEvents, commands);
 
-                continue;
-            }
-
-            await this.persistProcessor.handle(event, command);
-        }
+        const transferEvents = events.filter((e) => e.type === CertificateEventType.Transferred);
+        await this.persistProcessor.handleBatch(transferEvents, commands);
     }
 }

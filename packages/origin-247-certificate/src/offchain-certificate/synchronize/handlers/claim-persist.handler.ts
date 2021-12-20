@@ -1,4 +1,4 @@
-import { IClaimCommand, IIssueCommand } from '../../../types';
+import { IClaimCommand } from '../../../types';
 import { PersistHandler } from './persist.handler';
 import {
     CertificateEventRepository,
@@ -29,5 +29,22 @@ export class ClaimPersistHandler implements PersistHandler {
 
         await this.offchainCertificateService.claimPersisted(event.internalCertificateId, {});
         await this.certEventRepo.markAsSynchronized(event.id);
+    }
+
+    async handleBatch(
+        events: CertificateEventEntity[],
+        commands: CertificateCommandEntity[]
+    ): Promise<void> {
+        await this.certificateService.batchClaim(commands.map((c) => c.payload) as IClaimCommand[]);
+
+        await Promise.all(
+            events.map(async (event) => {
+                await this.offchainCertificateService.claimPersisted(
+                    event.internalCertificateId,
+                    {}
+                );
+                await this.certEventRepo.markAsSynchronized(event.id);
+            })
+        );
     }
 }
