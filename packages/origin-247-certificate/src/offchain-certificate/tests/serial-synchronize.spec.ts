@@ -1,6 +1,6 @@
 import { CertificateEventType } from '../events/Certificate.events';
 import { Test } from '@nestjs/testing';
-import { ProcessableEvent } from '../repositories/CertificateEvent/CertificateEvent.repository';
+import { SynchronizableEvent } from '../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateCommandEntity } from '../repositories/CertificateCommand/CertificateCommand.entity';
 import { SerialSynchronizeStrategy } from '../synchronize/strategies/serial-synchronize.strategy';
 import { SYNCHRONIZE_STRATEGY } from '../synchronize/strategies/synchronize.strategy';
@@ -72,7 +72,7 @@ describe('BlockchainSynchronize', () => {
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {}
-            } as ProcessableEvent;
+            } as SynchronizableEvent;
             const commandStub = {
                 payload: {},
                 id: 1
@@ -94,7 +94,7 @@ describe('BlockchainSynchronize', () => {
                 type: CertificateEventType.Claimed,
                 commandId: 1,
                 payload: {}
-            } as ProcessableEvent;
+            } as SynchronizableEvent;
             const commandStub = {
                 payload: {},
                 id: 1
@@ -116,7 +116,7 @@ describe('BlockchainSynchronize', () => {
                 type: CertificateEventType.Transferred,
                 commandId: 1,
                 payload: {}
-            } as ProcessableEvent;
+            } as SynchronizableEvent;
             const commandStub = {
                 payload: {},
                 id: 1

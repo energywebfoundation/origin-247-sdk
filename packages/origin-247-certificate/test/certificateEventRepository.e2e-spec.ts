@@ -4,9 +4,11 @@ import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 // import { CertificateService } from '../src';
 import {
+    CertificateIssuancePersistedEvent,
     CertificateIssuedEvent,
     CertificateTransferredEvent
 } from '../src/offchain-certificate/events/Certificate.events';
+import { IIssuancePersistedCommand, IIssueCommand } from '../src';
 
 jest.setTimeout(20 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
@@ -125,5 +127,38 @@ describe('CertificateEventRepository', () => {
         await certificateEventRepository.save(anotherEvent, 3);
         issuedCerts = await certificateEventRepository.getNumberOfCertificates();
         expect(issuedCerts).toBe(2);
+    });
+
+    describe.only('#getAllNotProcessed', function () {
+        it('should return empty list for no events to process', async () => {
+            const certs = await certificateEventRepository.getAllNotProcessed();
+            expect(certs).toHaveLength(0);
+        });
+
+        const createIssueCommand = (): IIssueCommand<unknown> => ({
+            toAddress: '0x1',
+            toTime: new Date().getTime(),
+            fromTime: new Date().getTime(),
+            energyValue: '100',
+            userId: 'user1',
+            deviceId: 'asdf',
+            metadata: {}
+        });
+
+        const createIssuancePersistedCommand = (): IIssuancePersistedCommand => ({
+            blockchainCertificateId: 0
+        });
+
+        it('should return events no events when all are persisted', async () => {
+            for (const event of [
+                new CertificateIssuedEvent(1, createIssueCommand()),
+                new CertificateIssuancePersistedEvent(1, createIssuancePersistedCommand())
+            ]) {
+                await certificateEventRepository.save(event, 0);
+            }
+
+            const certs = await certificateEventRepository.getAllNotProcessed();
+            expect(certs).toHaveLength(0);
+        });
     });
 });

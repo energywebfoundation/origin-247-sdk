@@ -1,7 +1,7 @@
 import { SynchronizeStrategy } from './synchronize.strategy';
 import {
     CertificateEventRepository,
-    ProcessableEvent
+    SynchronizableEvent
 } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { CertificateCommandRepository } from '../../repositories/CertificateCommand/CertificateCommand.repository';
@@ -21,18 +21,9 @@ export class SerialSynchronizeStrategy implements SynchronizeStrategy {
         private readonly persistProcessor: PersistProcessor
     ) {}
 
-    async synchronize(events: ProcessableEvent[]): Promise<void> {
+    async synchronize(events: SynchronizableEvent[]): Promise<void> {
         for (const event of events) {
             const command = await this.certCommandRepo.getById(event.commandId);
-
-            if (!command) {
-                await this.certEventRepo.saveProcessingError(
-                    event.id,
-                    `Cannot find command with id: ${event.commandId} corresponding to event ${event.id}`
-                );
-
-                continue;
-            }
 
             await this.persistProcessor.handle(event, command);
         }

@@ -18,19 +18,15 @@ export enum CertificateEventColumns {
 
 export type NewCertificateEvent = Omit<CertificateEventEntity, 'id' | 'createdAt'>;
 
-type ProcessableEventType =
+type SynchronizableEventType =
     | CertificateEventType.Issued
     | CertificateEventType.Transferred
     | CertificateEventType.Claimed;
 
-export type ProcessableEvent = CertificateEventEntity & { type: ProcessableEventType };
+export type SynchronizableEvent = CertificateEventEntity & { type: SynchronizableEventType };
 
 export interface CertificateEventRepository {
     save(event: ICertificateEvent, commandId: number): Promise<CertificateEventEntity>;
-
-    markAsSynchronized(eventId: number): Promise<CertificateEventEntity>;
-
-    saveProcessingError(eventId: number, error: string): Promise<CertificateEventEntity>;
 
     getByInternalCertificateId(internalCertId: number): Promise<CertificateEventEntity[]>;
 
@@ -38,5 +34,5 @@ export interface CertificateEventRepository {
 
     getNumberOfCertificates(): Promise<number>;
 
-    getAllNotProcessed(): Promise<ProcessableEvent[]>;
+    getAllNotProcessed(): Promise<SynchronizableEvent[]>;
 }
