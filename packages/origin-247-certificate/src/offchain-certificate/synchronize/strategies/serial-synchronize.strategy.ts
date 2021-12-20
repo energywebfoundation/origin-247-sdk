@@ -1,18 +1,15 @@
-import { createBlockchainJob, SynchronizeStrategy } from './synchronize.strategy';
+import { SynchronizeStrategy } from './synchronize.strategy';
 import {
-    CERTIFICATE_EVENT_REPOSITORY,
     CertificateEventRepository,
     ProcessableEvent
 } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { Inject, Injectable } from '@nestjs/common';
+import { CertificateCommandRepository } from '../../repositories/CertificateCommand/CertificateCommand.repository';
 import {
     CERTIFICATE_COMMAND_REPOSITORY,
-    CertificateCommandRepository
-} from '../../repositories/CertificateCommand/CertificateCommand.repository';
-import { InjectQueue } from '@nestjs/bull';
-import { blockchainQueueName } from '../../../blockchain-actions.processor';
-import { Queue } from 'bull';
-import { BlockchainAction } from '../../../types';
+    CERTIFICATE_EVENT_REPOSITORY
+} from '../../repositories/repository.keys';
+import { PersistProcessor } from '../handlers/persist.handler';
 
 @Injectable()
 export class SerialSynchronizeStrategy implements SynchronizeStrategy {
@@ -21,8 +18,7 @@ export class SerialSynchronizeStrategy implements SynchronizeStrategy {
         private readonly certCommandRepo: CertificateCommandRepository,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
-        @InjectQueue(blockchainQueueName)
-        private readonly blockchainActionsQueue: Queue<BlockchainAction>
+        private readonly persistProcessor: PersistProcessor
     ) {}
 
     async synchronize(events: ProcessableEvent[]): Promise<void> {
@@ -38,8 +34,7 @@ export class SerialSynchronizeStrategy implements SynchronizeStrategy {
                 continue;
             }
 
-            await this.blockchainActionsQueue.add(createBlockchainJob(event, command));
-            await this.certEventRepo.markAsSynchronized(event.id);
+            await this.persistProcessor.handle(event, command);
         }
     }
 }

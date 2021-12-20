@@ -1,4 +1,5 @@
-import { IClaimData, IClaim } from '@energyweb/issuer';
+import { IClaim, IClaimData } from '@energyweb/issuer';
+
 export type UnixTimestamp = number;
 
 export interface ICertificate<T = null> {
@@ -76,6 +77,14 @@ export interface IClaimCommand {
     forAddress: string;
     energyValue?: string;
 }
+
+export interface IClaimPersistedCommand {}
+
+export interface IIssuancePersistedCommand {
+    blockchainCertificateId: number;
+}
+
+export interface ITransferPersistedCommand {}
 
 export interface ITransferCommand {
     certificateId: number;

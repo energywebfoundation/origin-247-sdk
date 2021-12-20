@@ -1,8 +1,6 @@
 import { CertificateEventEntity } from './CertificateEvent.entity';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 
-export const CERTIFICATE_EVENT_REPOSITORY = Symbol.for('CERTIFICATE_EVENT_REPOSITORY');
-
 export interface FindOptions {
     eventId: number;
     createdAt: Date;

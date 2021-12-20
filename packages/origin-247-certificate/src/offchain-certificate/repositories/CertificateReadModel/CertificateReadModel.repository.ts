@@ -1,8 +1,6 @@
 import { ICertificateReadModel } from '../../../types';
 import { CertificateReadModelEntity } from './CertificateReadModel.entity';
 
-export const CERTIFICATE_READ_MODEL_REPOSITORY = Symbol.for('CERTIFICATE_READ_MODEL_REPOSITORY');
-
 export interface FindOptions {}
 
 export enum CertificateReadModelColumns {}

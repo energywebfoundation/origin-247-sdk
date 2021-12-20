@@ -20,18 +20,14 @@ import {
     OffchainCertificateService
 } from '../src';
 import { PassportModule } from '@nestjs/passport';
-import {
-    CERTIFICATE_EVENT_REPOSITORY,
-    CertificateEventRepository
-} from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
-import {
-    CERTIFICATE_READ_MODEL_REPOSITORY,
-    CertificateReadModelRepository
-} from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
+import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
+import { CertificateReadModelRepository } from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
+import { CertificateCommandRepository } from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.repository';
 import {
     CERTIFICATE_COMMAND_REPOSITORY,
-    CertificateCommandRepository
-} from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.repository';
+    CERTIFICATE_EVENT_REPOSITORY,
+    CERTIFICATE_READ_MODEL_REPOSITORY
+} from '../src/offchain-certificate/repositories/repository.keys';
 
 const testLogger = new Logger('e2e');
 

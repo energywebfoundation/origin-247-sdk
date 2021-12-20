@@ -1,9 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 // import { CertificateModule } from '../certificate.module';
-import { CERTIFICATE_COMMAND_REPOSITORY } from './repositories/CertificateCommand/CertificateCommand.repository';
 import { CertificateCommandPostgresRepository } from './repositories/CertificateCommand/CertificateCommandPostgres.repository';
-import { CERTIFICATE_EVENT_REPOSITORY } from './repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventPostgresRepository } from './repositories/CertificateEvent/CertificateEventPostgres.repository';
 import { OffchainCertificateService } from './offchain-certificate.service';
 import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../types';
@@ -11,7 +9,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateEventEntity } from './repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateReadModelEntity } from './repositories/CertificateReadModel/CertificateReadModel.entity';
-import { CERTIFICATE_READ_MODEL_REPOSITORY } from './repositories/CertificateReadModel/CertificateReadModel.repository';
 import { CertificateReadModelPostgresRepository } from './repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
 import { BullModule } from '@nestjs/bull';
 import { blockchainQueueName } from '../blockchain-actions.processor';
@@ -22,6 +19,15 @@ import {
 } from './synchronize/blockchain-synchronize.task';
 import { SYNCHRONIZE_STRATEGY } from './synchronize/strategies/synchronize.strategy';
 import { SerialSynchronizeStrategy } from './synchronize/strategies/serial-synchronize.strategy';
+import {
+    CERTIFICATE_COMMAND_REPOSITORY,
+    CERTIFICATE_EVENT_REPOSITORY,
+    CERTIFICATE_READ_MODEL_REPOSITORY
+} from './repositories/repository.keys';
+import { IssuancePersistHandler } from './synchronize/handlers/issuance-persist.handler';
+import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
+import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
+import { PersistProcessor } from './synchronize/handlers/persist.handler';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -48,7 +54,11 @@ const serviceProvider = {
         },
         serviceProvider,
         BlockchainSynchronizeService,
-        BlockchainSynchronizeTask
+        BlockchainSynchronizeTask,
+        IssuancePersistHandler,
+        ClaimPersistHandler,
+        TransferPersistHandler,
+        PersistProcessor
     ],
     exports: [serviceProvider],
     imports: [

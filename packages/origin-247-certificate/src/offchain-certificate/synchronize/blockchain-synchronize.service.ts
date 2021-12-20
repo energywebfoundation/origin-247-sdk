@@ -1,9 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import {
-    CERTIFICATE_EVENT_REPOSITORY,
-    CertificateEventRepository
-} from '../repositories/CertificateEvent/CertificateEvent.repository';
+import { CertificateEventRepository } from '../repositories/CertificateEvent/CertificateEvent.repository';
 import { SYNCHRONIZE_STRATEGY, SynchronizeStrategy } from './strategies/synchronize.strategy';
+import { CERTIFICATE_EVENT_REPOSITORY } from '../repositories/repository.keys';
 
 @Injectable()
 export class BlockchainSynchronizeService {
