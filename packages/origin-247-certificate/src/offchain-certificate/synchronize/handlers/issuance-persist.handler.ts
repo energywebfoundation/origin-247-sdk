@@ -46,8 +46,14 @@ export class IssuancePersistHandler implements PersistHandler {
             toTime: new Date(commandPayload.toTime)
         });
 
-        await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
-            blockchainCertificateId: certificate.id
-        });
+        if (certificate.id) {
+            await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
+                blockchainCertificateId: certificate.id
+            });
+        } else {
+            await this.offchainCertificateService.persistError(event.internalCertificateId, {
+                errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`
+            });
+        }
     }
 }

@@ -39,8 +39,17 @@ export class TransferPersistHandler implements PersistHandler {
             return;
         }
 
-        await this.certificateService.transfer(command.payload as ITransferCommand);
+        const result = await this.certificateService.transfer(command.payload as ITransferCommand);
 
-        await this.offchainCertificateService.transferPersisted(event.internalCertificateId, {});
+        if (result.success) {
+            await this.offchainCertificateService.transferPersisted(
+                event.internalCertificateId,
+                {}
+            );
+        } else {
+            await this.offchainCertificateService.persistError(event.internalCertificateId, {
+                errorMessage: `[${result.statusCode}] ${result.message}`
+            });
+        }
     }
 }

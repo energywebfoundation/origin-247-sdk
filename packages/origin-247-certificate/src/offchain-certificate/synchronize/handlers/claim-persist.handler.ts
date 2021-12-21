@@ -39,8 +39,14 @@ export class ClaimPersistHandler implements PersistHandler {
             return;
         }
 
-        await this.certificateService.claim(command.payload as IClaimCommand);
+        const result = await this.certificateService.claim(command.payload as IClaimCommand);
 
-        await this.offchainCertificateService.claimPersisted(event.internalCertificateId, {});
+        if (result.success) {
+            await this.offchainCertificateService.claimPersisted(event.internalCertificateId, {});
+        } else {
+            await this.offchainCertificateService.persistError(event.internalCertificateId, {
+                errorMessage: `[${result.statusCode}] ${result.message}`
+            });
+        }
     }
 }
