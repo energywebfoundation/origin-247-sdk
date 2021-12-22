@@ -1,31 +1,38 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { InjectQueue, Process, Processor } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Process, Processor } from '@nestjs/bull';
 import { BlockchainSynchronizeService } from './blockchain-synchronize.service';
+import { CERTIFICATE_EVENT_REPOSITORY } from '../repositories/repository.keys';
+import { CertificateEventRepository } from '../repositories/CertificateEvent/CertificateEvent.repository';
+import { SYNCHRONIZE_STRATEGY, SynchronizeStrategy } from './strategies/synchronize.strategy';
 
-const EVERY_15_MINUTES = '*/15  * * * *';
 const SYNCHRONIZATION_CONCURRENCY = 1;
 
 export const blockchainSynchronizeQueueName = 'blockchain-synchronize';
-export const synchronizationCron = process.env.BLOCKHCHAIN_SYNCHRONIZATION_CRON ?? EVERY_15_MINUTES;
 
 @Injectable()
 @Processor(blockchainSynchronizeQueueName)
-export class BlockchainSynchronizeTask implements OnModuleInit {
+export class BlockchainSynchronizeTask {
     private readonly logger = new Logger(BlockchainSynchronizeTask.name);
 
     constructor(
-        @InjectQueue(blockchainSynchronizeQueueName)
-        private readonly synchronizationQueue: Queue,
+        private readonly blockchainSynchronizeService: BlockchainSynchronizeService,
 
-        private readonly blockchainSynchronizeService: BlockchainSynchronizeService
+        @Inject(CERTIFICATE_EVENT_REPOSITORY)
+        private readonly certEventRepo: CertificateEventRepository,
+
+        @Inject(SYNCHRONIZE_STRATEGY)
+        private readonly synchronizeStrategy: SynchronizeStrategy
     ) {}
 
     @Process({ concurrency: SYNCHRONIZATION_CONCURRENCY })
     async synchronizeWithBlockchain(): Promise<void> {
         try {
             this.logger.debug(`Synchronization with blockchain started at ${new Date()}`);
-            await this.blockchainSynchronizeService.synchronize();
+
+            const events = await this.certEventRepo.getAllNotProcessed();
+            await this.synchronizeStrategy.synchronize(events);
+
+            this.logger.debug(`Synchronization with blockchain finished at ${new Date()}`);
         } catch (e) {
             this.logger.error(
                 `Error occurred while synchronizing certificates with blockchain: ${e.message}`,
@@ -34,13 +41,5 @@ export class BlockchainSynchronizeTask implements OnModuleInit {
 
             throw e;
         }
-    }
-
-    async onModuleInit() {
-        await this.synchronizationQueue.add({}, { repeat: { cron: synchronizationCron } });
-
-        this.logger.debug(
-            `Synchronization with blockchain set up and repeats at: ${synchronizationCron}`
-        );
     }
 }

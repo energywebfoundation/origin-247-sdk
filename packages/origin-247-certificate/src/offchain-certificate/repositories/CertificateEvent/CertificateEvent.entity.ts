@@ -21,12 +21,6 @@ export class CertificateEventEntity {
     @Column({ enum: CertificateEventType })
     type: CertificateEventType;
 
-    @Column({ default: false })
-    synchronized: boolean;
-
-    @Column({ nullable: true, type: 'text' })
-    synchronizeError: string | null;
-
     @Column()
     version: number;
 

@@ -9,6 +9,7 @@ import {
     IIssuancePersistedCommand,
     IIssueCommand,
     IIssueCommandParams,
+    IPersistErrorCommand,
     ITransferCommand,
     ITransferPersistedCommand
 } from '../types';
@@ -18,6 +19,7 @@ import {
     CertificateClaimPersistedEvent,
     CertificateIssuancePersistedEvent,
     CertificateIssuedEvent,
+    CertificatePersistErrorEvent,
     CertificateTransferPersistedEvent,
     CertificateTransferredEvent,
     ICertificateEvent
@@ -108,6 +110,18 @@ export class OffchainCertificateService<T = null> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
 
         const event = new CertificateTransferPersistedEvent(internalCertificateId, command);
+
+        const aggregate = await this.createAggregate([event]);
+        await this.propagate(event, savedCommand, aggregate);
+    }
+
+    public async persistError(
+        internalCertificateId: number,
+        command: IPersistErrorCommand
+    ): Promise<void> {
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
+
+        const event = new CertificatePersistErrorEvent(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);

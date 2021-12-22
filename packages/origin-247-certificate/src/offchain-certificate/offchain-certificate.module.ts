@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-// import { CertificateModule } from '../certificate.module';
 import { CertificateCommandPostgresRepository } from './repositories/CertificateCommand/CertificateCommandPostgres.repository';
 import { CertificateEventPostgresRepository } from './repositories/CertificateEvent/CertificateEventPostgres.repository';
 import { OffchainCertificateService } from './offchain-certificate.service';
@@ -28,6 +27,7 @@ import { IssuancePersistHandler } from './synchronize/handlers/issuance-persist.
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
 import { PersistProcessor } from './synchronize/handlers/persist.handler';
+import { CertificateModule } from '../certificate.module';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -62,6 +62,7 @@ const serviceProvider = {
     ],
     exports: [serviceProvider],
     imports: [
+        CertificateModule,
         CqrsModule,
         TypeOrmModule.forFeature([
             CertificateEventEntity,

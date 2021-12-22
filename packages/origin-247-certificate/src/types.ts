@@ -86,6 +86,10 @@ export interface IIssuancePersistedCommand {
 
 export interface ITransferPersistedCommand {}
 
+export interface IPersistErrorCommand {
+    errorMessage: string;
+}
+
 export interface ITransferCommand {
     certificateId: number;
     fromAddress: string;

@@ -1,5 +1,5 @@
 import { IEvent } from '@nestjs/cqrs';
-import { IIssueCommand, ITransferCommand, IClaimCommand } from '../../types';
+import { IClaimCommand, IIssueCommand, ITransferCommand } from '../../types';
 
 const version = 1;
 
@@ -9,7 +9,8 @@ export enum CertificateEventType {
     Claimed = 'Claimed',
     IssuancePersisted = 'IssuancePersisted',
     TransferPersisted = 'TransferPersisted',
-    ClaimPersisted = 'ClaimPersisted'
+    ClaimPersisted = 'ClaimPersisted',
+    PersistError = 'PersistError'
 }
 
 export interface ICertificateEvent {
@@ -25,7 +26,10 @@ export class CertificateIssuedEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public internalCertificateId: number, public payload: IIssueCommand<unknown>) {}
+    constructor(
+        public readonly internalCertificateId: number,
+        public readonly payload: IIssueCommand<unknown>
+    ) {}
 }
 
 export class CertificateTransferredEvent implements IEvent {
@@ -33,7 +37,10 @@ export class CertificateTransferredEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public internalCertificateId: number, public payload: ITransferCommand) {}
+    constructor(
+        public readonly internalCertificateId: number,
+        public readonly payload: ITransferCommand
+    ) {}
 }
 
 export class CertificateClaimedEvent implements IEvent {
@@ -41,7 +48,10 @@ export class CertificateClaimedEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public internalCertificateId: number, public payload: IClaimCommand) {}
+    constructor(
+        public readonly internalCertificateId: number,
+        public readonly payload: IClaimCommand
+    ) {}
 }
 
 export class CertificateIssuancePersistedEvent implements IEvent {
@@ -50,8 +60,8 @@ export class CertificateIssuancePersistedEvent implements IEvent {
     public readonly createdAt = new Date();
 
     constructor(
-        public internalCertificateId: number,
-        public payload: { blockchainCertificateId: number }
+        public readonly internalCertificateId: number,
+        public readonly payload: { blockchainCertificateId: number }
     ) {}
 }
 
@@ -60,7 +70,7 @@ export class CertificateTransferPersistedEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public internalCertificateId: number, public payload: {}) {}
+    constructor(public readonly internalCertificateId: number, public readonly payload: {}) {}
 }
 
 export class CertificateClaimPersistedEvent implements IEvent {
@@ -68,5 +78,13 @@ export class CertificateClaimPersistedEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public internalCertificateId: number, public payload: {}) {}
+    constructor(public readonly internalCertificateId: number, public readonly payload: {}) {}
+}
+
+export class CertificatePersistErrorEvent implements IEvent {
+    public readonly type = CertificateEventType.PersistError;
+    public readonly version = version;
+    public readonly createdAt = new Date();
+
+    constructor(public internalCertificateId: number, public payload: { errorMessage: string }) {}
 }

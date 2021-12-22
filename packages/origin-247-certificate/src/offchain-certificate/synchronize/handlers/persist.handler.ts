@@ -1,14 +1,15 @@
-import { ProcessableEvent } from '../../repositories/CertificateEvent/CertificateEvent.repository';
+import { SynchronizableEvent } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateCommandEntity } from '../../repositories/CertificateCommand/CertificateCommand.entity';
 import { ClaimPersistHandler } from './claim-persist.handler';
 import { IssuancePersistHandler } from './issuance-persist.handler';
 import { TransferPersistHandler } from './transfer-persist.handler';
+import { Injectable } from '@nestjs/common';
 
 export interface PersistHandler {
-    canHandle(event: ProcessableEvent): boolean;
+    canHandle(event: SynchronizableEvent): boolean;
 
-    handle(event: CertificateEventEntity, command: CertificateCommandEntity): Promise<void>;
+    handle(event: CertificateEventEntity, command: CertificateCommandEntity | null): Promise<void>;
 
     handleBatch(
         events: CertificateEventEntity[],
@@ -16,6 +17,7 @@ export interface PersistHandler {
     ): Promise<void>;
 }
 
+@Injectable()
 export class PersistProcessor {
     private readonly processors: PersistHandler[] = [];
 
@@ -27,7 +29,7 @@ export class PersistProcessor {
         this.processors = [claimPersistHandler, transferPersistHandler, issuancePersistHandler];
     }
 
-    public async handle(event: ProcessableEvent, command: CertificateCommandEntity) {
+    public async handle(event: SynchronizableEvent, command: CertificateCommandEntity | null) {
         const applicableProcessors = this.processors.filter((handler) => handler.canHandle(event));
 
         for (let processor of applicableProcessors) {
