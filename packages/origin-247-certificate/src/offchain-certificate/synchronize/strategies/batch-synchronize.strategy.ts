@@ -1,7 +1,7 @@
 import { SynchronizeStrategy } from './synchronize.strategy';
 import {
     CertificateEventRepository,
-    ProcessableEvent
+    SynchronizableEvent
 } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { Inject, Injectable } from '@nestjs/common';
 import { CertificateCommandRepository } from '../../repositories/CertificateCommand/CertificateCommand.repository';
@@ -22,7 +22,7 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
         private readonly persistProcessor: PersistProcessor
     ) {}
 
-    async synchronize(events: ProcessableEvent[]): Promise<void> {
+    async synchronize(events: SynchronizableEvent[]): Promise<void> {
         const commands = await this.certCommandRepo.getByIds(events.map((e) => e.commandId));
 
         const issueEvents = events.filter((e) => e.type === CertificateEventType.Issued);

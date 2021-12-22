@@ -28,7 +28,7 @@ export class IssuancePersistHandler implements PersistHandler {
         private readonly certEventRepo: CertificateEventRepository
     ) {}
 
-    public canHandle(event: SynchronizableEvent) {
+    public canHandle(event: CertificateEventEntity) {
         return event.type === CertificateEventType.Issued;
     }
 
@@ -74,10 +74,21 @@ export class IssuancePersistHandler implements PersistHandler {
 
         await Promise.all(
             events.map(async (event, index) => {
-                await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
-                    blockchainCertificateId: certificateIds[index]
-                });
-                await this.certEventRepo.markAsSynchronized(event.id);
+                if (certificateIds) {
+                    await this.offchainCertificateService.issuePersisted(
+                        event.internalCertificateId,
+                        {
+                            blockchainCertificateId: certificateIds[index]
+                        }
+                    );
+                } else {
+                    await this.offchainCertificateService.persistError(
+                        event.internalCertificateId,
+                        {
+                            errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`
+                        }
+                    );
+                }
             })
         );
     }

@@ -28,7 +28,7 @@ export class ClaimPersistHandler implements PersistHandler {
         private readonly certEventRepo: CertificateEventRepository
     ) {}
 
-    public canHandle(event: SynchronizableEvent) {
+    public canHandle(event: CertificateEventEntity) {
         return event.type === CertificateEventType.Claimed;
     }
 

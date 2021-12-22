@@ -28,7 +28,7 @@ export class TransferPersistHandler implements PersistHandler {
         private readonly certEventRepo: CertificateEventRepository
     ) {}
 
-    public canHandle(event: SynchronizableEvent) {
+    public canHandle(event: CertificateEventEntity) {
         return event.type === CertificateEventType.Transferred;
     }
 
@@ -58,16 +58,25 @@ export class TransferPersistHandler implements PersistHandler {
         events: CertificateEventEntity[],
         commands: CertificateCommandEntity[]
     ): Promise<void> {
-        await this.certificateService.batchTransfer(
+        const result = await this.certificateService.batchTransfer(
             commands.map((c) => c.payload) as ITransferCommand[]
         );
 
         await Promise.all(
             events.map(async (event) => {
-                await this.offchainCertificateService.transferPersisted(
-                    event.internalCertificateId,
-                    {}
-                );
+                if (result.success) {
+                    await this.offchainCertificateService.transferPersisted(
+                        event.internalCertificateId,
+                        {}
+                    );
+                } else {
+                    await this.offchainCertificateService.persistError(
+                        event.internalCertificateId,
+                        {
+                            errorMessage: `[${result.statusCode}] ${result.message}`
+                        }
+                    );
+                }
             })
         );
     }
