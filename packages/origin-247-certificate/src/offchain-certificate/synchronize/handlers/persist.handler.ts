@@ -4,6 +4,7 @@ import { CertificateCommandEntity } from '../../repositories/CertificateCommand/
 import { ClaimPersistHandler } from './claim-persist.handler';
 import { IssuancePersistHandler } from './issuance-persist.handler';
 import { TransferPersistHandler } from './transfer-persist.handler';
+import { Injectable } from '@nestjs/common';
 
 export interface PersistHandler {
     canHandle(event: SynchronizableEvent): boolean;
@@ -11,6 +12,7 @@ export interface PersistHandler {
     handle(event: CertificateEventEntity, command: CertificateCommandEntity | null): Promise<void>;
 }
 
+@Injectable()
 export class PersistProcessor {
     constructor(
         private readonly claimPersistHandler: ClaimPersistHandler,

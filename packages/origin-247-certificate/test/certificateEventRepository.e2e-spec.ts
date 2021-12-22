@@ -132,7 +132,7 @@ describe('CertificateEventRepository', () => {
         expect(issuedCerts).toBe(2);
     });
 
-    describe.only('#getAllNotProcessed', function () {
+    describe('#getAllNotProcessed', () => {
         it('should return empty list for no events to process', async () => {
             const certs = await certificateEventRepository.getAllNotProcessed();
             expect(certs).toHaveLength(0);

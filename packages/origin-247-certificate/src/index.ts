@@ -12,6 +12,7 @@ export * from './certificateForUnitTests.service';
 export * from './offchain-certificate/offchain-certificate.module';
 export * from './offchain-certificate/offchain-certificate.service';
 export * from './offchain-certificate/certificate.aggregate';
+export * from './offchain-certificate/synchronize/blockchain-synchronize.service';
 
 export const CertificateEntities = [
     CertificateEventEntity,

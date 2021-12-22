@@ -13,10 +13,11 @@ import { CertificateCommandEntity } from '../../repositories/CertificateCommand/
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateService } from '../../../certificate.service';
 import { OffchainCertificateService } from '../../offchain-certificate.service';
-import { Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
 import { cannotFindCorrespondingCommandErrorMessage } from '../strategies/synchronize.errors';
 
+@Injectable()
 export class ClaimPersistHandler implements PersistHandler {
     constructor(
         @Inject(CERTIFICATE_SERVICE_TOKEN)

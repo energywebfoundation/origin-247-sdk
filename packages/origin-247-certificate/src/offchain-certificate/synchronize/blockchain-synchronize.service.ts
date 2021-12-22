@@ -1,21 +1,16 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CertificateEventRepository } from '../repositories/CertificateEvent/CertificateEvent.repository';
-import { SYNCHRONIZE_STRATEGY, SynchronizeStrategy } from './strategies/synchronize.strategy';
-import { CERTIFICATE_EVENT_REPOSITORY } from '../repositories/repository.keys';
+import { Injectable } from '@nestjs/common';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
+import { blockchainSynchronizeQueueName } from './blockchain-synchronize.task';
 
 @Injectable()
 export class BlockchainSynchronizeService {
     constructor(
-        @Inject(CERTIFICATE_EVENT_REPOSITORY)
-        private readonly certEventRepo: CertificateEventRepository,
-
-        @Inject(SYNCHRONIZE_STRATEGY)
-        private readonly synchronizeStrategy: SynchronizeStrategy
+        @InjectQueue(blockchainSynchronizeQueueName)
+        private readonly synchronizationQueue: Queue
     ) {}
 
     public async synchronize() {
-        const events = await this.certEventRepo.getAllNotProcessed();
-
-        await this.synchronizeStrategy.synchronize(events);
+        await this.synchronizationQueue.add({});
     }
 }
