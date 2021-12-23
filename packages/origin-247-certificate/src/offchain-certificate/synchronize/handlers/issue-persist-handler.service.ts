@@ -4,10 +4,7 @@ import {
     OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
 } from '../../../types';
 import { PersistHandler } from './persist.handler';
-import {
-    CertificateEventRepository,
-    SynchronizableEvent
-} from '../../repositories/CertificateEvent/CertificateEvent.repository';
+import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventType } from '../../events/Certificate.events';
 import { CertificateCommandEntity } from '../../repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
@@ -18,7 +15,7 @@ import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys
 import { cannotFindCorrespondingCommandErrorMessage } from '../strategies/synchronize.errors';
 
 @Injectable()
-export class IssuancePersistHandler implements PersistHandler {
+export class IssuePersistHandler implements PersistHandler {
     constructor(
         @Inject(CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: CertificateService,
@@ -47,7 +44,7 @@ export class IssuancePersistHandler implements PersistHandler {
             toTime: new Date(commandPayload.toTime)
         });
 
-        if (certificate.id) {
+        if (this.isCertificateIdValid(certificate?.id)) {
             await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
                 blockchainCertificateId: certificate.id
             });
@@ -74,7 +71,13 @@ export class IssuancePersistHandler implements PersistHandler {
 
         await Promise.all(
             events.map(async (event, index) => {
-                if (certificateIds) {
+                const areCertificateIdsValid =
+                    certificateIds &&
+                    certificateIds.every((certificateId) =>
+                        this.isCertificateIdValid(certificateId)
+                    );
+
+                if (areCertificateIdsValid) {
                     await this.offchainCertificateService.issuePersisted(
                         event.internalCertificateId,
                         {
@@ -91,5 +94,9 @@ export class IssuancePersistHandler implements PersistHandler {
                 }
             })
         );
+    }
+
+    private isCertificateIdValid(certificateId: number): boolean {
+        return !Number.isNaN(parseInt(`${certificateId}`, 10));
     }
 }

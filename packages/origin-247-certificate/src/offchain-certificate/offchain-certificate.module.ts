@@ -23,7 +23,7 @@ import {
     CERTIFICATE_EVENT_REPOSITORY,
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from './repositories/repository.keys';
-import { IssuancePersistHandler } from './synchronize/handlers/issuance-persist.handler';
+import { IssuePersistHandler } from './synchronize/handlers/issue-persist-handler.service';
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
 import { PersistProcessor } from './synchronize/handlers/persist.handler';
@@ -55,7 +55,7 @@ const serviceProvider = {
         serviceProvider,
         BlockchainSynchronizeService,
         BlockchainSynchronizeTask,
-        IssuancePersistHandler,
+        IssuePersistHandler,
         ClaimPersistHandler,
         TransferPersistHandler,
         PersistProcessor

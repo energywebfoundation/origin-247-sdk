@@ -2,7 +2,7 @@ import { SynchronizableEvent } from '../../repositories/CertificateEvent/Certifi
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateCommandEntity } from '../../repositories/CertificateCommand/CertificateCommand.entity';
 import { ClaimPersistHandler } from './claim-persist.handler';
-import { IssuancePersistHandler } from './issuance-persist.handler';
+import { IssuePersistHandler } from './issue-persist-handler.service';
 import { TransferPersistHandler } from './transfer-persist.handler';
 import { Injectable } from '@nestjs/common';
 
@@ -23,7 +23,7 @@ export class PersistProcessor {
 
     constructor(
         private readonly claimPersistHandler: ClaimPersistHandler,
-        private readonly issuancePersistHandler: IssuancePersistHandler,
+        private readonly issuancePersistHandler: IssuePersistHandler,
         private readonly transferPersistHandler: TransferPersistHandler
     ) {
         this.processors = [claimPersistHandler, transferPersistHandler, issuancePersistHandler];
