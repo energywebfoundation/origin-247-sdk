@@ -2,16 +2,15 @@ import { bootstrapTestInstance } from './setup';
 import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
-// import { CertificateService } from '../src';
 import {
     CertificateClaimedEvent,
-    CertificateIssuancePersistedEvent,
+    CertificateEventType,
     CertificateIssuedEvent,
-    CertificatePersistErrorEvent,
     CertificateTransferredEvent,
     ICertificateEvent
 } from '../src/offchain-certificate/events/Certificate.events';
-import { IClaimCommand, IIssuancePersistedCommand, IIssueCommand, ITransferCommand } from '../src';
+import { IClaimCommand, IIssueCommand, ITransferCommand } from '../src';
+import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
 
 jest.setTimeout(20 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
@@ -20,9 +19,15 @@ describe('CertificateEventRepository', () => {
     let app: INestApplication;
     let databaseService: DatabaseService;
     let certificateEventRepository: CertificateEventRepository;
+    let certificateEventService: CertificateEventService;
 
     beforeAll(async () => {
-        ({ app, databaseService, certificateEventRepository } = await bootstrapTestInstance());
+        ({
+            app,
+            databaseService,
+            certificateEventRepository,
+            certificateEventService
+        } = await bootstrapTestInstance());
 
         await app.init();
     });
@@ -51,7 +56,7 @@ describe('CertificateEventRepository', () => {
             deviceId: 'asdf',
             metadata: {}
         });
-        await certificateEventRepository.save(event, 1);
+        await certificateEventService.save(event, 1);
         const certs = await certificateEventRepository.getAll();
         expect(certs).toHaveLength(1);
     });
@@ -81,9 +86,9 @@ describe('CertificateEventRepository', () => {
             deviceId: 'asdf',
             metadata: {}
         });
-        await certificateEventRepository.save(event, 1);
-        await certificateEventRepository.save(otherEvent, 2);
-        await certificateEventRepository.save(differentEvent, 3);
+        await certificateEventService.save(event, 1);
+        await certificateEventService.save(otherEvent, 2);
+        await certificateEventService.save(differentEvent, 3);
 
         const certs = await certificateEventRepository.getByInternalCertificateId(1);
 
@@ -103,7 +108,7 @@ describe('CertificateEventRepository', () => {
             deviceId: 'asdf',
             metadata: {}
         });
-        await certificateEventRepository.save(event, 1);
+        await certificateEventService.save(event, 1);
         issuedCerts = await certificateEventRepository.getNumberOfCertificates();
         expect(issuedCerts).toBe(1);
 
@@ -113,7 +118,7 @@ describe('CertificateEventRepository', () => {
             energyValue: '100',
             fromAddress: '0x2'
         });
-        await certificateEventRepository.save(otherEvent, 2);
+        await certificateEventService.save(otherEvent, 2);
 
         issuedCerts = await certificateEventRepository.getNumberOfCertificates();
         expect(issuedCerts).toBe(1);
@@ -127,7 +132,7 @@ describe('CertificateEventRepository', () => {
             deviceId: 'asdf',
             metadata: {}
         });
-        await certificateEventRepository.save(anotherEvent, 3);
+        await certificateEventService.save(anotherEvent, 3);
         issuedCerts = await certificateEventRepository.getNumberOfCertificates();
         expect(issuedCerts).toBe(2);
     });
@@ -169,31 +174,33 @@ describe('CertificateEventRepository', () => {
             energyValue: '100'
         });
 
-        const createIssuancePersistedCommand = (): IIssuancePersistedCommand => ({
-            blockchainCertificateId: 0
-        });
-
         const prepareEvents = async (...events: ICertificateEvent[]) => {
             for (const event of events) {
-                await certificateEventRepository.save(event, 0);
+                await certificateEventService.save(event, 0);
             }
         };
 
         it('should return no events when all are persisted', async () => {
-            await prepareEvents(
-                new CertificateIssuedEvent(1, createIssueCommand()),
-                new CertificateIssuancePersistedEvent(1, createIssuancePersistedCommand())
-            );
+            await prepareEvents(new CertificateIssuedEvent(1, createIssueCommand()));
+            await certificateEventRepository.updateAttempt({
+                internalCertificateId: 1,
+                hasError: false,
+                synchronized: true,
+                type: CertificateEventType.Issued
+            });
 
             const certs = await certificateEventRepository.getAllNotProcessed();
             expect(certs).toHaveLength(0);
         });
 
         it('should return no events when error occurred on them', async () => {
-            await prepareEvents(
-                new CertificateIssuedEvent(1, createIssueCommand()),
-                new CertificatePersistErrorEvent(1, { errorMessage: 'err0r!' })
-            );
+            await prepareEvents(new CertificateIssuedEvent(1, createIssueCommand()));
+            await certificateEventRepository.updateAttempt({
+                internalCertificateId: 1,
+                hasError: true,
+                synchronized: false,
+                type: CertificateEventType.Issued
+            });
 
             const certs = await certificateEventRepository.getAllNotProcessed();
 

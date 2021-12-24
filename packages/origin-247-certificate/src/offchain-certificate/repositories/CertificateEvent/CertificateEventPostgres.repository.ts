@@ -1,16 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Not, Repository } from 'typeorm';
+import { EntityManager, Repository } from 'typeorm';
 
 import { CertificateEventEntity } from './CertificateEvent.entity';
 import { CertificateEventRepository, SynchronizableEvent } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
+import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
 
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {
     constructor(
         @InjectRepository(CertificateEventEntity)
-        private repository: Repository<CertificateEventEntity>
+        private repository: Repository<CertificateEventEntity>,
+        @InjectRepository(CertificateSynchronizationAttemptEntity)
+        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>,
+        private entityManager: EntityManager
     ) {}
 
     public async getAll(): Promise<CertificateEventEntity[]> {
@@ -29,9 +33,14 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
 
     public async save(
         event: ICertificateEvent,
-        commandId: number
+        commandId: number,
+        txManager
     ): Promise<CertificateEventEntity> {
-        return await this.repository.save({
+        const repository = txManager
+            ? txManager.getRepository(CertificateEventEntity)
+            : this.repository;
+
+        return await repository.save({
             internalCertificateId: event.internalCertificateId,
             type: event.type,
             version: event.version,
@@ -41,49 +50,54 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         });
     }
 
+    public async updateAttempt({
+        internalCertificateId,
+        type,
+        synchronized,
+        hasError
+    }): Promise<CertificateSynchronizationAttemptEntity> {
+        const synchronizationAttempt = await this.synchronizationAttemptRepository.findOne({
+            where: { internalCertificateId, type }
+        });
+
+        if (!synchronizationAttempt) {
+            throw new Error('Synchronization attempt does not exist');
+        }
+
+        synchronizationAttempt.attemptsCount = synchronizationAttempt.attemptsCount + 1;
+        synchronizationAttempt.synchronized = synchronized;
+        synchronizationAttempt.hasError = hasError;
+
+        await this.synchronizationAttemptRepository.update(
+            synchronizationAttempt.id,
+            synchronizationAttempt
+        );
+
+        return synchronizationAttempt;
+    }
+
     public async getAllNotProcessed(): Promise<SynchronizableEvent[]> {
-        const processedWithErrors = await this.repository.find({
-            where: { type: CertificateEventType.PersistError },
-            select: ['internalCertificateId']
-        });
-        const issuePersisted = await this.repository.find({
-            where: { type: CertificateEventType.IssuancePersisted },
-            select: ['internalCertificateId']
-        });
-        const claimPersisted = await this.repository.find({
-            where: { type: CertificateEventType.ClaimPersisted },
-            select: ['internalCertificateId']
-        });
-        const transferPersisted = await this.repository.find({
-            where: { type: CertificateEventType.TransferPersisted },
-            select: ['internalCertificateId']
-        });
+        const query = this.repository
+            .createQueryBuilder('event')
+            .select([
+                'event.id',
+                'event.internalCertificateId',
+                'event.createdAt',
+                'event.commandId',
+                'event.type',
+                'event.version',
+                'event.payload'
+            ])
+            .leftJoinAndSelect(
+                CertificateSynchronizationAttemptEntity,
+                'attempt',
+                'attempt.internalCertificateId = event.internalCertificateId'
+            )
+            .where('attempt.has_error = FALSE')
+            .andWhere('attempt.synchronized = FALSE')
+            .andWhere('attempt.attempts_count = 0');
 
-        const eventsToProcess = await this.repository.find({
-            where: {
-                type: In([
-                    CertificateEventType.Transferred,
-                    CertificateEventType.Issued,
-                    CertificateEventType.Claimed
-                ]),
-                internalCertificateId: Not(
-                    In(processedWithErrors.map((e) => e.internalCertificateId))
-                )
-            }
-        });
-
-        const eventTypeToPersistedEvents = {
-            [CertificateEventType.Issued]: issuePersisted,
-            [CertificateEventType.Claimed]: claimPersisted,
-            [CertificateEventType.Transferred]: transferPersisted
-        };
-
-        return eventsToProcess.filter((event) => {
-            const persistedEvents = eventTypeToPersistedEvents[event.type];
-            return !persistedEvents.some(
-                (e) => e.internalCertificateId === event.internalCertificateId
-            );
-        }) as SynchronizableEvent[];
+        return (await query.getMany()) as SynchronizableEvent[];
     }
 
     public async getOne(eventId: number): Promise<CertificateEventEntity> {

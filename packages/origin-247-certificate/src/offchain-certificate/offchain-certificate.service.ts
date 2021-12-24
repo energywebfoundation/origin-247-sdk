@@ -34,6 +34,7 @@ import {
     CERTIFICATE_EVENT_REPOSITORY,
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from './repositories/repository.keys';
+import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 
 @Injectable()
 export class OffchainCertificateService<T = null> {
@@ -42,6 +43,7 @@ export class OffchainCertificateService<T = null> {
         private readonly certCommandRepo: CertificateCommandRepository,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
+        private readonly certificateEventService: CertificateEventService,
         private readonly eventBus: EventBus,
         @Inject(CERTIFICATE_READ_MODEL_REPOSITORY)
         private readonly readModelRepo: CertificateReadModelRepository
@@ -89,6 +91,12 @@ export class OffchainCertificateService<T = null> {
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
+        await this.certEventRepo.updateAttempt({
+            internalCertificateId: event.internalCertificateId,
+            type: event.type,
+            synchronized: true,
+            hasError: false
+        });
     }
 
     public async claimPersisted(
@@ -101,6 +109,12 @@ export class OffchainCertificateService<T = null> {
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
+        await this.certEventRepo.updateAttempt({
+            internalCertificateId: event.internalCertificateId,
+            type: event.type,
+            synchronized: true,
+            hasError: false
+        });
     }
 
     public async transferPersisted(
@@ -113,6 +127,12 @@ export class OffchainCertificateService<T = null> {
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
+        await this.certEventRepo.updateAttempt({
+            internalCertificateId: event.internalCertificateId,
+            type: event.type,
+            synchronized: true,
+            hasError: false
+        });
     }
 
     public async persistError(
@@ -125,6 +145,12 @@ export class OffchainCertificateService<T = null> {
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
+        await this.certEventRepo.updateAttempt({
+            internalCertificateId: event.internalCertificateId,
+            type: event.type,
+            synchronized: false,
+            hasError: true
+        });
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -224,7 +250,7 @@ export class OffchainCertificateService<T = null> {
         aggregate: CertificateAggregate
     ): Promise<void> {
         await this.eventBus.publish(event);
-        await this.certEventRepo.save(event, command.id);
+        await this.certificateEventService.save(event, command.id);
         await this.readModelRepo.save(aggregate.getCertificate()!);
     }
 
