@@ -14,8 +14,12 @@ import { CertificateEventEntity } from '../../repositories/CertificateEvent/Cert
 import { CertificateService } from '../../../certificate.service';
 import { OffchainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
+import {
+    CERTIFICATE_COMMAND_REPOSITORY,
+    CERTIFICATE_EVENT_REPOSITORY
+} from '../../repositories/repository.keys';
 import { cannotFindCorrespondingCommandErrorMessage } from '../strategies/synchronize.errors';
+import { CertificateCommandRepository } from '../../repositories/CertificateCommand/CertificateCommand.repository';
 
 @Injectable()
 export class ClaimPersistHandler implements PersistHandler {
@@ -25,14 +29,18 @@ export class ClaimPersistHandler implements PersistHandler {
         @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly offchainCertificateService: OffchainCertificateService,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
-        private readonly certEventRepo: CertificateEventRepository
+        private readonly certEventRepo: CertificateEventRepository,
+        @Inject(CERTIFICATE_COMMAND_REPOSITORY)
+        private readonly certCommandRepo: CertificateCommandRepository
     ) {}
 
     public canHandle(event: SynchronizableEvent) {
         return event.type === CertificateEventType.Claimed;
     }
 
-    public async handle(event: CertificateEventEntity, command: CertificateCommandEntity | null) {
+    public async handle(event: CertificateEventEntity) {
+        const command = await this.certCommandRepo.getById(event.commandId);
+
         if (!command) {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
                 errorMessage: cannotFindCorrespondingCommandErrorMessage(event)

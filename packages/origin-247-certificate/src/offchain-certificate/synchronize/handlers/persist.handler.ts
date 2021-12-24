@@ -9,7 +9,7 @@ import { Injectable } from '@nestjs/common';
 export interface PersistHandler {
     canHandle(event: SynchronizableEvent): boolean;
 
-    handle(event: CertificateEventEntity, command: CertificateCommandEntity | null): Promise<void>;
+    handle(event: CertificateEventEntity): Promise<void>;
 }
 
 @Injectable()
@@ -20,7 +20,7 @@ export class PersistProcessor {
         private readonly transferPersistHandler: TransferPersistHandler
     ) {}
 
-    public async handle(event: SynchronizableEvent, command: CertificateCommandEntity | null) {
+    public async handle(event: SynchronizableEvent) {
         const processors = [
             this.claimPersistHandler,
             this.transferPersistHandler,
@@ -28,7 +28,7 @@ export class PersistProcessor {
         ].filter((handler) => handler.canHandle(event));
 
         for (let processor of processors) {
-            await processor.handle(event, command);
+            await processor.handle(event);
         }
     }
 }
