@@ -32,7 +32,7 @@ import { omit } from 'lodash';
 
 export interface IClaimInput<T extends IConsumption, U extends IGeneration> {
     algorithmFn: (input: IMatchingInput<T, U>) => IMatchingOutput<T, U>;
-    claimCustomizationFn: (input: IMatch<IConsumption, IGeneration>[]) => IClaimCommand[];
+    claimCustomizationFn: (input: IMatch<T, U>[]) => IClaimCommand[];
     data: IMatchingInput<T, U>;
     timeframe: ITimeFrame;
 }
