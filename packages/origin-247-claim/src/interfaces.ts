@@ -10,23 +10,23 @@ export interface IGeneratorPreference {
 }
 
 export interface IConsumption {
-    consumerId: string;
+    id: string;
     volume: BigNumber;
 }
 export interface IGeneration {
-    generatorId: string;
+    id: string;
     volume: BigNumber;
     certificateId: number;
 }
-export interface IMatchingInput {
-    consumptions: IConsumption[];
-    generations: IGeneration[];
+export interface IMatchingInput<T extends IConsumption, U extends IGeneration> {
+    consumptions: T[];
+    generations: U[];
 }
 
-export interface IMatchingOutput {
-    matches: IMatch<IConsumption, IGeneration>[];
-    leftoverConsumptions: IConsumption[];
-    excessGenerations: IGeneration[];
+export interface IMatchingOutput<T extends IConsumption, U extends IGeneration> {
+    matches: IMatch<T, U>[];
+    leftoverConsumptions: T[];
+    excessGenerations: U[];
 }
 
 export interface IMatch<IConsumptionEntity, IGenerationEntity> {
