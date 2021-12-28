@@ -21,11 +21,10 @@
     },
     "dependencies": {
         "@nestjs/bull": "0.4.2",
-        "@types/lodash": "^4.14.178",
         "bull": "3.29.3",
         "cache-manager-ioredis": "2.1.0",
         "ethers": "5.3.1",
-        "lodash": "^4.17.21",
+        "lodash": "4.17.21",
         "passport": "0.5.0",
         "pg": "8.7.1",
         "typeorm": "0.2.39"
@@ -44,6 +43,7 @@
         "@nestjs/typeorm": "8.0.2",
         "@types/bull": "3.15.1",
         "@types/jest": "26.0.23",
+        "@types/lodash": "4.14.178",
         "@types/node": "16.11.3",
         "concurrently": "6.3.0",
         "ganache-cli": "6.12.2",
