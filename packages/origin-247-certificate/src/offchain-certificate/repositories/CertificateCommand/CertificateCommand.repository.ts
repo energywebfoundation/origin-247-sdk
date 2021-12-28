@@ -18,7 +18,5 @@ export interface CertificateCommandRepository {
 
     getById(commandId: number): Promise<CertificateCommandEntity | null>;
 
-    getByIds(commandIds: number[]): Promise<CertificateCommandEntity[]>;
-
     getAll(): Promise<CertificateCommandEntity[]>;
 }
