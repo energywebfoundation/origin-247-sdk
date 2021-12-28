@@ -61,7 +61,6 @@ describe('BlockchainSynchronize', () => {
 
             await serialStrategy.synchronize(events);
 
-            expect(commandRepositoryMock.getById).toBeCalledTimes(0);
             expect(eventRepositoryMock.markAsSynchronized).toBeCalledTimes(0);
             expect(persistProcessorMock.handle).toBeCalledTimes(0);
         });
@@ -73,19 +72,12 @@ describe('BlockchainSynchronize', () => {
                 commandId: 1,
                 payload: {}
             } as SynchronizableEvent;
-            const commandStub = {
-                payload: {},
-                id: 1
-            } as CertificateCommandEntity;
             const events = [eventStub];
-            commandRepositoryMock.getById.mockResolvedValueOnce(commandStub);
 
             await serialStrategy.synchronize(events);
 
-            expect(commandRepositoryMock.getById).toBeCalledTimes(1);
-            expect(commandRepositoryMock.getById).toBeCalledWith(eventStub.commandId);
             expect(persistProcessorMock.handle).toBeCalledTimes(1);
-            expect(persistProcessorMock.handle).toBeCalledWith(eventStub, commandStub);
+            expect(persistProcessorMock.handle).toBeCalledWith(eventStub);
         });
 
         it('work for new claim event', async () => {
@@ -95,19 +87,12 @@ describe('BlockchainSynchronize', () => {
                 commandId: 1,
                 payload: {}
             } as SynchronizableEvent;
-            const commandStub = {
-                payload: {},
-                id: 1
-            } as CertificateCommandEntity;
             const events = [eventStub];
-            commandRepositoryMock.getById.mockResolvedValueOnce(commandStub);
 
             await serialStrategy.synchronize(events);
 
-            expect(commandRepositoryMock.getById).toBeCalledTimes(1);
-            expect(commandRepositoryMock.getById).toBeCalledWith(eventStub.commandId);
             expect(persistProcessorMock.handle).toBeCalledTimes(1);
-            expect(persistProcessorMock.handle).toBeCalledWith(eventStub, commandStub);
+            expect(persistProcessorMock.handle).toBeCalledWith(eventStub);
         });
 
         it('work for new transfer event', async () => {
@@ -117,19 +102,12 @@ describe('BlockchainSynchronize', () => {
                 commandId: 1,
                 payload: {}
             } as SynchronizableEvent;
-            const commandStub = {
-                payload: {},
-                id: 1
-            } as CertificateCommandEntity;
             const events = [eventStub];
-            commandRepositoryMock.getById.mockResolvedValueOnce(commandStub);
 
             await serialStrategy.synchronize(events);
 
-            expect(commandRepositoryMock.getById).toBeCalledTimes(1);
-            expect(commandRepositoryMock.getById).toBeCalledWith(eventStub.commandId);
             expect(persistProcessorMock.handle).toBeCalledTimes(1);
-            expect(persistProcessorMock.handle).toBeCalledWith(eventStub, commandStub);
+            expect(persistProcessorMock.handle).toBeCalledWith(eventStub);
         });
     });
 });

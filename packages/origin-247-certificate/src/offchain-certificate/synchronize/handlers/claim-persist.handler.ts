@@ -1,21 +1,15 @@
-import {
-    CERTIFICATE_SERVICE_TOKEN,
-    IClaimCommand,
-    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
-} from '../../../types';
+import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../types';
 import { PersistHandler } from './persist.handler';
 import {
     CertificateEventRepository,
     SynchronizableEvent
 } from '../../repositories/CertificateEvent/CertificateEvent.repository';
-import { CertificateEventType } from '../../events/Certificate.events';
-import { CertificateCommandEntity } from '../../repositories/CertificateCommand/CertificateCommand.entity';
+import { CertificateClaimedEvent, CertificateEventType } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateService } from '../../../certificate.service';
 import { OffchainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
-import { cannotFindCorrespondingCommandErrorMessage } from '../strategies/synchronize.errors';
 
 @Injectable()
 export class ClaimPersistHandler implements PersistHandler {
@@ -32,20 +26,18 @@ export class ClaimPersistHandler implements PersistHandler {
         return event.type === CertificateEventType.Claimed;
     }
 
-    public async handle(event: CertificateEventEntity, command: CertificateCommandEntity | null) {
-        if (!command) {
-            await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: cannotFindCorrespondingCommandErrorMessage(event)
-            });
-            return;
-        }
+    public async handle(event: CertificateEventEntity) {
+        const claimedEvent = event as CertificateClaimedEvent;
 
-        const result = await this.certificateService.claim(command.payload as IClaimCommand);
+        const result = await this.certificateService.claim(claimedEvent.payload);
 
         if (result.success) {
-            await this.offchainCertificateService.claimPersisted(event.internalCertificateId, {});
+            await this.offchainCertificateService.claimPersisted(
+                claimedEvent.internalCertificateId,
+                {}
+            );
         } else {
-            await this.offchainCertificateService.persistError(event.internalCertificateId, {
+            await this.offchainCertificateService.persistError(claimedEvent.internalCertificateId, {
                 errorMessage: `[${result.statusCode}] ${result.message}`
             });
         }

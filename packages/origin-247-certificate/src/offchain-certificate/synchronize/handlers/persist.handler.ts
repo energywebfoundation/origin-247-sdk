@@ -1,6 +1,5 @@
 import { SynchronizableEvent } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
-import { CertificateCommandEntity } from '../../repositories/CertificateCommand/CertificateCommand.entity';
 import { ClaimPersistHandler } from './claim-persist.handler';
 import { IssuePersistHandler } from './issue-persist-handler.service';
 import { TransferPersistHandler } from './transfer-persist.handler';
@@ -9,12 +8,9 @@ import { Injectable } from '@nestjs/common';
 export interface PersistHandler {
     canHandle(event: CertificateEventEntity): boolean;
 
-    handle(event: CertificateEventEntity, command: CertificateCommandEntity | null): Promise<void>;
+    handle(event: CertificateEventEntity): Promise<void>;
 
-    handleBatch(
-        events: CertificateEventEntity[],
-        commands: CertificateCommandEntity[]
-    ): Promise<void>;
+    handleBatch(events: CertificateEventEntity[]): Promise<void>;
 }
 
 @Injectable()
@@ -29,15 +25,15 @@ export class PersistProcessor {
         this.processors = [claimPersistHandler, transferPersistHandler, issuancePersistHandler];
     }
 
-    public async handle(event: SynchronizableEvent, command: CertificateCommandEntity | null) {
+    public async handle(event: SynchronizableEvent) {
         const applicableProcessors = this.processors.filter((handler) => handler.canHandle(event));
 
         for (let processor of applicableProcessors) {
-            await processor.handle(event, command);
+            await processor.handle(event);
         }
     }
 
-    public async handleBatch(events: SynchronizableEvent[], commands: CertificateCommandEntity[]) {
+    public async handleBatch(events: SynchronizableEvent[]) {
         let processors: { handler: PersistHandler; events: CertificateEventEntity[] }[] = [
             { handler: this.claimPersistHandler, events: [] },
             { handler: this.transferPersistHandler, events: [] },
@@ -58,12 +54,8 @@ export class PersistProcessor {
 
         for (let processor of processors) {
             const eventsBatch = processor.events;
-            const commandsIdsBatch = eventsBatch.map((event) => event.commandId);
 
-            await processor.handler.handleBatch(
-                eventsBatch,
-                commands.filter((command) => commandsIdsBatch.includes(command.id))
-            );
+            await processor.handler.handleBatch(eventsBatch);
         }
     }
 }

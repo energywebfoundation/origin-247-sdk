@@ -1,18 +1,12 @@
-import {
-    CERTIFICATE_SERVICE_TOKEN,
-    IIssueCommand,
-    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
-} from '../../../types';
+import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../types';
 import { PersistHandler } from './persist.handler';
 import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
-import { CertificateEventType } from '../../events/Certificate.events';
-import { CertificateCommandEntity } from '../../repositories/CertificateCommand/CertificateCommand.entity';
+import { CertificateEventType, CertificateIssuedEvent } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateService } from '../../../certificate.service';
 import { OffchainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
-import { cannotFindCorrespondingCommandErrorMessage } from '../strategies/synchronize.errors';
 
 @Injectable()
 export class IssuePersistHandler implements PersistHandler {
@@ -29,19 +23,13 @@ export class IssuePersistHandler implements PersistHandler {
         return event.type === CertificateEventType.Issued;
     }
 
-    public async handle(event: CertificateEventEntity, command: CertificateCommandEntity | null) {
-        if (!command) {
-            await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: cannotFindCorrespondingCommandErrorMessage(event)
-            });
-            return;
-        }
+    public async handle(event: CertificateEventEntity) {
+        const issuedEvent = event as CertificateIssuedEvent<null>;
 
-        const commandPayload = command.payload as IIssueCommand<any>;
         const certificate = await this.certificateService.issue({
-            ...commandPayload,
-            fromTime: new Date(commandPayload.fromTime),
-            toTime: new Date(commandPayload.toTime)
+            ...issuedEvent.payload,
+            fromTime: new Date(issuedEvent.payload.fromTime),
+            toTime: new Date(issuedEvent.payload.toTime)
         });
 
         if (this.isCertificateIdValid(certificate?.id)) {
@@ -57,7 +45,6 @@ export class IssuePersistHandler implements PersistHandler {
 
     async handleBatch(
         events: CertificateEventEntity[],
-        commands: CertificateCommandEntity[]
     ): Promise<void> {
         const certificateIds = await this.certificateService.batchIssue(
             commands
