@@ -94,3 +94,8 @@ By default we expose some algorithms ready to be used
 
 Using `.findMatches`, `.findLeftoverConsumption`, `.findExcessGeneration` you can query for any devices and timeframes, and receive raw data,
 that later on can be aggregated. Metadata field is explained above.
+
+## Testing applications with ClaimModule
+
+`ClaimForUnitTestsModule` is exported, that uses `CertificateForUnitTestsModule` (`247-sdk`) and in-memory repositories to simplify testing,
+so no configuration for `CertificateModule` is necessary (like blockchain or redis configuration), and no database setup.
