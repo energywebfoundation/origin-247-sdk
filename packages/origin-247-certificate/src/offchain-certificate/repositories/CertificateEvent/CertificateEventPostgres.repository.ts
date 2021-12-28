@@ -51,25 +51,20 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
     }
 
     public async updateAttempt({
-        internalCertificateId,
-        type,
-        synchronized,
-        hasError
+        eventId,
+        error
     }): Promise<CertificateSynchronizationAttemptEntity> {
-        const synchronizationAttempt = await this.synchronizationAttemptRepository.findOne({
-            where: { internalCertificateId, type }
-        });
+        const synchronizationAttempt = await this.synchronizationAttemptRepository.findOne(eventId);
 
         if (!synchronizationAttempt) {
             throw new Error('Synchronization attempt does not exist');
         }
 
         synchronizationAttempt.attemptsCount = synchronizationAttempt.attemptsCount + 1;
-        synchronizationAttempt.synchronized = synchronized;
-        synchronizationAttempt.hasError = hasError;
+        synchronizationAttempt.error = error ?? null;
 
         await this.synchronizationAttemptRepository.update(
-            synchronizationAttempt.id,
+            synchronizationAttempt.eventId,
             synchronizationAttempt
         );
 
@@ -91,10 +86,9 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
             .leftJoinAndSelect(
                 CertificateSynchronizationAttemptEntity,
                 'attempt',
-                'attempt.internalCertificateId = event.internalCertificateId'
+                'attempt.eventId = event.id'
             )
-            .where('attempt.has_error = FALSE')
-            .andWhere('attempt.synchronized = FALSE')
+            .where('attempt.error IS NULL')
             .andWhere('attempt.attempts_count = 0');
 
         return (await query.getMany()) as SynchronizableEvent[];

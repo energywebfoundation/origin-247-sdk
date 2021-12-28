@@ -91,12 +91,6 @@ export class OffchainCertificateService<T = null> {
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
-        await this.certEventRepo.updateAttempt({
-            internalCertificateId: event.internalCertificateId,
-            type: event.type,
-            synchronized: true,
-            hasError: false
-        });
     }
 
     public async claimPersisted(
@@ -109,12 +103,6 @@ export class OffchainCertificateService<T = null> {
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
-        await this.certEventRepo.updateAttempt({
-            internalCertificateId: event.internalCertificateId,
-            type: event.type,
-            synchronized: true,
-            hasError: false
-        });
     }
 
     public async transferPersisted(
@@ -127,12 +115,6 @@ export class OffchainCertificateService<T = null> {
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
-        await this.certEventRepo.updateAttempt({
-            internalCertificateId: event.internalCertificateId,
-            type: event.type,
-            synchronized: true,
-            hasError: false
-        });
     }
 
     public async persistError(
@@ -144,13 +126,7 @@ export class OffchainCertificateService<T = null> {
         const event = new CertificatePersistErrorEvent(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
-        await this.propagate(event, savedCommand, aggregate);
-        await this.certEventRepo.updateAttempt({
-            internalCertificateId: event.internalCertificateId,
-            type: event.type,
-            synchronized: false,
-            hasError: true
-        });
+        await this.propagate(event, savedCommand, aggregate, command.errorMessage);
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -247,11 +223,16 @@ export class OffchainCertificateService<T = null> {
     private async propagate(
         event: ICertificateEvent,
         command: CertificateCommandEntity,
-        aggregate: CertificateAggregate
+        aggregate: CertificateAggregate,
+        errorMessage?: string
     ): Promise<void> {
         await this.eventBus.publish(event);
-        await this.certificateEventService.save(event, command.id);
+        const savedEvent = await this.certificateEventService.save(event, command.id);
         await this.readModelRepo.save(aggregate.getCertificate()!);
+        await this.certEventRepo.updateAttempt({
+            eventId: savedEvent.id,
+            error: errorMessage
+        });
     }
 
     private groupCommandsByCertificate<T extends { certificateId }>(

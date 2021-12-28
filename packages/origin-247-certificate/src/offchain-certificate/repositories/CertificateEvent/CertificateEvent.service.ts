@@ -37,13 +37,15 @@ export class CertificateEventService {
             );
 
             if (this.shouldBeSynchronized(savedEvent)) {
-                await txManager.getRepository(CertificateSynchronizationAttemptEntity).save({
+                const syncRepository = txManager.getRepository(
+                    CertificateSynchronizationAttemptEntity
+                );
+                const synchronizationEntity = syncRepository.create({
                     attemptsCount: 0,
-                    internalCertificateId: event.internalCertificateId,
-                    type: event.type,
-                    synchronized: false,
-                    hasError: false
+                    eventId: savedEvent.id
                 });
+
+                await syncRepository.save(synchronizationEntity);
             }
 
             return savedEvent;

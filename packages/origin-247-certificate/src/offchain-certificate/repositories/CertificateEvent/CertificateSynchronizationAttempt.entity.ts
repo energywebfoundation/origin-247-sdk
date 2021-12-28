@@ -1,28 +1,18 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
-import { CertificateEventType } from '../../events/Certificate.events';
+import { Column, CreateDateColumn, Entity, OneToOne, PrimaryColumn } from 'typeorm';
 
 export const tableName = 'certificate_synchronization_attempt';
 
 @Entity(tableName)
 export class CertificateSynchronizationAttemptEntity {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @CreateDateColumn({ type: 'timestamptz' })
-    createdAt: Date;
-
-    @Column()
-    internalCertificateId: number;
-
-    @Column({ enum: CertificateEventType })
-    type: CertificateEventType;
+    @PrimaryColumn()
+    eventId: number;
 
     @Column({ name: 'attempts_count' })
     attemptsCount: number;
 
-    @Column()
-    synchronized: boolean;
+    @Column({ nullable: true })
+    error?: string;
 
-    @Column({ name: 'has_error' })
-    hasError: boolean;
+    @CreateDateColumn({ type: 'timestamptz' })
+    createdAt: Date;
 }

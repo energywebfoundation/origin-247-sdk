@@ -4,13 +4,13 @@ import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 import {
     CertificateClaimedEvent,
-    CertificateEventType,
     CertificateIssuedEvent,
     CertificateTransferredEvent,
     ICertificateEvent
 } from '../src/offchain-certificate/events/Certificate.events';
 import { IClaimCommand, IIssueCommand, ITransferCommand } from '../src';
 import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
+import { CertificateEventEntity } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.entity';
 
 jest.setTimeout(20 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
@@ -175,18 +175,22 @@ describe('CertificateEventRepository', () => {
         });
 
         const prepareEvents = async (...events: ICertificateEvent[]) => {
+            const savedEvents: CertificateEventEntity[] = [];
+
             for (const event of events) {
-                await certificateEventService.save(event, 0);
+                const savedEvent = await certificateEventService.save(event, 0);
+                savedEvents.push(savedEvent);
             }
+
+            return savedEvents;
         };
 
         it('should return no events when all are persisted', async () => {
-            await prepareEvents(new CertificateIssuedEvent(1, createIssueCommand()));
+            const [event] = await prepareEvents(
+                new CertificateIssuedEvent(1, createIssueCommand())
+            );
             await certificateEventRepository.updateAttempt({
-                internalCertificateId: 1,
-                hasError: false,
-                synchronized: true,
-                type: CertificateEventType.Issued
+                eventId: event.id
             });
 
             const certs = await certificateEventRepository.getAllNotProcessed();
@@ -194,12 +198,12 @@ describe('CertificateEventRepository', () => {
         });
 
         it('should return no events when error occurred on them', async () => {
-            await prepareEvents(new CertificateIssuedEvent(1, createIssueCommand()));
+            const [event] = await prepareEvents(
+                new CertificateIssuedEvent(1, createIssueCommand())
+            );
             await certificateEventRepository.updateAttempt({
-                internalCertificateId: 1,
-                hasError: true,
-                synchronized: false,
-                type: CertificateEventType.Issued
+                eventId: event.id,
+                error: 'some error'
             });
 
             const certs = await certificateEventRepository.getAllNotProcessed();

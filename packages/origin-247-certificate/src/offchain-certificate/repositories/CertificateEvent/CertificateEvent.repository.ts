@@ -20,10 +20,8 @@ export interface CertificateEventRepository {
     getByInternalCertificateId(internalCertId: number): Promise<CertificateEventEntity[]>;
 
     updateAttempt(updateData: {
-        internalCertificateId: number;
-        type: CertificateEventType;
-        synchronized: boolean;
-        hasError: boolean;
+        eventId: number;
+        error?: string;
     }): Promise<CertificateSynchronizationAttemptEntity>;
 
     getAll(): Promise<CertificateEventEntity[]>;
