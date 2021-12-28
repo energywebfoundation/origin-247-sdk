@@ -1,6 +1,5 @@
 import { SynchronizableEvent } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
-import { CertificateCommandEntity } from '../../repositories/CertificateCommand/CertificateCommand.entity';
 import { ClaimPersistHandler } from './claim-persist.handler';
 import { IssuancePersistHandler } from './issuance-persist.handler';
 import { TransferPersistHandler } from './transfer-persist.handler';

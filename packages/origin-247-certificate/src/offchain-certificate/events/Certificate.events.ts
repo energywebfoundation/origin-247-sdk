@@ -21,14 +21,14 @@ export interface ICertificateEvent {
     createdAt: Date;
 }
 
-export class CertificateIssuedEvent implements IEvent {
+export class CertificateIssuedEvent<MetadataType = unknown> implements IEvent {
     public readonly type = CertificateEventType.Issued;
     public readonly version = version;
     public readonly createdAt = new Date();
 
     constructor(
         public readonly internalCertificateId: number,
-        public readonly payload: IIssueCommand<unknown>
+        public readonly payload: IIssueCommand<MetadataType>
     ) {}
 }
 
