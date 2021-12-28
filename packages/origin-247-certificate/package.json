@@ -21,9 +21,11 @@
     },
     "dependencies": {
         "@nestjs/bull": "0.4.2",
+        "@types/lodash": "^4.14.178",
         "bull": "3.29.3",
         "cache-manager-ioredis": "2.1.0",
         "ethers": "5.3.1",
+        "lodash": "^4.17.21",
         "passport": "0.5.0",
         "pg": "8.7.1",
         "typeorm": "0.2.39"
@@ -47,9 +49,9 @@
         "ganache-cli": "6.12.2",
         "jest": "27.0.5",
         "ts-jest": "27.0.3",
+        "ts-node": "9.1.1",
         "typescript": "4.3.4",
-        "wait-on": "6.0.0",
-        "ts-node": "9.1.1"
+        "wait-on": "6.0.0"
     },
     "peerDependencies": {
         "@energyweb/issuer": "4.1.1-alpha.1636552048.0",

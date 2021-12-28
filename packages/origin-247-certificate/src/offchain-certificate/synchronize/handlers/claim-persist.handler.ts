@@ -7,6 +7,7 @@ import { CertificateService } from '../../../certificate.service';
 import { OffchainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
+import { compact } from 'lodash';
 
 @Injectable()
 export class ClaimPersistHandler implements PersistHandler {
@@ -40,13 +41,15 @@ export class ClaimPersistHandler implements PersistHandler {
         }
     }
 
-    async handleBatch(events: CertificateEventEntity[]): Promise<void> {
+    private async synchronizeBatchBlock(
+        events: CertificateEventEntity[]
+    ): Promise<{ failedCertificateIds: number[] }> {
         const claimedEvents = events as CertificateClaimedEvent[];
         const result = await this.certificateService.batchClaim(
             claimedEvents.map((event) => event.payload)
         );
 
-        await Promise.all(
+        const failedCertificateIds = await Promise.all(
             events.map(async (event) => {
                 if (result.success) {
                     await this.offchainCertificateService.claimPersisted(
@@ -60,8 +63,16 @@ export class ClaimPersistHandler implements PersistHandler {
                             errorMessage: `[${result.statusCode}] ${result.message}`
                         }
                     );
+
+                    return event.internalCertificateId;
                 }
             })
         );
+
+        return { failedCertificateIds: compact(failedCertificateIds) };
+    }
+
+    async handleBatch(events: CertificateEventEntity[]) {
+        return await this.synchronizeBatchBlock(events);
     }
 }

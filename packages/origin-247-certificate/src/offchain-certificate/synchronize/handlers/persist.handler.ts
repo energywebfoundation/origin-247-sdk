@@ -10,7 +10,7 @@ export interface PersistHandler {
 
     handle(event: CertificateEventEntity): Promise<void>;
 
-    handleBatch(events: CertificateEventEntity[]): Promise<void>;
+    handleBatch(events: CertificateEventEntity[]): Promise<{ failedCertificateIds: number[] }>;
 }
 
 @Injectable()
@@ -52,10 +52,14 @@ export class PersistProcessor {
             });
         }
 
+        const failedCertificateIds: number[] = [];
         for (let processor of processors) {
             const eventsBatch = processor.events;
 
-            await processor.handler.handleBatch(eventsBatch);
+            const result = await processor.handler.handleBatch(eventsBatch);
+            failedCertificateIds.push(...result.failedCertificateIds);
         }
+
+        return { failedCertificateIds };
     }
 }

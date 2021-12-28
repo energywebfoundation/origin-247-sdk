@@ -7,6 +7,11 @@ import { CertificateService } from '../../../certificate.service';
 import { OffchainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
+import {
+    BATCH_CONFIGURATION_TOKEN,
+    BatchConfiguration
+} from '../../../../../origin-247-transfer/src/batch/configuration';
+import { chunk, compact } from 'lodash';
 
 @Injectable()
 export class TransferPersistHandler implements PersistHandler {
@@ -16,7 +21,9 @@ export class TransferPersistHandler implements PersistHandler {
         @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly offchainCertificateService: OffchainCertificateService,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
-        private readonly certEventRepo: CertificateEventRepository
+        private readonly certEventRepo: CertificateEventRepository,
+        @Inject(BATCH_CONFIGURATION_TOKEN)
+        private batchConfiguration: BatchConfiguration
     ) {}
 
     public canHandle(event: CertificateEventEntity) {
@@ -40,13 +47,15 @@ export class TransferPersistHandler implements PersistHandler {
         }
     }
 
-    async handleBatch(events: CertificateEventEntity[]): Promise<void> {
+    private async synchronizeBatchBlock(
+        events: CertificateEventEntity[]
+    ): Promise<{ failedCertificateIds: number[] }> {
         const transferredEvents = events as CertificateTransferredEvent[];
         const result = await this.certificateService.batchTransfer(
             transferredEvents.map((event) => event.payload)
         );
 
-        await Promise.all(
+        const failedCertificateIds = await Promise.all(
             events.map(async (event) => {
                 if (result.success) {
                     await this.offchainCertificateService.transferPersisted(
@@ -60,8 +69,22 @@ export class TransferPersistHandler implements PersistHandler {
                             errorMessage: `[${result.statusCode}] ${result.message}`
                         }
                     );
+                    return event.internalCertificateId;
                 }
             })
         );
+        return { failedCertificateIds: compact(failedCertificateIds) };
+    }
+
+    async handleBatch(events: CertificateEventEntity[]) {
+        const eventsBlocks = chunk(events, this.batchConfiguration.transferBatchSize);
+        const failedCertificateIds: number[] = [];
+
+        for (const eventsBlock of eventsBlocks) {
+            const result = await this.synchronizeBatchBlock(eventsBlock);
+            failedCertificateIds.push(...result.failedCertificateIds);
+        }
+
+        return { failedCertificateIds };
     }
 }

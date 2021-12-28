@@ -1,46 +1,19 @@
 import { CertificateEventType } from '../events/Certificate.events';
 import { Test } from '@nestjs/testing';
 import { SynchronizableEvent } from '../repositories/CertificateEvent/CertificateEvent.repository';
-import { CertificateCommandEntity } from '../repositories/CertificateCommand/CertificateCommand.entity';
 import { SerialSynchronizeStrategy } from '../synchronize/strategies/serial-synchronize.strategy';
 import { SYNCHRONIZE_STRATEGY } from '../synchronize/strategies/synchronize.strategy';
-import {
-    CERTIFICATE_COMMAND_REPOSITORY,
-    CERTIFICATE_EVENT_REPOSITORY
-} from '../repositories/repository.keys';
 import { PersistProcessor } from '../synchronize/handlers/persist.handler';
 
 describe('BlockchainSynchronize', () => {
     let serialStrategy: SerialSynchronizeStrategy;
-    const eventRepositoryMock = {
-        getAllNotProcessed: jest.fn(),
-        markAsSynchronized: jest.fn(),
-        getAll: jest.fn(),
-        saveProcessingError: jest.fn(),
-        save: jest.fn(),
-        getByInternalCertificateId: jest.fn(),
-        getNumberOfCertificates: jest.fn()
-    };
-
     const persistProcessorMock = {
         handle: jest.fn()
-    };
-
-    const commandRepositoryMock = {
-        getById: jest.fn()
     };
 
     beforeEach(async () => {
         const app = await Test.createTestingModule({
             providers: [
-                {
-                    provide: CERTIFICATE_COMMAND_REPOSITORY,
-                    useValue: commandRepositoryMock
-                },
-                {
-                    provide: CERTIFICATE_EVENT_REPOSITORY,
-                    useValue: eventRepositoryMock
-                },
                 {
                     provide: SYNCHRONIZE_STRATEGY,
                     useClass: SerialSynchronizeStrategy
@@ -61,7 +34,6 @@ describe('BlockchainSynchronize', () => {
 
             await serialStrategy.synchronize(events);
 
-            expect(eventRepositoryMock.markAsSynchronized).toBeCalledTimes(0);
             expect(persistProcessorMock.handle).toBeCalledTimes(0);
         });
 
