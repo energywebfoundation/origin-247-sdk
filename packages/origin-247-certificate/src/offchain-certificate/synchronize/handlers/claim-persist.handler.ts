@@ -1,9 +1,6 @@
 import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../types';
 import { PersistHandler } from './persist.handler';
-import {
-    CertificateEventRepository,
-    SynchronizableEvent
-} from '../../repositories/CertificateEvent/CertificateEvent.repository';
+import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateClaimedEvent, CertificateEventType } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateService } from '../../../certificate.service';
@@ -43,12 +40,10 @@ export class ClaimPersistHandler implements PersistHandler {
         }
     }
 
-    async handleBatch(
-        events: CertificateEventEntity[],
-        commands: CertificateCommandEntity[]
-    ): Promise<void> {
+    async handleBatch(events: CertificateEventEntity[]): Promise<void> {
+        const claimedEvents = events as CertificateClaimedEvent[];
         const result = await this.certificateService.batchClaim(
-            commands.map((c) => c.payload) as IClaimCommand[]
+            claimedEvents.map((event) => event.payload)
         );
 
         await Promise.all(

@@ -1,9 +1,6 @@
 import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../types';
 import { PersistHandler } from './persist.handler';
-import {
-    CertificateEventRepository,
-    SynchronizableEvent
-} from '../../repositories/CertificateEvent/CertificateEvent.repository';
+import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventType, CertificateTransferredEvent } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateService } from '../../../certificate.service';
@@ -43,12 +40,10 @@ export class TransferPersistHandler implements PersistHandler {
         }
     }
 
-    async handleBatch(
-        events: CertificateEventEntity[],
-        commands: CertificateCommandEntity[]
-    ): Promise<void> {
+    async handleBatch(events: CertificateEventEntity[]): Promise<void> {
+        const transferredEvents = events as CertificateTransferredEvent[];
         const result = await this.certificateService.batchTransfer(
-            commands.map((c) => c.payload) as ITransferCommand[]
+            transferredEvents.map((event) => event.payload)
         );
 
         await Promise.all(

@@ -43,12 +43,12 @@ export class IssuePersistHandler implements PersistHandler {
         }
     }
 
-    async handleBatch(
-        events: CertificateEventEntity[],
-    ): Promise<void> {
+    async handleBatch(events: CertificateEventEntity[]): Promise<void> {
+        const issuedEvents = events as CertificateIssuedEvent<null>[];
+
         const certificateIds = await this.certificateService.batchIssue(
-            commands
-                .map((command) => command.payload as IIssueCommand<any>)
+            issuedEvents
+                .map((issuedEvent) => issuedEvent.payload)
                 .map((payload) => ({
                     ...payload,
                     fromTime: new Date(payload.fromTime),
