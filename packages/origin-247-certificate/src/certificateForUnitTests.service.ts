@@ -36,7 +36,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
                 new Date(entry.creationTime * 1000) >= creationTimeFrom &&
                 new Date(entry.creationTime * 1000) <= creationTimeTo;
 
-            const isDeviceOk = deviceId ? entry.deviceId === entry.deviceId : true;
+            const isDeviceOk = deviceId ? deviceId === entry.deviceId : true;
 
             return isDateOk && isDeviceOk;
         });
