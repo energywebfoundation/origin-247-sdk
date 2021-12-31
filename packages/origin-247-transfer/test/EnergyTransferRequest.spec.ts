@@ -1,4 +1,9 @@
-import { EnergyTransferRequest, State, TransferValidationStatus } from '../src';
+import {
+    EnergyTransferRequest,
+    EnergyTransferRequestAttrs,
+    State,
+    TransferValidationStatus
+} from '../src';
 
 describe('Energy Transfer Request', () => {
     describe('computedValidationStatus', () => {
@@ -6,21 +11,22 @@ describe('Energy Transfer Request', () => {
             expect(etr.toAttrs().state).toBe(state);
         };
 
-        const createEtr = (volume = '100') => {
+        const createEtr = (attrs: Partial<EnergyTransferRequestAttrs> = {}) => {
             const etr = EnergyTransferRequest.fromAttrs({
                 id: 1,
                 ...EnergyTransferRequest.newAttributes({
-                    buyerAddress: '',
-                    sellerAddress: '',
+                    buyerAddress: 'a',
+                    sellerAddress: 'b',
                     transferDate: new Date(),
-                    volume,
+                    volume: '100',
                     certificateData: {
                         generatorId: '',
                         fromTime: new Date().toISOString(),
                         toTime: new Date().toISOString(),
                         metadata: null
                     }
-                })
+                }),
+                ...attrs
             });
 
             return etr;
@@ -59,7 +65,21 @@ describe('Energy Transfer Request', () => {
         });
 
         it('immediately goes to Skipped status if created if no volume', () => {
-            const etr = createEtr('0');
+            const etr = EnergyTransferRequest.fromAttrs({
+                id: 1,
+                ...EnergyTransferRequest.newAttributes({
+                    buyerAddress: 'a',
+                    sellerAddress: 'b',
+                    transferDate: new Date(),
+                    volume: '0',
+                    certificateData: {
+                        generatorId: '',
+                        fromTime: new Date().toISOString(),
+                        toTime: new Date().toISOString(),
+                        metadata: null
+                    }
+                })
+            });
 
             expectState(etr, State.Skipped);
         });
@@ -133,6 +153,19 @@ describe('Energy Transfer Request', () => {
 
             etr.updateValidationStatus('validator2', TransferValidationStatus.Error);
             expectState(etr, State.ValidationInvalid);
+        });
+
+        it('skips validation if addresses are the same', () => {
+            const etr = createEtr({
+                buyerAddress: 'a',
+                sellerAddress: 'a'
+            });
+
+            etr.issuanceStarted();
+            etr.issuanceFinished(1);
+            etr.persisted();
+
+            expectState(etr, State.ValidationSkipped);
         });
     });
 });

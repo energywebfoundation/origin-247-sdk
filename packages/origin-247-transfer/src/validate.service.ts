@@ -123,10 +123,9 @@ export class ValidateService {
 
             return await this.commandBus.execute(command);
         } catch (e) {
-            this.logger.error(`
-                One of validation commands (${Command.name}) returned error for request: ${request.id}:
-                "${e.message}"
-            `);
+            this.logger.error(
+                `One of validation commands (${Command.name}) returned error for request: ${request.id}: "${e.message}"`
+            );
 
             return { validationResult: TransferValidationStatus.Error };
         }

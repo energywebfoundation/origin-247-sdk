@@ -42,10 +42,11 @@ export enum State {
     PersistenceAwaiting = 'PersistenceAwaiting',
     Persisted = 'Persisted',
     ValidationAwaiting = 'ValidationAwaiting',
+    ValidationSkipped = 'ValidationSkipped',
     ValidationInProgress = 'ValidationInProgress',
     Validated = 'Validated',
-    TransferAwaiting = 'TransferAwaiting',
     TransferInProgress = 'TransferInProgress',
+    TransferAwaiting = 'TransferAwaiting',
     Transferred = 'Transferred',
 
     // Computed states
@@ -60,7 +61,7 @@ interface StateTransition {
     [State.IssuanceInProgress]: [State.Issued, State.IssuanceError];
     [State.Issued]: [State.PersistenceAwaiting];
     [State.PersistenceAwaiting]: [State.Persisted];
-    [State.Persisted]: [State.ValidationAwaiting];
+    [State.Persisted]: [State.ValidationAwaiting, State.ValidationSkipped];
     [State.ValidationAwaiting]: [State.ValidationInProgress];
     [State.ValidationInProgress]: [State.Validated, State.ValidationError, State.ValidationInvalid];
     [State.Validated]: [State.TransferAwaiting];
@@ -127,7 +128,12 @@ export class EnergyTransferRequest {
 
     public persisted() {
         this.nextState(State.PersistenceAwaiting, State.Persisted);
-        this.nextState(State.Persisted, State.ValidationAwaiting);
+
+        if (this.attrs.buyerAddress === this.attrs.sellerAddress) {
+            this.nextState(State.Persisted, State.ValidationSkipped);
+        } else {
+            this.nextState(State.Persisted, State.ValidationAwaiting);
+        }
     }
 
     public startValidation(validatorNames: string[]): void {
