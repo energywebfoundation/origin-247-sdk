@@ -40,10 +40,12 @@ export class TransferPersistHandler implements PersistHandler {
                 event.internalCertificateId,
                 {}
             );
+            return { success: true };
         } else {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
                 errorMessage: `[${result.statusCode}] ${result.message}`
             });
+            return { success: false };
         }
     }
 
@@ -81,7 +83,11 @@ export class TransferPersistHandler implements PersistHandler {
         const failedCertificateIds: number[] = [];
 
         for (const eventsBlock of eventsBlocks) {
-            const result = await this.synchronizeBatchBlock(eventsBlock);
+            const nonFailedEvents = eventsBlock.filter(
+                (event) => !failedCertificateIds.includes(event.internalCertificateId)
+            );
+
+            const result = await this.synchronizeBatchBlock(nonFailedEvents);
             failedCertificateIds.push(...result.failedCertificateIds);
         }
 

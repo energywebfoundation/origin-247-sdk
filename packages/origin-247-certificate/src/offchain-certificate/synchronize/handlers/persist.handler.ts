@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
 export interface PersistHandler {
     canHandle(event: CertificateEventEntity): boolean;
 
-    handle(event: CertificateEventEntity): Promise<void>;
+    handle(event: CertificateEventEntity): Promise<{ success: boolean }>;
 
     handleBatch(events: CertificateEventEntity[]): Promise<{ failedCertificateIds: number[] }>;
 }
@@ -26,11 +26,13 @@ export class PersistProcessor {
     }
 
     public async handle(event: SynchronizableEvent) {
-        const applicableProcessors = this.processors.filter((handler) => handler.canHandle(event));
+        const applicableProcessor = this.processors.find((handler) => handler.canHandle(event));
 
-        for (let processor of applicableProcessors) {
-            await processor.handle(event);
+        if (!applicableProcessor) {
+            throw new Error(`Cannot find handler to process event of type: ${event.type}`);
         }
+
+        return await applicableProcessor.handle(event);
     }
 
     public async handleBatch(events: SynchronizableEvent[]) {

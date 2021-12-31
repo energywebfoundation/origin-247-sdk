@@ -34,10 +34,12 @@ export class ClaimPersistHandler implements PersistHandler {
                 claimedEvent.internalCertificateId,
                 {}
             );
+            return { success: true };
         } else {
             await this.offchainCertificateService.persistError(claimedEvent.internalCertificateId, {
                 errorMessage: `[${result.statusCode}] ${result.message}`
             });
+            return { success: false };
         }
     }
 

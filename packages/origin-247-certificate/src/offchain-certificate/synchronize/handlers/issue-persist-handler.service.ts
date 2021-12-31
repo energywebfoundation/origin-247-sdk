@@ -43,10 +43,12 @@ export class IssuePersistHandler implements PersistHandler {
             await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
                 blockchainCertificateId: certificate.id
             });
+            return { success: true };
         } else {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
                 errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`
             });
+            return { success: false };
         }
     }
 
@@ -100,7 +102,11 @@ export class IssuePersistHandler implements PersistHandler {
         const failedCertificateIds: number[] = [];
 
         for (const eventsBlock of eventsBlocks) {
-            const result = await this.synchronizeBatchBlock(eventsBlock);
+            const nonFailedEvents = eventsBlock.filter(
+                (event) => !failedCertificateIds.includes(event.internalCertificateId)
+            );
+
+            const result = await this.synchronizeBatchBlock(nonFailedEvents);
             failedCertificateIds.push(...result.failedCertificateIds);
         }
 

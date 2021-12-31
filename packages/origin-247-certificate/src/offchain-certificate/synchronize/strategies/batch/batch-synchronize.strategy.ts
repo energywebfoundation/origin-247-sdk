@@ -1,8 +1,8 @@
-import { SynchronizeStrategy } from './synchronize.strategy';
-import { SynchronizableEvent } from '../../repositories/CertificateEvent/CertificateEvent.repository';
+import { SynchronizeStrategy } from '../synchronize.strategy';
+import { SynchronizableEvent } from '../../../repositories/CertificateEvent/CertificateEvent.repository';
 import { Injectable } from '@nestjs/common';
-import { PersistProcessor } from '../handlers/persist.handler';
-import { CertificateEventType } from '../../events/Certificate.events';
+import { PersistProcessor } from '../../handlers/persist.handler';
+import { CertificateEventType } from '../../../events/Certificate.events';
 
 @Injectable()
 export class BatchSynchronizeStrategy implements SynchronizeStrategy {

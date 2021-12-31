@@ -14,7 +14,6 @@ import { blockchainQueueName } from '../blockchain-actions.processor';
 import { BlockchainSynchronizeService } from './synchronize/blockchain-synchronize.service';
 import { BlockchainSynchronizeTask } from './synchronize/blockchain-synchronize.task';
 import { SYNCHRONIZE_STRATEGY } from './synchronize/strategies/synchronize.strategy';
-import { SerialSynchronizeStrategy } from './synchronize/strategies/serial-synchronize.strategy';
 import {
     CERTIFICATE_COMMAND_REPOSITORY,
     CERTIFICATE_EVENT_REPOSITORY,
@@ -28,6 +27,11 @@ import { PersistProcessor } from './synchronize/handlers/persist.handler';
 import { CertificateModule } from '../certificate.module';
 import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
+import { BatchSynchronizeStrategy } from './synchronize/strategies/batch/batch-synchronize.strategy';
+import {
+    BATCH_CONFIGURATION_TOKEN,
+    batchConfiguration
+} from './synchronize/strategies/batch/batch.configuration';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -50,7 +54,11 @@ const serviceProvider = {
         },
         {
             provide: SYNCHRONIZE_STRATEGY,
-            useClass: SerialSynchronizeStrategy
+            useClass: BatchSynchronizeStrategy
+        },
+        {
+            provide: BATCH_CONFIGURATION_TOKEN,
+            useValue: batchConfiguration
         },
         serviceProvider,
         BlockchainSynchronizeService,
