@@ -28,6 +28,7 @@ import {
     CERTIFICATE_EVENT_REPOSITORY,
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from '../src/offchain-certificate/repositories/repository.keys';
+import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
 
 const testLogger = new Logger('e2e');
 
@@ -99,6 +100,7 @@ export const bootstrapTestInstance: any = async () => {
     const certificateEventRepository = await app.resolve<CertificateEventRepository>(
         CERTIFICATE_EVENT_REPOSITORY
     );
+    const certificateEventService = await app.resolve(CertificateEventService);
     const certificateReadModelRepository = await app.resolve<CertificateReadModelRepository>(
         CERTIFICATE_READ_MODEL_REPOSITORY
     );
@@ -135,6 +137,7 @@ export const bootstrapTestInstance: any = async () => {
         certificateEventRepository,
         certificateCommandRepository,
         certificateReadModelRepository,
+        certificateEventService,
         offchainCertificateService,
         app
     };

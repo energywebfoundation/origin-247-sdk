@@ -34,6 +34,7 @@ import {
     CERTIFICATE_EVENT_REPOSITORY,
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from './repositories/repository.keys';
+import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 
 @Injectable()
 export class OffchainCertificateService<T = null> {
@@ -42,6 +43,7 @@ export class OffchainCertificateService<T = null> {
         private readonly certCommandRepo: CertificateCommandRepository,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
+        private readonly certificateEventService: CertificateEventService,
         private readonly eventBus: EventBus,
         @Inject(CERTIFICATE_READ_MODEL_REPOSITORY)
         private readonly readModelRepo: CertificateReadModelRepository
@@ -124,7 +126,7 @@ export class OffchainCertificateService<T = null> {
         const event = new CertificatePersistErrorEvent(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
-        await this.propagate(event, savedCommand, aggregate);
+        await this.propagate(event, savedCommand, aggregate, command.errorMessage);
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -221,11 +223,16 @@ export class OffchainCertificateService<T = null> {
     private async propagate(
         event: ICertificateEvent,
         command: CertificateCommandEntity,
-        aggregate: CertificateAggregate
+        aggregate: CertificateAggregate,
+        errorMessage?: string
     ): Promise<void> {
         await this.eventBus.publish(event);
-        await this.certEventRepo.save(event, command.id);
+        const savedEvent = await this.certificateEventService.save(event, command.id);
         await this.readModelRepo.save(aggregate.getCertificate()!);
+        await this.certEventRepo.updateAttempt({
+            eventId: savedEvent.id,
+            error: errorMessage
+        });
     }
 
     private groupCommandsByCertificate<T extends { certificateId }>(

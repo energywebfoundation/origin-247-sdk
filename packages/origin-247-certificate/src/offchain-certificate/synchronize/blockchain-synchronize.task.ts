@@ -1,16 +1,17 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Process, Processor } from '@nestjs/bull';
 import { BlockchainSynchronizeService } from './blockchain-synchronize.service';
-import { CERTIFICATE_EVENT_REPOSITORY } from '../repositories/repository.keys';
+import {
+    CERTIFICATE_EVENT_REPOSITORY,
+    SYNCHRONIZE_QUEUE_NAME
+} from '../repositories/repository.keys';
 import { CertificateEventRepository } from '../repositories/CertificateEvent/CertificateEvent.repository';
 import { SYNCHRONIZE_STRATEGY, SynchronizeStrategy } from './strategies/synchronize.strategy';
 
 const SYNCHRONIZATION_CONCURRENCY = 1;
 
-export const blockchainSynchronizeQueueName = 'blockchain-synchronize';
-
 @Injectable()
-@Processor(blockchainSynchronizeQueueName)
+@Processor(SYNCHRONIZE_QUEUE_NAME)
 export class BlockchainSynchronizeTask {
     private readonly logger = new Logger(BlockchainSynchronizeTask.name);
 
