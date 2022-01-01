@@ -23,7 +23,7 @@ import {
 import { IssuePersistHandler } from './synchronize/handlers/issue-persist-handler.service';
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
-import { PersistProcessor } from './synchronize/handlers/persist.handler';
+import { SynchronizeProcessor } from './synchronize/handlers/persist.handler';
 import { CertificateModule } from '../certificate.module';
 import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
@@ -66,7 +66,7 @@ const serviceProvider = {
         IssuePersistHandler,
         ClaimPersistHandler,
         TransferPersistHandler,
-        PersistProcessor,
+        SynchronizeProcessor,
         CertificateEventService
     ],
     exports: [serviceProvider],

@@ -1,5 +1,4 @@
 import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../types';
-import { PersistHandler } from './persist.handler';
 import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventType, CertificateTransferredEvent } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
@@ -12,9 +11,10 @@ import {
     BatchConfiguration
 } from '../../../../../origin-247-transfer/src/batch/configuration';
 import { chunk, compact } from 'lodash';
+import { SynchronizeHandler } from './synchronize.handler';
 
 @Injectable()
-export class TransferPersistHandler implements PersistHandler {
+export class TransferPersistHandler implements SynchronizeHandler {
     constructor(
         @Inject(CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: CertificateService,

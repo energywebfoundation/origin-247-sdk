@@ -2,7 +2,7 @@ import { CertificateEventType } from '../events/Certificate.events';
 import { Test } from '@nestjs/testing';
 import { SynchronizableEvent } from '../repositories/CertificateEvent/CertificateEvent.repository';
 import { SYNCHRONIZE_STRATEGY } from '../synchronize/strategies/synchronize.strategy';
-import { PersistProcessor } from '../synchronize/handlers/persist.handler';
+import { SynchronizeProcessor } from '../synchronize/handlers/persist.handler';
 import { BatchSynchronizeStrategy } from '../synchronize/strategies/batch-synchronize.strategy';
 
 describe('BatchSynchronizeStrategy', () => {
@@ -23,7 +23,7 @@ describe('BatchSynchronizeStrategy', () => {
                     useClass: BatchSynchronizeStrategy
                 },
                 {
-                    provide: PersistProcessor,
+                    provide: SynchronizeProcessor,
                     useValue: persistProcessorMock
                 }
             ]
