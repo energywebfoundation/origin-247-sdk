@@ -1,11 +1,11 @@
 import { SynchronizeStrategy } from '../synchronize.strategy';
 import { SynchronizableEvent } from '../../../repositories/CertificateEvent/CertificateEvent.repository';
 import { Injectable } from '@nestjs/common';
-import { SynchronizeProcessor } from '../../handlers/persist.handler';
+import { SynchronizeManager } from '../../handlers/synchronize.manager';
 
 @Injectable()
 export class SerialSynchronizeStrategy implements SynchronizeStrategy {
-    constructor(private readonly persistProcessor: SynchronizeProcessor) {}
+    constructor(private readonly synchronizeManager: SynchronizeManager) {}
 
     async synchronize(events: SynchronizableEvent[]): Promise<void> {
         const sortedEvents = events.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
@@ -16,7 +16,7 @@ export class SerialSynchronizeStrategy implements SynchronizeStrategy {
                 continue;
             }
 
-            const { success } = await this.persistProcessor.handle(event);
+            const { success } = await this.synchronizeManager.handle(event);
 
             if (!success) {
                 failedCertificateIds.push(event.internalCertificateId);
