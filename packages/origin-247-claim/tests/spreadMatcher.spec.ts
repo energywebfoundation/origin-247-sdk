@@ -1304,6 +1304,35 @@ describe('spreadMatcher', () => {
             volume: BigNumber.from(1)
         });
     });
+
+    it('Edge case fail - two consumptions with the same id, but one is satisfied during matching', () => {
+        const result = integerMatcher({
+            groupPriority: [
+                [
+                    {
+                        id: 'consumerA',
+                        groupPriority: [[{ id: 'generatorA' }]]
+                    }
+                ]
+            ],
+            entityGroups: [
+                [
+                    { id: 'consumerA', volume: 100 },
+                    { id: 'consumerA', volume: 50 }
+                ],
+                [{ id: 'generatorA', volume: 150 }]
+            ]
+        });
+
+        expect(result.matches[0]).toEqual({
+            entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
+            volume: 100
+        });
+        expect(result.matches[1]).toEqual({
+            entities: [{ id: 'consumerA' }, { id: 'generatorA' }],
+            volume: 50
+        });
+    });
 });
 
 type Primitive = string | number | boolean | undefined | null;
