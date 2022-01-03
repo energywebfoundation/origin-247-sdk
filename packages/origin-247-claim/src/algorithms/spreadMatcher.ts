@@ -241,12 +241,17 @@ export namespace SpreadMatcher {
     const getRoundInput = <T extends Entity, P extends Entity>(
         data: Params<T, P>
     ): RoundInput<T, P> => {
-        const entity1Group = getFirstUsableGroup(data.groupPriority, data.entityGroups[0]);
+        const entitiesWithVolume = [
+            data.entityGroups[0].filter((e) => e.volume.gt(0)),
+            data.entityGroups[1].filter((e) => e.volume.gt(0))
+        ] as const;
+
+        const entity1Group = getFirstUsableGroup(data.groupPriority, entitiesWithVolume[0]);
 
         const routes = entity1Group.flatMap((entity1GroupEntry) => {
             const preferredEntity2Group = getFirstUsableGroup(
                 entity1GroupEntry.groupPriority,
-                data.entityGroups[1]
+                entitiesWithVolume[1]
             );
 
             return cartesian(
@@ -258,8 +263,8 @@ export namespace SpreadMatcher {
         return {
             routes,
             entityGroups: [
-                data.entityGroups[0].filter((entity) => routes.some((e) => e[0].id === entity.id)),
-                data.entityGroups[1].filter((entity) => routes.some((e) => e[1].id === entity.id))
+                entitiesWithVolume[0].filter((entity) => routes.some((e) => e[0].id === entity.id)),
+                entitiesWithVolume[1].filter((entity) => routes.some((e) => e[1].id === entity.id))
             ]
         };
     };
@@ -272,13 +277,11 @@ export namespace SpreadMatcher {
         groups: T[][],
         entities: P[]
     ): (T & { entities: P[] })[] => {
-        const entitiesWithVolume = entities.filter((e) => e.volume.gt(0));
-
         const groupsWithVolume = groups
             .map((group) => {
                 const entitiesInGroup = group.map((entry) => ({
                     ...entry,
-                    entities: entitiesWithVolume.filter((e) => e.id === entry.id)
+                    entities: entities.filter((e) => e.id === entry.id)
                 }));
 
                 return entitiesInGroup;
