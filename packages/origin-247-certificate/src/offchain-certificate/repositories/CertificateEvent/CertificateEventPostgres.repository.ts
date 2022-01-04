@@ -1,11 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { CertificateEventEntity } from './CertificateEvent.entity';
 import { CertificateEventRepository, SynchronizableEvent } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
+import { MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT } from '../../synchronize/blockchain-synchronize.const';
 
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {
@@ -13,8 +14,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         @InjectRepository(CertificateEventEntity)
         private repository: Repository<CertificateEventEntity>,
         @InjectRepository(CertificateSynchronizationAttemptEntity)
-        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>,
-        private entityManager: EntityManager
+        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>
     ) {}
 
     public async getAll(): Promise<CertificateEventEntity[]> {
@@ -88,8 +88,10 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 'attempt',
                 'attempt.eventId = event.id'
             )
-            .where('attempt.error IS NULL')
-            .andWhere('attempt.attempts_count = 0');
+            .where('(attempt.error IS NULL AND attempt.attempts_count = 0)')
+            .orWhere(
+                `(attempt.error IS NOT NULL AND attempt.attempts_count < ${MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT})`
+            );
 
         return (await query.getMany()) as SynchronizableEvent[];
     }

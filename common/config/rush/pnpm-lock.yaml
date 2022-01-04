@@ -41,7 +41,6 @@ specifiers:
   '@types/cache-manager-ioredis': 2.0.2
   '@types/chai': 4.2.22
   '@types/jest': 26.0.23
-  '@types/lodash': 4.14.176
   '@types/mocha': 9.0.0
   '@types/node': 16.11.3
   '@types/react': 17.0.19
@@ -59,7 +58,6 @@ specifiers:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2
   jest: 27.0.5
-  lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
   pg: 8.7.1
@@ -115,13 +113,12 @@ dependencies:
   '@rush-temp/origin-247-energy-api': file:projects/origin-247-energy-api.tgz_c70c36eb34bb288ea7f47d1c20b8c460
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.5.0
   '@typechain/ethers-v5': 7.1.0_8e93b6e8d98cb9a74a36e053ec23ff7e
-  '@typechain/hardhat': 2.3.1_512973f51e7672eecf86f542b17ea4fd
+  '@typechain/hardhat': 2.3.1_hardhat@2.6.4+typechain@5.1.2
   '@types/bull': 3.15.1
   '@types/cache-manager': 3.4.2
   '@types/cache-manager-ioredis': 2.0.2
   '@types/chai': 4.2.22
   '@types/jest': 26.0.23
-  '@types/lodash': 4.14.176
   '@types/mocha': 9.0.0
   '@types/node': 16.11.3
   '@types/react': 17.0.19
@@ -139,7 +136,6 @@ dependencies:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2_webpack@5.51.1
   jest: 27.0.5_ts-node@9.1.1
-  lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
   pg: 8.7.1
@@ -2674,6 +2670,18 @@ packages:
       typechain: 5.1.2_typescript@4.3.4
     dev: false
 
+  /@typechain/hardhat/2.3.1_hardhat@2.6.4+typechain@5.1.2:
+    resolution: {integrity: sha512-BQV8OKQi0KAzLXCdsPO0pZBNQQ6ra8A2ucC26uFX/kquRBtJu1yEyWnVSmtr07b5hyRoJRpzUeINLnyqz4/MAw==}
+    peerDependencies:
+      hardhat: ^2.0.10
+      lodash: ^4.17.15
+      typechain: ^5.1.2
+    dependencies:
+      fs-extra: 9.1.0
+      hardhat: 2.6.4
+      typechain: 5.1.2_typescript@4.3.4
+    dev: false
+
   /@types/abstract-leveldown/5.0.2:
     resolution: {integrity: sha512-+jA1XXF3jsz+Z7FcuiNqgK53hTa/luglT2TyTpKPqoYbxVY+mCPF22Rm+q3KPBrMHJwNXFrTViHszBOfU4vftQ==}
     dev: false
@@ -2819,6 +2827,10 @@ packages:
 
   /@types/lodash/4.14.176:
     resolution: {integrity: sha512-xZmuPTa3rlZoIbtDUyJKZQimJV3bxCmzMIO2c9Pz9afyDro6kr7R79GwcB6mRhuoPmV2p1Vb66WOJH7F886WKQ==}
+    dev: false
+
+  /@types/lodash/4.14.178:
+    resolution: {integrity: sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==}
     dev: false
 
   /@types/lru-cache/5.1.1:
@@ -13599,7 +13611,7 @@ packages:
     dev: false
 
   file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c:
-    resolution: {integrity: sha512-LRVYkdv0xt5Qb9jfISlG/uVhxN1Yj38gZ77r4IOK4VDrhqmvBmGkRLea+19dLy9lD21X81FsdYoOpkOOHPRyUg==, tarball: file:projects/origin-247-certificate.tgz}
+    resolution: {integrity: sha512-8ux57n0BjCiHHUD7eA7eoGaEvWQ5QWmJuuWvnRwzjrxxNajvDyqEXsol4Xi+xNNSvhIIreZhyoEOov5Cn0S5VQ==, tarball: file:projects/origin-247-certificate.tgz}
     id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
@@ -13618,6 +13630,7 @@ packages:
       '@nestjs/typeorm': 8.0.2_21fafc1ad40aee5295760495ea02e464
       '@types/bull': 3.15.1
       '@types/jest': 26.0.23
+      '@types/lodash': 4.14.178
       '@types/node': 16.11.3
       bull: 3.29.3
       cache-manager-ioredis: 2.1.0
@@ -13625,6 +13638,7 @@ packages:
       ethers: 5.3.1
       ganache-cli: 6.12.2
       jest: 27.0.5_ts-node@9.1.1
+      lodash: 4.17.21
       passport: 0.5.0
       pg: 8.7.1
       ts-jest: 27.0.3_jest@27.0.5+typescript@4.3.4
