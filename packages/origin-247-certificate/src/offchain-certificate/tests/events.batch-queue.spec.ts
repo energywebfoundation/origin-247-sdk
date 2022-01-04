@@ -59,6 +59,23 @@ describe('EventsBatchQueue', () => {
             expect(eventsBatchQueue.popBatch()).toEqual([]);
         });
 
+        it('should return empty array if there are no events after processing everything', async () => {
+            const eventStub = {
+                id: 0,
+                internalCertificateId: 0,
+                type: CertificateEventType.Issued,
+                commandId: 1,
+                payload: {},
+                createdAt: new Date(1)
+            } as SynchronizableEvent;
+            const events = [eventStub];
+
+            const eventsBatchQueue = new EventsBatchQueue(events);
+
+            expect(eventsBatchQueue.popBatch()).toEqual([eventStub]);
+            expect(eventsBatchQueue.popBatch()).toEqual([]);
+        });
+
         it('should return all events if they are for different certificates', async () => {
             const eventStub = {
                 id: 0,

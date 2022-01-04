@@ -1,5 +1,5 @@
 import { SynchronizableEvent } from '../../../repositories/CertificateEvent/CertificateEvent.repository';
-import { flatten } from 'lodash';
+import { flatten, groupBy } from 'lodash';
 
 type CertificateId = number;
 
@@ -9,17 +9,7 @@ export class EventsBatchQueue {
     constructor(events: SynchronizableEvent[]) {
         const sortedEvents = events.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
-        sortedEvents.forEach((event) => {
-            const eventsForThatCertificate = this.eventsToProcess[event.internalCertificateId];
-            if (eventsForThatCertificate) {
-                this.eventsToProcess[event.internalCertificateId] = [
-                    ...eventsForThatCertificate,
-                    event
-                ];
-            } else {
-                this.eventsToProcess[event.internalCertificateId] = [event];
-            }
-        });
+        this.eventsToProcess = groupBy(sortedEvents, 'internalCertificateId');
     }
 
     public popBatch(): SynchronizableEvent[] {
@@ -27,8 +17,12 @@ export class EventsBatchQueue {
 
         Object.entries(this.eventsToProcess).forEach(([certificateId, eventsForCertificate]) => {
             const [firstEvent, ...otherEvents] = eventsForCertificate;
-            this.eventsToProcess[certificateId] = otherEvents;
-            eventsToProcess.push(firstEvent);
+            if (firstEvent) {
+                this.eventsToProcess[certificateId] = otherEvents;
+                eventsToProcess.push(firstEvent);
+            } else {
+                this.removeEventsForCertificateIds([Number(certificateId)]);
+            }
         });
 
         return eventsToProcess;
