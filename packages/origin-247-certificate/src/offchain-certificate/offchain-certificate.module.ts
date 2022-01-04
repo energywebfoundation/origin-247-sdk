@@ -12,22 +12,26 @@ import { CertificateReadModelPostgresRepository } from './repositories/Certifica
 import { BullModule } from '@nestjs/bull';
 import { blockchainQueueName } from '../blockchain-actions.processor';
 import { BlockchainSynchronizeService } from './synchronize/blockchain-synchronize.service';
-import {
-    blockchainSynchronizeQueueName,
-    BlockchainSynchronizeTask
-} from './synchronize/blockchain-synchronize.task';
+import { BlockchainSynchronizeTask } from './synchronize/blockchain-synchronize.task';
 import { SYNCHRONIZE_STRATEGY } from './synchronize/strategies/synchronize.strategy';
-import { SerialSynchronizeStrategy } from './synchronize/strategies/serial-synchronize.strategy';
 import {
     CERTIFICATE_COMMAND_REPOSITORY,
     CERTIFICATE_EVENT_REPOSITORY,
-    CERTIFICATE_READ_MODEL_REPOSITORY
+    CERTIFICATE_READ_MODEL_REPOSITORY,
+    SYNCHRONIZE_QUEUE_NAME
 } from './repositories/repository.keys';
-import { IssuancePersistHandler } from './synchronize/handlers/issuance-persist.handler';
+import { IssuePersistHandler } from './synchronize/handlers/issue-persist-handler.service';
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
-import { PersistProcessor } from './synchronize/handlers/persist.handler';
+import { SynchronizeProcessor } from './synchronize/handlers/persist.handler';
 import { CertificateModule } from '../certificate.module';
+import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
+import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
+import { BatchSynchronizeStrategy } from './synchronize/strategies/batch/batch-synchronize.strategy';
+import {
+    BATCH_CONFIGURATION_TOKEN,
+    batchConfiguration
+} from './synchronize/strategies/batch/batch.configuration';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -50,15 +54,20 @@ const serviceProvider = {
         },
         {
             provide: SYNCHRONIZE_STRATEGY,
-            useClass: SerialSynchronizeStrategy
+            useClass: BatchSynchronizeStrategy
+        },
+        {
+            provide: BATCH_CONFIGURATION_TOKEN,
+            useValue: batchConfiguration
         },
         serviceProvider,
         BlockchainSynchronizeService,
         BlockchainSynchronizeTask,
-        IssuancePersistHandler,
+        IssuePersistHandler,
         ClaimPersistHandler,
         TransferPersistHandler,
-        PersistProcessor
+        SynchronizeProcessor,
+        CertificateEventService
     ],
     exports: [serviceProvider],
     imports: [
@@ -67,12 +76,13 @@ const serviceProvider = {
         TypeOrmModule.forFeature([
             CertificateEventEntity,
             CertificateCommandEntity,
-            CertificateReadModelEntity
+            CertificateReadModelEntity,
+            CertificateSynchronizationAttemptEntity
         ]),
 
         BullModule.registerQueue(
             {
-                name: blockchainSynchronizeQueueName
+                name: SYNCHRONIZE_QUEUE_NAME
             },
             {
                 name: blockchainQueueName,

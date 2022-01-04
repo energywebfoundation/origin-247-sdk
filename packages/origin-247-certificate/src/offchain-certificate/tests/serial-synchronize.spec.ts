@@ -1,52 +1,25 @@
 import { CertificateEventType } from '../events/Certificate.events';
 import { Test } from '@nestjs/testing';
 import { SynchronizableEvent } from '../repositories/CertificateEvent/CertificateEvent.repository';
-import { CertificateCommandEntity } from '../repositories/CertificateCommand/CertificateCommand.entity';
-import { SerialSynchronizeStrategy } from '../synchronize/strategies/serial-synchronize.strategy';
 import { SYNCHRONIZE_STRATEGY } from '../synchronize/strategies/synchronize.strategy';
-import {
-    CERTIFICATE_COMMAND_REPOSITORY,
-    CERTIFICATE_EVENT_REPOSITORY
-} from '../repositories/repository.keys';
-import { PersistProcessor } from '../synchronize/handlers/persist.handler';
+import { SynchronizeProcessor } from '../synchronize/handlers/persist.handler';
+import { SerialSynchronizeStrategy } from '../synchronize/strategies/serial/serial-synchronize.strategy';
 
 describe('BlockchainSynchronize', () => {
     let serialStrategy: SerialSynchronizeStrategy;
-    const eventRepositoryMock = {
-        getAllNotProcessed: jest.fn(),
-        markAsSynchronized: jest.fn(),
-        getAll: jest.fn(),
-        saveProcessingError: jest.fn(),
-        save: jest.fn(),
-        getByInternalCertificateId: jest.fn(),
-        getNumberOfCertificates: jest.fn()
-    };
-
     const persistProcessorMock = {
         handle: jest.fn()
-    };
-
-    const commandRepositoryMock = {
-        getById: jest.fn()
     };
 
     beforeEach(async () => {
         const app = await Test.createTestingModule({
             providers: [
                 {
-                    provide: CERTIFICATE_COMMAND_REPOSITORY,
-                    useValue: commandRepositoryMock
-                },
-                {
-                    provide: CERTIFICATE_EVENT_REPOSITORY,
-                    useValue: eventRepositoryMock
-                },
-                {
                     provide: SYNCHRONIZE_STRATEGY,
                     useClass: SerialSynchronizeStrategy
                 },
                 {
-                    provide: PersistProcessor,
+                    provide: SynchronizeProcessor,
                     useValue: persistProcessorMock
                 }
             ]
@@ -61,7 +34,6 @@ describe('BlockchainSynchronize', () => {
 
             await serialStrategy.synchronize(events);
 
-            expect(eventRepositoryMock.markAsSynchronized).toBeCalledTimes(0);
             expect(persistProcessorMock.handle).toBeCalledTimes(0);
         });
 
@@ -70,9 +42,11 @@ describe('BlockchainSynchronize', () => {
                 id: 0,
                 type: CertificateEventType.Issued,
                 commandId: 1,
+                createdAt: new Date(),
                 payload: {}
             } as SynchronizableEvent;
             const events = [eventStub];
+            persistProcessorMock.handle.mockResolvedValueOnce({ success: true });
 
             await serialStrategy.synchronize(events);
 
@@ -85,9 +59,11 @@ describe('BlockchainSynchronize', () => {
                 id: 0,
                 type: CertificateEventType.Claimed,
                 commandId: 1,
+                createdAt: new Date(),
                 payload: {}
             } as SynchronizableEvent;
             const events = [eventStub];
+            persistProcessorMock.handle.mockResolvedValueOnce({ success: true });
 
             await serialStrategy.synchronize(events);
 
@@ -100,14 +76,42 @@ describe('BlockchainSynchronize', () => {
                 id: 0,
                 type: CertificateEventType.Transferred,
                 commandId: 1,
+                createdAt: new Date(),
                 payload: {}
             } as SynchronizableEvent;
+            persistProcessorMock.handle.mockResolvedValueOnce({ success: true });
             const events = [eventStub];
 
             await serialStrategy.synchronize(events);
 
             expect(persistProcessorMock.handle).toBeCalledTimes(1);
             expect(persistProcessorMock.handle).toBeCalledWith(eventStub);
+        });
+
+        it('should not synchronize event if it failed for that certificate ids', async () => {
+            const issueEvent = {
+                id: 0,
+                internalCertificateId: 0,
+                type: CertificateEventType.Issued,
+                commandId: 1,
+                createdAt: new Date(0),
+                payload: {}
+            } as SynchronizableEvent;
+            const claimEvent = {
+                id: 0,
+                internalCertificateId: 0,
+                type: CertificateEventType.Claimed,
+                commandId: 1,
+                createdAt: new Date(1),
+                payload: {}
+            } as SynchronizableEvent;
+            const events = [issueEvent, claimEvent];
+            persistProcessorMock.handle.mockResolvedValueOnce({ success: false });
+
+            await serialStrategy.synchronize(events);
+
+            expect(persistProcessorMock.handle).toBeCalledTimes(1);
+            expect(persistProcessorMock.handle).toBeCalledWith(issueEvent);
         });
     });
 });
