@@ -11,8 +11,8 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
 
     async synchronize(events: SynchronizableEvent[]): Promise<void> {
         const failedCertificateIds: number[] = [];
-        const hasNotFailedBefore = (e: SynchronizableEvent) =>
-            !failedCertificateIds.includes(e.internalCertificateId);
+        const hasCertificateFailed = (e: SynchronizableEvent) =>
+            failedCertificateIds.includes(e.internalCertificateId);
         const eventsBatchQueue = new EventsBatchQueue(events);
 
         while (!eventsBatchQueue.isEmpty()) {
@@ -21,7 +21,7 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
             // Batch issue certificates
             const issueEvents = batch
                 .filter((e) => e.type === CertificateEventType.Issued)
-                .filter(hasNotFailedBefore);
+                .filter((e) => !hasCertificateFailed(e));
             if (issueEvents.length) {
                 const issueResult = await this.synchronizeManager.handleBatch(issueEvents);
                 failedCertificateIds.push(...issueResult.failedCertificateIds);
@@ -31,7 +31,7 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
             // Batch transfer certificates
             const transferEvents = batch
                 .filter((e) => e.type === CertificateEventType.Transferred)
-                .filter(hasNotFailedBefore);
+                .filter((e) => !hasCertificateFailed(e));
             if (transferEvents.length) {
                 const transferResult = await this.synchronizeManager.handleBatch(transferEvents);
                 eventsBatchQueue.removeEventsForCertificateIds(transferResult.failedCertificateIds);
@@ -40,7 +40,7 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
             // Batch claim certificates
             const claimEvents = batch
                 .filter((e) => e.type === CertificateEventType.Claimed)
-                .filter(hasNotFailedBefore);
+                .filter((e) => !hasCertificateFailed(e));
             if (claimEvents.length) {
                 const claimResult = await this.synchronizeManager.handleBatch(claimEvents);
                 failedCertificateIds.push(...claimResult.failedCertificateIds);
