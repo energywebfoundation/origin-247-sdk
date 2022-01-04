@@ -1,4 +1,4 @@
-import { ICertificateReadModel } from '../../../types';
+import { ICertificateReadModel } from '../../types';
 import { CertificateReadModelEntity } from './CertificateReadModel.entity';
 
 export interface FindOptions {}

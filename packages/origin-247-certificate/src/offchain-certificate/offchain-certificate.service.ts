@@ -2,18 +2,13 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CertificateCommandRepository } from './repositories/CertificateCommand/CertificateCommand.repository';
 import { CertificateEventRepository } from './repositories/CertificateEvent/CertificateEvent.repository';
 import { EventBus } from '@nestjs/cqrs';
-
+import { IClaimCommand, IIssueCommand, ITransferCommand, IIssueCommandParams } from '../types';
 import {
-    IClaimCommand,
-    IClaimPersistedCommand,
-    IIssuancePersistedCommand,
-    IIssueCommand,
-    IIssueCommandParams,
+    ITransferPersistedCommand,
     IPersistErrorCommand,
-    ITransferCommand,
-    ITransferPersistedCommand
-} from '../types';
-
+    IIssuancePersistedCommand,
+    IClaimPersistedCommand
+} from './types';
 import {
     CertificateClaimedEvent,
     CertificateClaimPersistedEvent,
@@ -24,7 +19,6 @@ import {
     CertificateTransferredEvent,
     ICertificateEvent
 } from './events/Certificate.events';
-
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
 import { CertificateAggregate } from './certificate.aggregate';
@@ -37,7 +31,7 @@ import {
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 
 @Injectable()
-export class OffchainCertificateService<T = null> {
+export class OffChainCertificateService<T = null> {
     constructor(
         @Inject(CERTIFICATE_COMMAND_REPOSITORY)
         private readonly certCommandRepo: CertificateCommandRepository,

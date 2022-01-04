@@ -7,10 +7,11 @@ import {
     CertificateTransferredEvent,
     ICertificateEvent
 } from './events/Certificate.events';
-import { ICertificateReadModel, IIssueCommand } from '../types';
+import { IIssueCommand } from '../types';
 import { CertificateErrors } from './errors';
 import { BigNumber } from 'ethers';
 import { compareDates } from '../utils/date-utils';
+import { ICertificateReadModel } from '..';
 
 export class CertificateAggregate {
     private certificate: ICertificateReadModel | null = null;

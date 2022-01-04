@@ -1,6 +1,5 @@
 import { Test } from '@nestjs/testing';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../repositories/repository.keys';
-import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../types';
 import { TransferPersistHandler } from '../synchronize/handlers/transfer-persist.handler';
 import { CertificateEventType } from '../events/Certificate.events';
 import { CertificateEventEntity } from '../repositories/CertificateEvent/CertificateEvent.entity';
@@ -8,6 +7,8 @@ import {
     BATCH_CONFIGURATION_TOKEN,
     batchConfiguration
 } from '../synchronize/strategies/batch/batch.configuration';
+import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../..';
+import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../types';
 
 describe('TransferPersistHandler', () => {
     let transferPersistHandler: TransferPersistHandler;
@@ -27,7 +28,7 @@ describe('TransferPersistHandler', () => {
         const app = await Test.createTestingModule({
             providers: [
                 {
-                    provide: CERTIFICATE_SERVICE_TOKEN,
+                    provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
                     useValue: certificateServiceMock
                 },
                 {

@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CertificateService, CERTIFICATE_SERVICE_TOKEN } from '@energyweb/origin-247-certificate';
+import {
+    CertificateService,
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+} from '@energyweb/origin-247-certificate';
 import {
     EnergyTransferRequestRepository,
     ENERGY_TRANSFER_REQUEST_REPOSITORY
@@ -13,7 +16,7 @@ import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configura
 @Injectable()
 export class IssueService {
     constructor(
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
+        @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private certificateService: CertificateService<unknown>,
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private etrRepository: EnergyTransferRequestRepository,

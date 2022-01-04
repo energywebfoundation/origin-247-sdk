@@ -1,9 +1,10 @@
-import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../types';
+import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../onchain-certificate/types';
+import { OnChainCertificateService } from '../../../onchain-certificate/onchain-certificate.service';
+import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../types';
 import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventType, CertificateIssuedEvent } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
-import { CertificateService } from '../../../certificate.service';
-import { OffchainCertificateService } from '../../offchain-certificate.service';
+import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
 import { chunk, compact } from 'lodash';
@@ -16,10 +17,10 @@ import {
 @Injectable()
 export class IssuePersistHandler implements SynchronizeHandler {
     constructor(
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
-        private readonly certificateService: CertificateService,
+        @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
+        private readonly certificateService: OnChainCertificateService,
         @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
-        private readonly offchainCertificateService: OffchainCertificateService,
+        private readonly offchainCertificateService: OffChainCertificateService,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
         @Inject(BATCH_CONFIGURATION_TOKEN)

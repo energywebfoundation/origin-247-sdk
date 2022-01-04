@@ -11,13 +11,13 @@ import { getProviderWithFallback } from '@energyweb/utils-general';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 import {
-    CERTIFICATE_SERVICE_TOKEN,
-    CertificateEntities,
-    CertificateModule,
-    CertificateService,
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    OffChainCertificateEntities,
+    OnChainCertificateModule,
+    OnChainCertificateService,
     OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    OffchainCertificateModule,
-    OffchainCertificateService
+    OffChainCertificateModule,
+    OffChainCertificateService
 } from '../src';
 import { PassportModule } from '@nestjs/passport';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -79,10 +79,10 @@ export const bootstrapTestInstance: any = async () => {
                 database: process.env.DB_DATABASE ?? 'origin',
                 logging: ['info'],
                 keepConnectionAlive: true,
-                entities: [...IssuerEntities, ...CertificateEntities]
+                entities: [...IssuerEntities, ...OffChainCertificateEntities]
             }),
-            OffchainCertificateModule,
-            CertificateModule,
+            OffChainCertificateModule,
+            OnChainCertificateModule,
             QueueingModule(),
             BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' })
@@ -92,7 +92,9 @@ export const bootstrapTestInstance: any = async () => {
 
     const app = moduleFixture.createNestApplication();
 
-    const certificateService = await app.resolve<CertificateService>(CERTIFICATE_SERVICE_TOKEN);
+    const certificateService = await app.resolve<OnChainCertificateService>(
+        ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    );
     const databaseService = await app.resolve<DatabaseService>(DatabaseService);
     const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(
         BlockchainPropertiesService
@@ -104,7 +106,7 @@ export const bootstrapTestInstance: any = async () => {
     const certificateReadModelRepository = await app.resolve<CertificateReadModelRepository>(
         CERTIFICATE_READ_MODEL_REPOSITORY
     );
-    const offchainCertificateService = await app.resolve<OffchainCertificateService>(
+    const offchainCertificateService = await app.resolve<OffChainCertificateService>(
         OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
     );
     const certificateCommandRepository = await app.resolve<CertificateCommandRepository>(

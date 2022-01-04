@@ -33,7 +33,7 @@ import { ClaimModule } from '../src/claim.module';
 import {
     CertificateModule,
     CertificateService,
-    CERTIFICATE_SERVICE_TOKEN
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN
 } from '@energyweb/origin-247-certificate';
 import { ClaimFacade } from '../src';
 const testLogger = new Logger('e2e');
@@ -115,7 +115,9 @@ export const bootstrapTestInstance = async () => {
     );
     const claimFacade = await app.resolve<ClaimFacade>(ClaimFacade);
 
-    const certificateService = await app.resolve<CertificateService>(CERTIFICATE_SERVICE_TOKEN);
+    const certificateService = await app.resolve<CertificateService>(
+        ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    );
 
     const blockchainProperties = await blockchainPropertiesService.create(
         provider.network.chainId,

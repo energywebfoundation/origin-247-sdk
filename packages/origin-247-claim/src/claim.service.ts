@@ -24,7 +24,7 @@ import {
 } from './interfaces';
 import {
     CertificateService,
-    CERTIFICATE_SERVICE_TOKEN,
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
     IClaimCommand
 } from '@energyweb/origin-247-certificate';
 
@@ -52,7 +52,7 @@ export class ClaimService {
         private leftoverConsumptionRepo: LeftoverConsumptionRepository,
         @Inject(EXCESS_GENERATION_REPOSITORY)
         private excessGenerationRepo: ExcessGenerationRepository,
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
+        @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private certificateService: CertificateService<unknown>
     ) {}
 

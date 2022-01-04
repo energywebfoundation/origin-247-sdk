@@ -2,15 +2,13 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CertificateCommandPostgresRepository } from './repositories/CertificateCommand/CertificateCommandPostgres.repository';
 import { CertificateEventPostgresRepository } from './repositories/CertificateEvent/CertificateEventPostgres.repository';
-import { OffchainCertificateService } from './offchain-certificate.service';
-import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../types';
+import { OffChainCertificateService } from './offchain-certificate.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateEventEntity } from './repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateReadModelEntity } from './repositories/CertificateReadModel/CertificateReadModel.entity';
 import { CertificateReadModelPostgresRepository } from './repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
 import { BullModule } from '@nestjs/bull';
-import { blockchainQueueName } from '../blockchain-actions.processor';
 import { BlockchainSynchronizeService } from './synchronize/blockchain-synchronize.service';
 import { BlockchainSynchronizeTask } from './synchronize/blockchain-synchronize.task';
 import { SYNCHRONIZE_STRATEGY } from './synchronize/strategies/synchronize.strategy';
@@ -22,7 +20,7 @@ import {
 } from './repositories/repository.keys';
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
-import { CertificateModule } from '../certificate.module';
+import { OnChainCertificateModule } from '../onchain-certificate/onchain-certificate.module';
 import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 import { BatchSynchronizeStrategy } from './synchronize/strategies/batch/batch-synchronize.strategy';
@@ -32,10 +30,11 @@ import {
 } from './synchronize/strategies/batch/batch.configuration';
 import { IssuePersistHandler } from './synchronize/handlers/issue-persist.handler';
 import { SynchronizeManager } from './synchronize/handlers/synchronize.manager';
+import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '..';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    useClass: OffchainCertificateService
+    useClass: OffChainCertificateService
 };
 
 @Module({
@@ -71,7 +70,7 @@ const serviceProvider = {
     ],
     exports: [serviceProvider],
     imports: [
-        CertificateModule,
+        OnChainCertificateModule,
         CqrsModule,
         TypeOrmModule.forFeature([
             CertificateEventEntity,
@@ -80,17 +79,9 @@ const serviceProvider = {
             CertificateSynchronizationAttemptEntity
         ]),
 
-        BullModule.registerQueue(
-            {
-                name: SYNCHRONIZE_QUEUE_NAME
-            },
-            {
-                name: blockchainQueueName,
-                settings: {
-                    lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
-                }
-            }
-        )
+        BullModule.registerQueue({
+            name: SYNCHRONIZE_QUEUE_NAME
+        })
     ]
 })
-export class OffchainCertificateModule {}
+export class OffChainCertificateModule {}

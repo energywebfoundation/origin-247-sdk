@@ -1,7 +1,7 @@
 import { bootstrapTestInstance } from './setup';
 import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { OffchainCertificateService } from '../src';
+import { OffChainCertificateService } from '../src';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateCommandRepository } from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.repository';
 import { CertificateReadModelRepository } from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
@@ -12,7 +12,7 @@ process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 describe('Offchain Certificate service', () => {
     let app: INestApplication;
     let databaseService: DatabaseService;
-    let offchainCertificateService: OffchainCertificateService;
+    let offchainCertificateService: OffChainCertificateService;
     let certificateEventRepository: CertificateEventRepository;
     let certificateCommandRepository: CertificateCommandRepository;
     let certificateReadModelRepository: CertificateReadModelRepository;

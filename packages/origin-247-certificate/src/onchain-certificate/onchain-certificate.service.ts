@@ -8,17 +8,14 @@ import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
 import { IClaim } from '@energyweb/issuer';
 import { Job, Queue } from 'bull';
+import { BlockchainAction, BlockchainActionType, ICertificate, ISuccessResponse } from './types';
 import {
-    BlockchainAction,
-    BlockchainActionType,
-    ICertificate,
     IClaimCommand,
     IIssueCommand,
     IIssueCommandParams,
     IIssuedCertificate,
-    ISuccessResponse,
     ITransferCommand
-} from './types';
+} from '../types';
 import { blockchainQueueName } from './blockchain-actions.processor';
 
 const jobOptions = {
@@ -28,7 +25,7 @@ const jobOptions = {
 };
 
 @Injectable()
-export class CertificateService<T = null> {
+export class OnChainCertificateService<T = null> {
     constructor(
         private readonly queryBus: QueryBus,
         @InjectQueue(blockchainQueueName)

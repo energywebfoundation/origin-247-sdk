@@ -1,7 +1,7 @@
 import { bootstrapTestInstance, user2Wallet, userWallet } from './setup';
 import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { CertificateService } from '../src';
+import { OnChainCertificateService } from '../src';
 
 jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
@@ -9,7 +9,7 @@ process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 describe('Certificate service', () => {
     let app: INestApplication;
     let databaseService: DatabaseService;
-    let certificateService: CertificateService;
+    let certificateService: OnChainCertificateService;
 
     beforeAll(async () => {
         ({ app, databaseService, certificateService } = await bootstrapTestInstance());
@@ -158,7 +158,7 @@ describe('Certificate service', () => {
     });
 
     it('Properly parses metadata', async () => {
-        const certificateService2 = (certificateService as any) as CertificateService<{
+        const certificateService2 = (certificateService as any) as OnChainCertificateService<{
             custom: string;
         }>;
 

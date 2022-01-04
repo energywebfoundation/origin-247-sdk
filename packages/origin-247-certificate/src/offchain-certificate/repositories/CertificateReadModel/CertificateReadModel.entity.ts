@@ -1,7 +1,7 @@
 import { CreateDateColumn, Entity, Column, Index, UpdateDateColumn, PrimaryColumn } from 'typeorm';
 import { IClaim } from '@energyweb/issuer';
-import { ICertificateReadModel } from '../../../types';
 import { bigintTransformer } from '../utils';
+import { ICertificateReadModel } from '../../types';
 
 export const tableName = 'certificate_read_model';
 

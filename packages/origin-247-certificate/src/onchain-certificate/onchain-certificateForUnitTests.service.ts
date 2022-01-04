@@ -1,19 +1,12 @@
-import { CertificateService } from './certificate.service';
-import { EventBus } from '@nestjs/cqrs';
+import { OnChainCertificateService } from './onchain-certificate.service';
 import { BigNumber } from 'ethers';
-import {
-    ICertificate,
-    IClaimCommand,
-    ITransferCommand,
-    ISuccessResponse,
-    IIssuedCertificate,
-    IIssueCommandParams
-} from './types';
+import { ICertificate, ISuccessResponse } from './types';
+import { IIssuedCertificate, IIssueCommandParams, IClaimCommand, ITransferCommand } from '../types';
 import { Injectable } from '@nestjs/common';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
 @Injectable()
-export class CertificateForUnitTestsService<T> implements PublicPart<CertificateService<T>> {
+export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCertificateService<T>> {
     private serial = 0;
     private db: ICertificate<T>[] = [];
 
