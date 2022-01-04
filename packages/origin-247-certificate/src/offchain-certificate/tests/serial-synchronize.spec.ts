@@ -2,12 +2,16 @@ import { CertificateEventType } from '../events/Certificate.events';
 import { Test } from '@nestjs/testing';
 import { SynchronizableEvent } from '../repositories/CertificateEvent/CertificateEvent.repository';
 import { SYNCHRONIZE_STRATEGY } from '../synchronize/strategies/synchronize.strategy';
-import { SynchronizeProcessor } from '../synchronize/handlers/persist.handler';
 import { SerialSynchronizeStrategy } from '../synchronize/strategies/serial/serial-synchronize.strategy';
+import { SynchronizeManager } from '../synchronize/handlers/synchronize.manager';
+import {
+    BATCH_CONFIGURATION_TOKEN,
+    batchConfiguration
+} from '../synchronize/strategies/batch/batch.configuration';
 
 describe('BlockchainSynchronize', () => {
     let serialStrategy: SerialSynchronizeStrategy;
-    const persistProcessorMock = {
+    const synchronizeManagerMock = {
         handle: jest.fn()
     };
 
@@ -19,8 +23,12 @@ describe('BlockchainSynchronize', () => {
                     useClass: SerialSynchronizeStrategy
                 },
                 {
-                    provide: SynchronizeProcessor,
-                    useValue: persistProcessorMock
+                    provide: SynchronizeManager,
+                    useValue: synchronizeManagerMock
+                },
+                {
+                    provide: BATCH_CONFIGURATION_TOKEN,
+                    useValue: batchConfiguration
                 }
             ]
         }).compile();
@@ -34,7 +42,7 @@ describe('BlockchainSynchronize', () => {
 
             await serialStrategy.synchronize(events);
 
-            expect(persistProcessorMock.handle).toBeCalledTimes(0);
+            expect(synchronizeManagerMock.handle).toBeCalledTimes(0);
         });
 
         it('work for new issuance event', async () => {
@@ -46,12 +54,12 @@ describe('BlockchainSynchronize', () => {
                 payload: {}
             } as SynchronizableEvent;
             const events = [eventStub];
-            persistProcessorMock.handle.mockResolvedValueOnce({ success: true });
+            synchronizeManagerMock.handle.mockResolvedValueOnce({ success: true });
 
             await serialStrategy.synchronize(events);
 
-            expect(persistProcessorMock.handle).toBeCalledTimes(1);
-            expect(persistProcessorMock.handle).toBeCalledWith(eventStub);
+            expect(synchronizeManagerMock.handle).toBeCalledTimes(1);
+            expect(synchronizeManagerMock.handle).toBeCalledWith(eventStub);
         });
 
         it('work for new claim event', async () => {
@@ -63,12 +71,12 @@ describe('BlockchainSynchronize', () => {
                 payload: {}
             } as SynchronizableEvent;
             const events = [eventStub];
-            persistProcessorMock.handle.mockResolvedValueOnce({ success: true });
+            synchronizeManagerMock.handle.mockResolvedValueOnce({ success: true });
 
             await serialStrategy.synchronize(events);
 
-            expect(persistProcessorMock.handle).toBeCalledTimes(1);
-            expect(persistProcessorMock.handle).toBeCalledWith(eventStub);
+            expect(synchronizeManagerMock.handle).toBeCalledTimes(1);
+            expect(synchronizeManagerMock.handle).toBeCalledWith(eventStub);
         });
 
         it('work for new transfer event', async () => {
@@ -79,13 +87,13 @@ describe('BlockchainSynchronize', () => {
                 createdAt: new Date(),
                 payload: {}
             } as SynchronizableEvent;
-            persistProcessorMock.handle.mockResolvedValueOnce({ success: true });
+            synchronizeManagerMock.handle.mockResolvedValueOnce({ success: true });
             const events = [eventStub];
 
             await serialStrategy.synchronize(events);
 
-            expect(persistProcessorMock.handle).toBeCalledTimes(1);
-            expect(persistProcessorMock.handle).toBeCalledWith(eventStub);
+            expect(synchronizeManagerMock.handle).toBeCalledTimes(1);
+            expect(synchronizeManagerMock.handle).toBeCalledWith(eventStub);
         });
 
         it('should not synchronize event if it failed for that certificate ids', async () => {
@@ -106,12 +114,12 @@ describe('BlockchainSynchronize', () => {
                 payload: {}
             } as SynchronizableEvent;
             const events = [issueEvent, claimEvent];
-            persistProcessorMock.handle.mockResolvedValueOnce({ success: false });
+            synchronizeManagerMock.handle.mockResolvedValueOnce({ success: false });
 
             await serialStrategy.synchronize(events);
 
-            expect(persistProcessorMock.handle).toBeCalledTimes(1);
-            expect(persistProcessorMock.handle).toBeCalledWith(issueEvent);
+            expect(synchronizeManagerMock.handle).toBeCalledTimes(1);
+            expect(synchronizeManagerMock.handle).toBeCalledWith(issueEvent);
         });
     });
 });

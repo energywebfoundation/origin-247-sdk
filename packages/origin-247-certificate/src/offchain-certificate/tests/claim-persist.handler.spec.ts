@@ -4,7 +4,10 @@ import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '.
 import { ClaimPersistHandler } from '../synchronize/handlers/claim-persist.handler';
 import { CertificateEventType } from '../events/Certificate.events';
 import { CertificateEventEntity } from '../repositories/CertificateEvent/CertificateEvent.entity';
-import { CertificateCommandEntity } from '../repositories/CertificateCommand/CertificateCommand.entity';
+import {
+    BATCH_CONFIGURATION_TOKEN,
+    batchConfiguration
+} from '../synchronize/strategies/batch/batch.configuration';
 
 describe('ClaimPersistHandler', () => {
     let claimPersistHandler: ClaimPersistHandler;
@@ -35,6 +38,10 @@ describe('ClaimPersistHandler', () => {
                     provide: CERTIFICATE_EVENT_REPOSITORY,
                     useValue: certEventRepoMock
                 },
+                {
+                    provide: BATCH_CONFIGURATION_TOKEN,
+                    useValue: batchConfiguration
+                },
                 ClaimPersistHandler
             ]
         }).compile();
@@ -50,15 +57,6 @@ describe('ClaimPersistHandler', () => {
         createdAt: new Date(),
         payload: {},
         version: 0,
-        ...values
-    });
-
-    const createCommand = (
-        values: Partial<CertificateCommandEntity> = {}
-    ): CertificateCommandEntity => ({
-        payload: {},
-        id: 0,
-        createdAt: new Date(),
         ...values
     });
 
@@ -85,33 +83,15 @@ describe('ClaimPersistHandler', () => {
     });
 
     describe('#handle', () => {
-        it('should report persist error if command is null', async () => {
-            const command = null;
-            const event = createEvent();
-
-            await claimPersistHandler.handle(event, command);
-
-            expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(1);
-            expect(offchainCertificateServiceMock.persistError).toBeCalledWith(
-                event.internalCertificateId,
-                {
-                    errorMessage: expect.any(String)
-                }
-            );
-            expect(certificateServiceMock.claim).toBeCalledTimes(0);
-            expect(offchainCertificateServiceMock.claimPersisted).toBeCalledTimes(0);
-        });
-
         it('should trigger claim persisted if claim was successful', async () => {
-            const command = createCommand();
             const event = createEvent();
             certificateServiceMock.claim.mockResolvedValueOnce({ success: true });
 
-            await claimPersistHandler.handle(event, command);
+            await claimPersistHandler.handle(event);
 
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(0);
             expect(certificateServiceMock.claim).toBeCalledTimes(1);
-            expect(certificateServiceMock.claim).toBeCalledWith(command.payload);
+            expect(certificateServiceMock.claim).toBeCalledWith(event.payload);
             expect(offchainCertificateServiceMock.claimPersisted).toBeCalledTimes(1);
             expect(offchainCertificateServiceMock.claimPersisted).toBeCalledWith(
                 event.internalCertificateId,
@@ -120,14 +100,13 @@ describe('ClaimPersistHandler', () => {
         });
 
         it('should report persist error if synchronization failed', async () => {
-            const command = createCommand();
             const event = createEvent();
             certificateServiceMock.claim.mockResolvedValueOnce({ success: false });
 
-            await claimPersistHandler.handle(event, command);
+            await claimPersistHandler.handle(event);
 
             expect(certificateServiceMock.claim).toBeCalledTimes(1);
-            expect(certificateServiceMock.claim).toBeCalledWith(command.payload);
+            expect(certificateServiceMock.claim).toBeCalledWith(event.payload);
             expect(offchainCertificateServiceMock.claimPersisted).toBeCalledTimes(0);
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(1);
             expect(
@@ -138,17 +117,16 @@ describe('ClaimPersistHandler', () => {
 
     describe('#handleBatch', () => {
         it('should trigger claim persisted for all events if batchClaim was successful', async () => {
-            const command = createCommand();
             const event = createEvent();
             certificateServiceMock.batchClaim.mockResolvedValueOnce({ success: true });
 
-            await claimPersistHandler.handleBatch([event, event], [command, command]);
+            await claimPersistHandler.handleBatch([event, event]);
 
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(0);
             expect(certificateServiceMock.batchClaim).toBeCalledTimes(1);
             expect(certificateServiceMock.batchClaim).toBeCalledWith([
-                command.payload,
-                command.payload
+                event.payload,
+                event.payload
             ]);
             expect(offchainCertificateServiceMock.claimPersisted).toBeCalledTimes(2);
             expect(offchainCertificateServiceMock.claimPersisted).nthCalledWith(
@@ -164,17 +142,16 @@ describe('ClaimPersistHandler', () => {
         });
 
         it('should report persist error for all events if synchronization failed', async () => {
-            const command = createCommand();
             const event = createEvent();
             certificateServiceMock.batchClaim.mockResolvedValueOnce({ success: false });
 
-            await claimPersistHandler.handleBatch([event, event], [command, command]);
+            await claimPersistHandler.handleBatch([event, event]);
 
             expect(offchainCertificateServiceMock.claimPersisted).toBeCalledTimes(0);
             expect(certificateServiceMock.batchClaim).toBeCalledTimes(1);
             expect(certificateServiceMock.batchClaim).toBeCalledWith([
-                command.payload,
-                command.payload
+                event.payload,
+                event.payload
             ]);
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(2);
             expect(offchainCertificateServiceMock.persistError).nthCalledWith(

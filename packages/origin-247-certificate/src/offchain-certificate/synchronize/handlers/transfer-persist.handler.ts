@@ -6,12 +6,12 @@ import { CertificateService } from '../../../certificate.service';
 import { OffchainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
+import { chunk, compact } from 'lodash';
+import { SynchronizeHandler } from './synchronize.handler';
 import {
     BATCH_CONFIGURATION_TOKEN,
     BatchConfiguration
-} from '../../../../../origin-247-transfer/src/batch/configuration';
-import { chunk, compact } from 'lodash';
-import { SynchronizeHandler } from './synchronize.handler';
+} from '../strategies/batch/batch.configuration';
 
 @Injectable()
 export class TransferPersistHandler implements SynchronizeHandler {
