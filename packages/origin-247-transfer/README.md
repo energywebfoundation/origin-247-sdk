@@ -9,7 +9,7 @@ For example:
 2. Seller owns generation device, and wants to sell energy to the buyer (by transferring certificate)
 3. Application receives information, that generation happened. It passes this information to `origin-247-transfer` module.
 4. `origin-247-transfer` module asks application for sites for the transfer. If such sites are found, certificate is issued for the seller.
-5. `origin-247-transfer` after ensuring that certificate has been issued asks application to verify the trade (there are various methods to do that)
+5. If sites are equal validation and transfer are skipped. Otherwise `origin-247-transfer` after ensuring that certificate has been issued asks application to verify the trade (there are various methods to do that)
 6. Application informs `origin-247-transfer` that trade is valid.
 7. `origin-247-transfer` transfers certificate from seller to buyer.
 
@@ -153,6 +153,8 @@ TransferModule.register({
 7. Call `GenerationReadingStoredEvent` created in step 1. that triggers whole transfer process. You may also want to consult test `setup` files in this repository, that although complex, may give a hint in case of any problems.
 
 ## Notes
+
+### Caching
 
 `origin-247-transfer` module makes use of caching, for some purposes. [Official NestJS technique](https://docs.nestjs.com/techniques/caching) is used for that.
 By default it uses in-memory cache, but for production use it is best to actually use persistent store for that, otherwise some ETRs may hang on `PersistanceAwaiting` state.

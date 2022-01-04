@@ -67,25 +67,36 @@ export class ProofRequestService {
             timestamp: new Date(r.timestamp * 1000),
             value: r.value
         }));
-        const readingsWithDateAndInt = readings.map((r) => ({
-            timestamp: new Date(r.timestamp * 1000),
-            value: Number(r.value)
-        }));
         const createProofCommand = new CreateProofCommand(deviceId, readings);
 
         try {
             await this.repository.markRequestsAsProcessing(requestIds);
 
             const proof: NotaryProof = await this.commandBus.execute(createProofCommand);
+            const proofedReadings = proof.leafs.map((leaf) => {
+                const parsedValue = JSON.parse(leaf.value) as {
+                    timestamp: number;
+                    value: string;
+                };
 
-            await this.readService.storeWithProof(deviceId, readingsWithDateAndInt, proof.rootHash);
+                return {
+                    value: Number(parsedValue.value),
+                    timestamp: new Date(parsedValue.timestamp * 1000),
+                    proofLeafHash: leaf.hash
+                };
+            });
+
+            await this.readService.storeWithProof(deviceId, proof.rootHash, proofedReadings);
 
             await this.repository.removeRequests(requestIds);
 
             const processedEvent = new ReadingProofProcessedEvent(
                 deviceId,
                 proof.rootHash,
-                readingsWithDate
+                proofedReadings.map((r) => ({
+                    ...r,
+                    value: String(r.value)
+                }))
             );
 
             this.eventBus.publish(processedEvent);

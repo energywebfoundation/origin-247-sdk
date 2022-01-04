@@ -1,10 +1,9 @@
-import { IEvent, EventsHandler, IEventHandler } from '@nestjs/cqrs';
+import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { TransferService } from '../transfer.service';
 import { queueThrottle } from './queueThrottle';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './configuration';
-
-export class AwaitingTransferEvent implements IEvent {}
+import { AwaitingTransferEvent } from './events';
 
 @EventsHandler(AwaitingTransferEvent)
 export class AwaitingTransferEventHandler implements IEventHandler<AwaitingTransferEvent> {

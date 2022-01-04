@@ -1,4 +1,5 @@
 import { OnChainCertificateService } from './onchain-certificate.service';
+import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { BigNumber } from 'ethers';
 import { ICertificate, ISuccessResponse } from './types';
 import { IIssuedCertificate, IIssueCommandParams, IClaimCommand, ITransferCommand } from '../types';
@@ -10,8 +11,29 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
     private serial = 0;
     private db: ICertificate<T>[] = [];
 
-    public async getAll(): Promise<ICertificate<T>[]> {
-        return [...this.db];
+    public async getAll(options: IGetAllCertificatesOptions = {}): Promise<ICertificate<T>[]> {
+        const lastDate = new Date('2030-01-01T00:00:00.000Z');
+        const generationEndFrom = options.generationEndFrom ?? new Date(0);
+        const generationEndTo = options.generationEndTo ?? lastDate;
+        const generationStartFrom = options.generationStartFrom ?? new Date(0);
+        const generationStartTo = options.generationStartTo ?? lastDate;
+        const creationTimeFrom = options.creationTimeFrom ?? new Date(0);
+        const creationTimeTo = options.creationTimeTo ?? lastDate;
+        const deviceId = options.deviceId;
+
+        return this.db.filter((entry) => {
+            const isDateOk =
+                new Date(entry.generationStartTime * 1000) >= generationStartFrom &&
+                new Date(entry.generationStartTime * 1000) <= generationStartTo &&
+                new Date(entry.generationEndTime * 1000) >= generationEndFrom &&
+                new Date(entry.generationEndTime * 1000) <= generationEndTo &&
+                new Date(entry.creationTime * 1000) >= creationTimeFrom &&
+                new Date(entry.creationTime * 1000) <= creationTimeTo;
+
+            const isDeviceOk = deviceId ? deviceId === entry.deviceId : true;
+
+            return isDateOk && isDeviceOk;
+        });
     }
 
     public async getById(id: number): Promise<ICertificate<T> | null> {

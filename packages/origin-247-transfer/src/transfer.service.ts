@@ -8,8 +8,9 @@ import {
     ENERGY_TRANSFER_REQUEST_REPOSITORY
 } from './repositories/EnergyTransferRequest.repository';
 import { EnergyTransferRequest, State } from './EnergyTransferRequest';
-import { chunk } from 'lodash';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
+import { EventBus } from '@nestjs/cqrs';
+import { AwaitingTransferEvent } from './batch/events';
 
 @Injectable()
 export class TransferService {
@@ -19,17 +20,19 @@ export class TransferService {
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private etrRepository: EnergyTransferRequestRepository,
         @Inject(BATCH_CONFIGURATION_TOKEN)
-        private batchConfiguration: BatchConfiguration
+        private batchConfiguration: BatchConfiguration,
+        private eventBus: EventBus
     ) {}
 
     public async transferTask() {
-        const etrs = await this.etrRepository.findByState(State.TransferAwaiting);
+        const etrs = await this.etrRepository.findByState(State.TransferAwaiting, {
+            limit: this.batchConfiguration.transferBatchSize
+        });
 
-        const chunkedEtrs = chunk(etrs, this.batchConfiguration.transferBatchSize);
+        await this.transferCertificates(etrs);
 
-        for (const chunk of chunkedEtrs) {
-            await this.transferCertificates(chunk);
-        }
+        // Loop
+        this.eventBus.publish(new AwaitingTransferEvent());
     }
 
     private async transferCertificates(etrs: EnergyTransferRequest[]): Promise<void> {

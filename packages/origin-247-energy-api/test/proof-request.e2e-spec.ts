@@ -75,6 +75,14 @@ describe('Notary module - e2e', () => {
         expect(readings[1][0]).toHaveProperty('proofRootHash', proofs[1].rootHash);
         expect(readings[1][1]).toHaveProperty('proofRootHash', proofs[1].rootHash);
         expect(readings[1][2]).toHaveProperty('proofRootHash', proofs[1].rootHash);
+
+        expect(readings[0][0]).toHaveProperty('proofLeafHash', proofs[0].leafs[0].hash);
+        expect(readings[0][1]).toHaveProperty('proofLeafHash', proofs[0].leafs[1].hash);
+        expect(readings[0][2]).toHaveProperty('proofLeafHash', proofs[0].leafs[2].hash);
+
+        expect(readings[1][0]).toHaveProperty('proofLeafHash', proofs[1].leafs[0].hash);
+        expect(readings[1][1]).toHaveProperty('proofLeafHash', proofs[1].leafs[1].hash);
+        expect(readings[1][2]).toHaveProperty('proofLeafHash', proofs[1].leafs[2].hash);
     });
 });
 
