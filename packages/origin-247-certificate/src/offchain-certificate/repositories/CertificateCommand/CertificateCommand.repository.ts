@@ -1,7 +1,5 @@
 import { CertificateCommandEntity } from './CertificateCommand.entity';
 
-export const CERTIFICATE_COMMAND_REPOSITORY = Symbol.for('CERTIFICATE_COMMAND_REPOSITORY');
-
 export interface FindOptions {
     eventId: number;
     createdAt: Date;

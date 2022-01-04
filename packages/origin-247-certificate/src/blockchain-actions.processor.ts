@@ -5,16 +5,18 @@ import { CommandBus } from '@nestjs/cqrs';
 import { BlockchainAction, BlockchainActionType } from './types';
 import { BigNumber } from 'ethers';
 import {
-    ClaimCertificateCommand,
-    IssueCertificateCommand,
-    TransferCertificateCommand,
     BatchClaimCertificatesCommand,
     BatchIssueCertificatesCommand,
-    BatchTransferCertificatesCommand
+    BatchTransferCertificatesCommand,
+    ClaimCertificateCommand,
+    IssueCertificateCommand,
+    TransferCertificateCommand
 } from '@energyweb/issuer-api';
 import { TransactionPollService } from './transaction-poll.service';
 
-@Processor('blockchain-actions')
+export const blockchainQueueName = 'blockchain-actions';
+
+@Processor(blockchainQueueName)
 export class BlockchainActionsProcessor {
     private readonly logger = new Logger(BlockchainActionsProcessor.name);
 

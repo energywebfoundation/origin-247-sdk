@@ -1,6 +1,5 @@
-import { CreateDateColumn, Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
+import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
 import { CertificateEventType } from '../../events/Certificate.events';
-import { bigintTransformer } from '../utils';
 
 export const tableName = 'certificate_event';
 

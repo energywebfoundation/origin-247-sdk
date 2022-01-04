@@ -1,31 +1,32 @@
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { ICertificateEvent } from '../../events/Certificate.events';
+import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
+import { EntityManager } from 'typeorm';
+import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
 
-export const CERTIFICATE_EVENT_REPOSITORY = Symbol.for('CERTIFICATE_EVENT_REPOSITORY');
+export type SynchronizableEventType =
+    | CertificateEventType.Issued
+    | CertificateEventType.Transferred
+    | CertificateEventType.Claimed;
 
-export interface FindOptions {
-    eventId: number;
-    createdAt: Date;
-}
-
-export enum CertificateEventColumns {
-    Id = 'id',
-    internalCertificateId = 'internalCertificateId',
-    CommandId = 'commandId',
-    CreatedAt = 'createdAt',
-    Type = 'type',
-    Version = 'version',
-    Payload = 'payload'
-}
-
-export type NewCertificateEvent = Omit<CertificateEventEntity, 'id' | 'createdAt'>;
+export type SynchronizableEvent = CertificateEventEntity & { type: SynchronizableEventType };
 
 export interface CertificateEventRepository {
-    save(event: ICertificateEvent, commandId: number): Promise<CertificateEventEntity>;
+    save(
+        event: ICertificateEvent,
+        commandId: number,
+        txManager: EntityManager | null
+    ): Promise<CertificateEventEntity>;
 
     getByInternalCertificateId(internalCertId: number): Promise<CertificateEventEntity[]>;
+
+    updateAttempt(updateData: {
+        eventId: number;
+        error?: string;
+    }): Promise<CertificateSynchronizationAttemptEntity>;
 
     getAll(): Promise<CertificateEventEntity[]>;
 
     getNumberOfCertificates(): Promise<number>;
+
+    getAllNotProcessed(): Promise<SynchronizableEvent[]>;
 }

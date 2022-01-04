@@ -7,18 +7,19 @@ import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
 import { IClaim } from '@energyweb/issuer';
-import { Queue, Job } from 'bull';
+import { Job, Queue } from 'bull';
 import {
+    BlockchainAction,
+    BlockchainActionType,
     ICertificate,
     IClaimCommand,
     IIssueCommand,
-    ITransferCommand,
-    ISuccessResponse,
-    BlockchainActionType,
-    BlockchainAction,
+    IIssueCommandParams,
     IIssuedCertificate,
-    IIssueCommandParams
+    ISuccessResponse,
+    ITransferCommand
 } from './types';
+import { blockchainQueueName } from './blockchain-actions.processor';
 
 const jobOptions = {
     // redis cleanup
@@ -30,7 +31,7 @@ const jobOptions = {
 export class CertificateService<T = null> {
     constructor(
         private readonly queryBus: QueryBus,
-        @InjectQueue('blockchain-actions')
+        @InjectQueue(blockchainQueueName)
         private readonly blockchainActionsQueue: Queue<BlockchainAction>
     ) {}
 

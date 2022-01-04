@@ -1,31 +1,40 @@
-import { Injectable, Inject } from '@nestjs/common';
-import {
-    CERTIFICATE_COMMAND_REPOSITORY,
-    CertificateCommandRepository
-} from './repositories/CertificateCommand/CertificateCommand.repository';
-import {
-    CERTIFICATE_EVENT_REPOSITORY,
-    CertificateEventRepository
-} from './repositories/CertificateEvent/CertificateEvent.repository';
+import { Inject, Injectable } from '@nestjs/common';
+import { CertificateCommandRepository } from './repositories/CertificateCommand/CertificateCommand.repository';
+import { CertificateEventRepository } from './repositories/CertificateEvent/CertificateEvent.repository';
 import { EventBus } from '@nestjs/cqrs';
 
-import { IClaimCommand, IIssueCommand, ITransferCommand, IIssueCommandParams } from '../types';
+import {
+    IClaimCommand,
+    IClaimPersistedCommand,
+    IIssuancePersistedCommand,
+    IIssueCommand,
+    IIssueCommandParams,
+    IPersistErrorCommand,
+    ITransferCommand,
+    ITransferPersistedCommand
+} from '../types';
 
 import {
-    CertificateIssuedEvent,
-    CertificateTransferredEvent,
     CertificateClaimedEvent,
+    CertificateClaimPersistedEvent,
+    CertificateIssuancePersistedEvent,
+    CertificateIssuedEvent,
+    CertificatePersistErrorEvent,
+    CertificateTransferPersistedEvent,
+    CertificateTransferredEvent,
     ICertificateEvent
 } from './events/Certificate.events';
 
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
-import {
-    CertificateReadModelRepository,
-    CERTIFICATE_READ_MODEL_REPOSITORY
-} from './repositories/CertificateReadModel/CertificateReadModel.repository';
+import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
 import { CertificateAggregate } from './certificate.aggregate';
 import { CertificateErrors } from './errors';
-import { IClaim } from '@energyweb/issuer';
+import {
+    CERTIFICATE_COMMAND_REPOSITORY,
+    CERTIFICATE_EVENT_REPOSITORY,
+    CERTIFICATE_READ_MODEL_REPOSITORY
+} from './repositories/repository.keys';
+import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 
 @Injectable()
 export class OffchainCertificateService<T = null> {
@@ -34,6 +43,7 @@ export class OffchainCertificateService<T = null> {
         private readonly certCommandRepo: CertificateCommandRepository,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
+        private readonly certificateEventService: CertificateEventService,
         private readonly eventBus: EventBus,
         @Inject(CERTIFICATE_READ_MODEL_REPOSITORY)
         private readonly readModelRepo: CertificateReadModelRepository
@@ -69,6 +79,54 @@ export class OffchainCertificateService<T = null> {
         const event = new CertificateTransferredEvent(command.certificateId, command);
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
+    }
+
+    public async issuePersisted(
+        internalCertificateId: number,
+        command: IIssuancePersistedCommand
+    ): Promise<void> {
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
+
+        const event = new CertificateIssuancePersistedEvent(internalCertificateId, command);
+
+        const aggregate = await this.createAggregate([event]);
+        await this.propagate(event, savedCommand, aggregate);
+    }
+
+    public async claimPersisted(
+        internalCertificateId: number,
+        command: IClaimPersistedCommand
+    ): Promise<void> {
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
+
+        const event = new CertificateClaimPersistedEvent(internalCertificateId, {});
+
+        const aggregate = await this.createAggregate([event]);
+        await this.propagate(event, savedCommand, aggregate);
+    }
+
+    public async transferPersisted(
+        internalCertificateId: number,
+        command: ITransferPersistedCommand
+    ): Promise<void> {
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
+
+        const event = new CertificateTransferPersistedEvent(internalCertificateId, command);
+
+        const aggregate = await this.createAggregate([event]);
+        await this.propagate(event, savedCommand, aggregate);
+    }
+
+    public async persistError(
+        internalCertificateId: number,
+        command: IPersistErrorCommand
+    ): Promise<void> {
+        const savedCommand = await this.certCommandRepo.save({ payload: command });
+
+        const event = new CertificatePersistErrorEvent(internalCertificateId, command);
+
+        const aggregate = await this.createAggregate([event]);
+        await this.propagate(event, savedCommand, aggregate, command.errorMessage);
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -165,11 +223,16 @@ export class OffchainCertificateService<T = null> {
     private async propagate(
         event: ICertificateEvent,
         command: CertificateCommandEntity,
-        aggregate: CertificateAggregate
+        aggregate: CertificateAggregate,
+        errorMessage?: string
     ): Promise<void> {
         await this.eventBus.publish(event);
-        await this.certEventRepo.save(event, command.id);
+        const savedEvent = await this.certificateEventService.save(event, command.id);
         await this.readModelRepo.save(aggregate.getCertificate()!);
+        await this.certEventRepo.updateAttempt({
+            eventId: savedEvent.id,
+            error: errorMessage
+        });
     }
 
     private groupCommandsByCertificate<T extends { certificateId }>(

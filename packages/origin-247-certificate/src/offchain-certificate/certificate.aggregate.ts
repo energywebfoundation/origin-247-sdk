@@ -1,10 +1,13 @@
 import {
-    ICertificateEvent,
+    CertificateClaimedEvent,
+    CertificateClaimPersistedEvent,
     CertificateEventType,
+    CertificateIssuancePersistedEvent,
+    CertificateTransferPersistedEvent,
     CertificateTransferredEvent,
-    CertificateClaimedEvent
+    ICertificateEvent
 } from './events/Certificate.events';
-import { IIssueCommand, ICertificateReadModel } from '../types';
+import { ICertificateReadModel, IIssueCommand } from '../types';
 import { CertificateErrors } from './errors';
 import { BigNumber } from 'ethers';
 import { compareDates } from '../utils/date-utils';
@@ -28,6 +31,15 @@ export class CertificateAggregate {
                 break;
             case CertificateEventType.Claimed:
                 this.claim(event as CertificateClaimedEvent);
+                break;
+            case CertificateEventType.ClaimPersisted:
+                this.claimPersisted(event as CertificateClaimPersistedEvent);
+                break;
+            case CertificateEventType.IssuancePersisted:
+                this.issuancePersisted(event as CertificateIssuancePersistedEvent);
+                break;
+            case CertificateEventType.TransferPersisted:
+                this.transferPersisted(event as CertificateTransferPersistedEvent);
                 break;
         }
     }
@@ -65,6 +77,12 @@ export class CertificateAggregate {
         };
     }
 
+    private issuancePersisted(event: CertificateIssuancePersistedEvent): void {
+        const { blockchainCertificateId } = event.payload;
+
+        this.certificate!.blockchainCertificateId = blockchainCertificateId;
+    }
+
     private transfer(event: CertificateTransferredEvent): void {
         this.validateTransfer(event);
 
@@ -80,6 +98,8 @@ export class CertificateAggregate {
         this.certificate!.owners[fromAddress] = newFromBalance.toString();
         this.certificate!.owners[toAddress] = newToBalance.toString();
     }
+
+    private transferPersisted(event: CertificateTransferPersistedEvent): void {}
 
     private claim(event: CertificateClaimedEvent): void {
         this.validateClaim(event);
@@ -107,6 +127,8 @@ export class CertificateAggregate {
             claimData: claimData
         });
     }
+
+    private claimPersisted(event: CertificateClaimPersistedEvent): void {}
 
     private validateTransfer(event: CertificateTransferredEvent): void {
         const {

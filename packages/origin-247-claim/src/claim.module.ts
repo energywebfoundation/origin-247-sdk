@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CertificateModule } from '@energyweb/origin-247-certificate';
+import { CertificateModule, OffchainCertificateModule } from '@energyweb/origin-247-certificate';
 import { ClaimService } from './claim.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { MatchResultEntity } from './repositories/MatchResult/MatchResult.entity';
@@ -20,7 +20,7 @@ import { ClaimFacade } from './claim.facade';
             LeftoverConsumptionEntity,
             ExcessGenerationEntity
         ]),
-        CertificateModule
+        OffchainCertificateModule
     ],
     providers: [
         ClaimService,
