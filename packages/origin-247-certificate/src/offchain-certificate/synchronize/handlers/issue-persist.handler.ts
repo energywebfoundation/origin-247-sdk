@@ -1,6 +1,5 @@
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../onchain-certificate/types';
 import { OnChainCertificateService } from '../../../onchain-certificate/onchain-certificate.service';
-import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../types';
 import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventType, CertificateIssuedEvent } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
@@ -19,7 +18,6 @@ export class IssuePersistHandler implements SynchronizeHandler {
     constructor(
         @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: OnChainCertificateService,
-        @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly offchainCertificateService: OffChainCertificateService,
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,

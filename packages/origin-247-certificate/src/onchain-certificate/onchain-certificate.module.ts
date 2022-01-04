@@ -9,17 +9,19 @@ import { BlockchainActionsProcessor, blockchainQueueName } from './blockchain-ac
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from './types';
 import { CertificateUpdatedHandler } from './certificate-updated.handler';
 
+const realCertificateProvider = {
+    provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    useClass: OnChainCertificateService
+};
+
 @Module({
     providers: [
-        {
-            provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
-            useClass: OnChainCertificateService
-        },
+        realCertificateProvider,
         BlockchainActionsProcessor,
         TransactionPollService,
         CertificateUpdatedHandler
     ],
-    exports: [ONCHAIN_CERTIFICATE_SERVICE_TOKEN],
+    exports: [realCertificateProvider],
     imports: [
         IssuerModule.register({
             enableCertificationRequest: false,
@@ -36,14 +38,14 @@ import { CertificateUpdatedHandler } from './certificate-updated.handler';
 })
 export class OnChainCertificateModule {}
 
+const inMemoryServiceProvider = {
+    provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    useClass: CertificateForUnitTestsService
+};
+
 @Module({
-    providers: [
-        {
-            provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
-            useClass: CertificateForUnitTestsService
-        }
-    ],
-    exports: [ONCHAIN_CERTIFICATE_SERVICE_TOKEN],
+    providers: [inMemoryServiceProvider],
+    exports: [inMemoryServiceProvider],
     imports: [CqrsModule]
 })
 export class OnChainCertificateForUnitTestsModule {}

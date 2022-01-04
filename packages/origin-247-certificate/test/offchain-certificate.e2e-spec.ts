@@ -15,7 +15,7 @@ describe('Offchain Certificate service', () => {
     let offchainCertificateService: OffChainCertificateService;
     let certificateEventRepository: CertificateEventRepository;
     let certificateCommandRepository: CertificateCommandRepository;
-    let certificateReadModelRepository: CertificateReadModelRepository;
+    let certificateReadModelRepository: CertificateReadModelRepository<unknown>;
 
     beforeAll(async () => {
         ({

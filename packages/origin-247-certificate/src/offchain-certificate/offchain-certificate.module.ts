@@ -20,7 +20,10 @@ import {
 } from './repositories/repository.keys';
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
-import { OnChainCertificateModule } from '../onchain-certificate/onchain-certificate.module';
+import {
+    OnChainCertificateModule,
+    OnChainCertificateForUnitTestsModule
+} from '../onchain-certificate/onchain-certificate.module';
 import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 import { BatchSynchronizeStrategy } from './synchronize/strategies/batch/batch-synchronize.strategy';
@@ -30,12 +33,9 @@ import {
 } from './synchronize/strategies/batch/batch.configuration';
 import { IssuePersistHandler } from './synchronize/handlers/issue-persist.handler';
 import { SynchronizeManager } from './synchronize/handlers/synchronize.manager';
-import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '..';
-
-const serviceProvider = {
-    provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    useClass: OffChainCertificateService
-};
+import { CertificateCommandInMemoryRepository } from './repositories/CertificateCommand/CertificateCommandInMemory.repository';
+import { CertificateEventInMemoryRepository } from './repositories/CertificateEvent/CertificateEventInMemory.repository';
+import { CertificateReadModelInMemoryRepository } from './repositories/CertificateReadModel/CertificateReadModelInMemory.repository';
 
 @Module({
     providers: [
@@ -59,7 +59,7 @@ const serviceProvider = {
             provide: BATCH_CONFIGURATION_TOKEN,
             useValue: batchConfiguration
         },
-        serviceProvider,
+        OffChainCertificateService,
         BlockchainSynchronizeService,
         BlockchainSynchronizeTask,
         IssuePersistHandler,
@@ -68,7 +68,7 @@ const serviceProvider = {
         SynchronizeManager,
         CertificateEventService
     ],
-    exports: [serviceProvider],
+    exports: [OffChainCertificateService],
     imports: [
         OnChainCertificateModule,
         CqrsModule,
@@ -85,3 +85,39 @@ const serviceProvider = {
     ]
 })
 export class OffChainCertificateModule {}
+
+@Module({
+    providers: [
+        {
+            provide: CERTIFICATE_COMMAND_REPOSITORY,
+            useClass: CertificateCommandInMemoryRepository
+        },
+        {
+            provide: CERTIFICATE_EVENT_REPOSITORY,
+            useClass: CertificateEventInMemoryRepository
+        },
+        {
+            provide: CERTIFICATE_READ_MODEL_REPOSITORY,
+            useClass: CertificateReadModelInMemoryRepository
+        },
+        {
+            provide: SYNCHRONIZE_STRATEGY,
+            useClass: BatchSynchronizeStrategy
+        },
+        {
+            provide: BATCH_CONFIGURATION_TOKEN,
+            useValue: batchConfiguration
+        },
+        OffChainCertificateService,
+        BlockchainSynchronizeService,
+        BlockchainSynchronizeTask,
+        IssuePersistHandler,
+        ClaimPersistHandler,
+        TransferPersistHandler,
+        SynchronizeManager,
+        CertificateEventService
+    ],
+    exports: [OffChainCertificateService],
+    imports: [OnChainCertificateForUnitTestsModule, CqrsModule]
+})
+export class OffChainCertificateForUnitTestsModule {}

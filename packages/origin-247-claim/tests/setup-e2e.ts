@@ -31,9 +31,8 @@ import {
 import { ExcessGenerationPostgresRepository } from '../src/repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
 import { ClaimModule } from '../src/claim.module';
 import {
-    CertificateModule,
-    CertificateService,
-    ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    OffChainCertificateModule,
+    OffChainCertificateService
 } from '@energyweb/origin-247-certificate';
 import { ClaimFacade } from '../src';
 const testLogger = new Logger('e2e');
@@ -115,8 +114,8 @@ export const bootstrapTestInstance = async () => {
     );
     const claimFacade = await app.resolve<ClaimFacade>(ClaimFacade);
 
-    const certificateService = await app.resolve<CertificateService>(
-        ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    const certificateService = await app.resolve<OffChainCertificateService>(
+        OffChainCertificateService
     );
 
     const blockchainProperties = await blockchainPropertiesService.create(

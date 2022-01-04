@@ -1,3 +1,4 @@
+import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { ICertificateReadModel } from '../../types';
 import { CertificateReadModelEntity } from './CertificateReadModel.entity';
 
@@ -5,21 +6,21 @@ export interface FindOptions {}
 
 export enum CertificateReadModelColumns {}
 
-export type NewCertificateReadModel = Omit<
-    CertificateReadModelEntity,
+export type NewCertificateReadModel<T> = Omit<
+    CertificateReadModelEntity<T>,
     'id' | 'createdAt' | 'updatedAt'
 >;
 
-export interface CertificateReadModelRepository {
-    save(certificateRM: NewCertificateReadModel): Promise<CertificateReadModelEntity>;
+export interface CertificateReadModelRepository<T> {
+    save(certificateRM: NewCertificateReadModel<T>): Promise<CertificateReadModelEntity<T>>;
 
     getByInternalCertificateId(
         internalCertificateId: number
-    ): Promise<ICertificateReadModel | null>;
+    ): Promise<ICertificateReadModel<T> | null>;
 
     getManyByInternalCertificateIds(
         internalCertificateIds: number[]
-    ): Promise<ICertificateReadModel[]>;
+    ): Promise<ICertificateReadModel<T>[]>;
 
-    getAll(): Promise<ICertificateReadModel[]>;
+    getAll(options?: IGetAllCertificatesOptions): Promise<ICertificateReadModel<T>[]>;
 }

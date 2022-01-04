@@ -13,9 +13,7 @@ import { DatabaseService } from '@energyweb/origin-backend-utils';
 import {
     ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
     OffChainCertificateEntities,
-    OnChainCertificateModule,
     OnChainCertificateService,
-    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
     OffChainCertificateModule,
     OffChainCertificateService
 } from '../src';
@@ -82,7 +80,6 @@ export const bootstrapTestInstance: any = async () => {
                 entities: [...IssuerEntities, ...OffChainCertificateEntities]
             }),
             OffChainCertificateModule,
-            OnChainCertificateModule,
             QueueingModule(),
             BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' })
@@ -103,11 +100,11 @@ export const bootstrapTestInstance: any = async () => {
         CERTIFICATE_EVENT_REPOSITORY
     );
     const certificateEventService = await app.resolve(CertificateEventService);
-    const certificateReadModelRepository = await app.resolve<CertificateReadModelRepository>(
-        CERTIFICATE_READ_MODEL_REPOSITORY
-    );
+    const certificateReadModelRepository = await app.resolve<
+        CertificateReadModelRepository<unknown>
+    >(CERTIFICATE_READ_MODEL_REPOSITORY);
     const offchainCertificateService = await app.resolve<OffChainCertificateService>(
-        OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
+        OffChainCertificateService
     );
     const certificateCommandRepository = await app.resolve<CertificateCommandRepository>(
         CERTIFICATE_COMMAND_REPOSITORY

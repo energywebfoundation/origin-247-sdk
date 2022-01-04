@@ -1,12 +1,9 @@
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../onchain-certificate/types';
 import { OnChainCertificateService } from '../../../onchain-certificate/onchain-certificate.service';
-import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../types';
-import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
 import { CertificateEventType, CertificateTransferredEvent } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
 import { chunk, compact } from 'lodash';
 import { SynchronizeHandler } from './synchronize.handler';
 import {
@@ -19,10 +16,7 @@ export class TransferPersistHandler implements SynchronizeHandler {
     constructor(
         @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: OnChainCertificateService,
-        @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly offchainCertificateService: OffChainCertificateService,
-        @Inject(CERTIFICATE_EVENT_REPOSITORY)
-        private readonly certEventRepo: CertificateEventRepository,
         @Inject(BATCH_CONFIGURATION_TOKEN)
         private batchConfiguration: BatchConfiguration
     ) {}

@@ -7,7 +7,8 @@ import {
     ITransferPersistedCommand,
     IPersistErrorCommand,
     IIssuancePersistedCommand,
-    IClaimPersistedCommand
+    IClaimPersistedCommand,
+    ICertificateReadModel
 } from './types';
 import {
     CertificateClaimedEvent,
@@ -29,6 +30,7 @@ import {
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from './repositories/repository.keys';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
+import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 
 @Injectable()
 export class OffChainCertificateService<T = null> {
@@ -40,8 +42,22 @@ export class OffChainCertificateService<T = null> {
         private readonly certificateEventService: CertificateEventService,
         private readonly eventBus: EventBus,
         @Inject(CERTIFICATE_READ_MODEL_REPOSITORY)
-        private readonly readModelRepo: CertificateReadModelRepository
+        private readonly readModelRepo: CertificateReadModelRepository<T>
     ) {}
+
+    public async getAll(
+        options: IGetAllCertificatesOptions = {}
+    ): Promise<ICertificateReadModel<T>[]> {
+        const certificates = await this.readModelRepo.getAll(options);
+
+        return certificates;
+    }
+
+    public async getById(id: number): Promise<ICertificateReadModel<T> | null> {
+        const certificate = await this.readModelRepo.getByInternalCertificateId(id);
+
+        return certificate;
+    }
 
     public async issue(params: IIssueCommandParams<T>): Promise<number> {
         const command = {
@@ -199,8 +215,8 @@ export class OffChainCertificateService<T = null> {
         }
     }
 
-    private async createAggregate(events: ICertificateEvent[]): Promise<CertificateAggregate> {
-        const aggregate = CertificateAggregate.fromEvents([
+    private async createAggregate(events: ICertificateEvent[]): Promise<CertificateAggregate<T>> {
+        const aggregate = CertificateAggregate.fromEvents<T>([
             ...(await this.certEventRepo.getByInternalCertificateId(
                 events[0].internalCertificateId
             )),
@@ -217,7 +233,7 @@ export class OffChainCertificateService<T = null> {
     private async propagate(
         event: ICertificateEvent,
         command: CertificateCommandEntity,
-        aggregate: CertificateAggregate,
+        aggregate: CertificateAggregate<T>,
         errorMessage?: string
     ): Promise<void> {
         await this.eventBus.publish(event);

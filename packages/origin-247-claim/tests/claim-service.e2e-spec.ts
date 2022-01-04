@@ -11,7 +11,7 @@ import {
     IMatchingOutput
 } from '../src/interfaces';
 import { BigNumber } from '@ethersproject/bignumber';
-import { CertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
+import { OffChainCertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
 
 jest.setTimeout(60 * 1000);
 import { ClaimFacade } from '../src';
@@ -20,7 +20,7 @@ describe('Claiming - e2e', () => {
     let app: INestApplication;
     let matchResultRepository: MatchResultRepository;
     let databaseService: DatabaseService;
-    let certificateService: CertificateService;
+    let certificateService: OffChainCertificateService;
     let claimFacade: ClaimFacade;
 
     beforeAll(async () => {
@@ -62,7 +62,7 @@ describe('Claiming - e2e', () => {
         ];
         const batchClaimSpy = jest
             .spyOn(certificateService, 'batchClaim')
-            .mockImplementation(async () => ({ success: true }));
+            .mockImplementation(async () => {});
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
         const res = await claimFacade.claim({
@@ -117,7 +117,7 @@ describe('Claiming - e2e', () => {
         ];
         const batchClaimSpy = jest
             .spyOn(certificateService, 'batchClaim')
-            .mockImplementation(async () => ({ success: true }));
+            .mockImplementation(async () => {});
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
         const res = await claimFacade.claim({

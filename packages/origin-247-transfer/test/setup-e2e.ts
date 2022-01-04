@@ -14,10 +14,7 @@ import {
     GenerationReadingStoredEvent,
     TransferModule
 } from '../src';
-import {
-    CertificateService,
-    ONCHAIN_CERTIFICATE_SERVICE_TOKEN
-} from '@energyweb/origin-247-certificate';
+import { OffChainCertificateService } from '@energyweb/origin-247-certificate';
 import { entities as IssuerEntities } from '@energyweb/issuer-api';
 import { PassportModule } from '@nestjs/passport';
 import {
@@ -104,8 +101,8 @@ export const bootstrapTestInstance = async () => {
 
     const app = moduleFixture.createNestApplication();
 
-    const certificateService = await app.resolve<CertificateService>(
-        ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    const certificateService = await app.resolve<OffChainCertificateService>(
+        OffChainCertificateService
     );
     const databaseService = await app.resolve<DatabaseService>(DatabaseService);
     const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(

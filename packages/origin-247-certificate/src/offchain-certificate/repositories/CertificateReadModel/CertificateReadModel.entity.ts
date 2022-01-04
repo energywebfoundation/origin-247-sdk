@@ -1,12 +1,11 @@
 import { CreateDateColumn, Entity, Column, Index, UpdateDateColumn, PrimaryColumn } from 'typeorm';
 import { IClaim } from '@energyweb/issuer';
-import { bigintTransformer } from '../utils';
 import { ICertificateReadModel } from '../../types';
 
 export const tableName = 'certificate_read_model';
 
 @Entity(tableName)
-export class CertificateReadModelEntity implements ICertificateReadModel {
+export class CertificateReadModelEntity<T> implements ICertificateReadModel<T> {
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
@@ -20,13 +19,13 @@ export class CertificateReadModelEntity implements ICertificateReadModel {
     @Column()
     deviceId: string;
 
-    @Column({ type: 'bigint', transformer: bigintTransformer })
+    @Column({})
     generationStartTime: number;
 
-    @Column({ type: 'bigint', transformer: bigintTransformer })
+    @Column({})
     generationEndTime: number;
 
-    @Column({ type: 'bigint', transformer: bigintTransformer })
+    @Column({})
     creationTime: number;
 
     @Column({ type: 'simple-json' })
@@ -42,7 +41,7 @@ export class CertificateReadModelEntity implements ICertificateReadModel {
     creationBlockHash: string;
 
     @Column({ type: 'simple-json', nullable: true })
-    metadata: any;
+    metadata: T;
 
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;

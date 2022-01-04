@@ -8,7 +8,7 @@ import {
     batchConfiguration
 } from '../synchronize/strategies/batch/batch.configuration';
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../..';
-import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../types';
+import { OffChainCertificateService } from '../offchain-certificate.service';
 
 describe('ClaimPersistHandler', () => {
     let claimPersistHandler: ClaimPersistHandler;
@@ -32,7 +32,7 @@ describe('ClaimPersistHandler', () => {
                     useValue: certificateServiceMock
                 },
                 {
-                    provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
+                    provide: OffChainCertificateService,
                     useValue: offchainCertificateServiceMock
                 },
                 {

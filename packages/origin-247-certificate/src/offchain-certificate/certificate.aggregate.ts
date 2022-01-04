@@ -13,8 +13,8 @@ import { BigNumber } from 'ethers';
 import { compareDates } from '../utils/date-utils';
 import { ICertificateReadModel } from '..';
 
-export class CertificateAggregate {
-    private certificate: ICertificateReadModel | null = null;
+export class CertificateAggregate<T> {
+    private certificate: ICertificateReadModel<T> | null = null;
 
     private constructor(events: ICertificateEvent[]) {
         events
@@ -45,11 +45,11 @@ export class CertificateAggregate {
         }
     }
 
-    public getCertificate(): ICertificateReadModel | null {
+    public getCertificate(): ICertificateReadModel<T> | null {
         return this.certificate;
     }
 
-    public static fromEvents(events: ICertificateEvent[]): CertificateAggregate {
+    public static fromEvents<T>(events: ICertificateEvent[]): CertificateAggregate<T> {
         return new CertificateAggregate(events);
     }
 
@@ -68,8 +68,8 @@ export class CertificateAggregate {
             creationBlockHash: '',
             creationTime: Math.floor(Date.now() / 1000),
             deviceId: payload.deviceId,
-            generationStartTime: Math.floor(payload.fromTime),
-            generationEndTime: Math.floor(payload.toTime),
+            generationStartTime: Math.floor(payload.fromTime / 1000),
+            generationEndTime: Math.floor(payload.toTime / 1000),
             metadata: payload.metadata as any,
             owners: {
                 [payload.toAddress]: payload.energyValue

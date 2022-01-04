@@ -9,7 +9,7 @@ import {
     batchConfiguration
 } from '../synchronize/strategies/batch/batch.configuration';
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../..';
-import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../types';
+import { OffChainCertificateService } from '../offchain-certificate.service';
 
 describe('IssuePersistHandler', () => {
     let issuePersistHandler: IssuePersistHandler;
@@ -33,7 +33,7 @@ describe('IssuePersistHandler', () => {
                     useValue: certificateServiceMock
                 },
                 {
-                    provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
+                    provide: OffChainCertificateService,
                     useValue: offchainCertificateServiceMock
                 },
                 {
