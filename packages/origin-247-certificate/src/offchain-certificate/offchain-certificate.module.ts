@@ -20,10 +20,8 @@ import {
     CERTIFICATE_READ_MODEL_REPOSITORY,
     SYNCHRONIZE_QUEUE_NAME
 } from './repositories/repository.keys';
-import { IssuePersistHandler } from './synchronize/handlers/issue-persist-handler.service';
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
-import { SynchronizeProcessor } from './synchronize/handlers/persist.handler';
 import { CertificateModule } from '../certificate.module';
 import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
@@ -32,6 +30,8 @@ import {
     BATCH_CONFIGURATION_TOKEN,
     batchConfiguration
 } from './synchronize/strategies/batch/batch.configuration';
+import { IssuePersistHandler } from './synchronize/handlers/issue-persist.handler';
+import { SynchronizeManager } from './synchronize/handlers/synchronize.manager';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -66,7 +66,7 @@ const serviceProvider = {
         IssuePersistHandler,
         ClaimPersistHandler,
         TransferPersistHandler,
-        SynchronizeProcessor,
+        SynchronizeManager,
         CertificateEventService
     ],
     exports: [serviceProvider],

@@ -5,10 +5,13 @@ import {
     IIssueCommand,
     OFFCHAIN_CERTIFICATE_SERVICE_TOKEN
 } from '../../types';
-import { CertificateEventType } from '../events/Certificate.events';
+import { CertificateEventType, CertificateIssuedEvent } from '../events/Certificate.events';
 import { CertificateEventEntity } from '../repositories/CertificateEvent/CertificateEvent.entity';
-import { CertificateCommandEntity } from '../repositories/CertificateCommand/CertificateCommand.entity';
-import { IssuePersistHandler } from '../synchronize/handlers/issue-persist-handler.service';
+import { IssuePersistHandler } from '../synchronize/handlers/issue-persist.handler';
+import {
+    BATCH_CONFIGURATION_TOKEN,
+    batchConfiguration
+} from '../synchronize/strategies/batch/batch.configuration';
 
 describe('IssuePersistHandler', () => {
     let issuePersistHandler: IssuePersistHandler;
@@ -39,6 +42,10 @@ describe('IssuePersistHandler', () => {
                     provide: CERTIFICATE_EVENT_REPOSITORY,
                     useValue: certEventRepoMock
                 },
+                {
+                    provide: BATCH_CONFIGURATION_TOKEN,
+                    useValue: batchConfiguration
+                },
                 IssuePersistHandler
             ]
         }).compile();
@@ -52,25 +59,11 @@ describe('IssuePersistHandler', () => {
         internalCertificateId: 0,
         id: 0,
         createdAt: new Date(),
-        payload: {},
-        version: 0,
-        ...values
-    });
-
-    const createCommand = (
-        values: Partial<CertificateCommandEntity> = {}
-    ): CertificateCommandEntity => ({
         payload: {
-            fromTime: 0,
-            deviceId: '0',
-            toTime: 0,
-            energyValue: '0',
-            metadata: {},
-            toAddress: '0',
-            userId: '0'
-        },
-        id: 0,
-        createdAt: new Date(),
+            fromTime: new Date().getTime(),
+            toTime: new Date().getTime()
+        } as IIssueCommand<any>,
+        version: 0,
         ...values
     });
 
@@ -97,38 +90,19 @@ describe('IssuePersistHandler', () => {
     });
 
     describe('#handle', () => {
-        it('should report persist error if command is null', async () => {
-            const command = null;
-            const event = createEvent();
-
-            await issuePersistHandler.handle(event, command);
-
-            expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(1);
-            expect(offchainCertificateServiceMock.persistError).toBeCalledWith(
-                event.internalCertificateId,
-                {
-                    errorMessage: expect.any(String)
-                }
-            );
-            expect(certificateServiceMock.issue).toBeCalledTimes(0);
-            expect(offchainCertificateServiceMock.issuePersisted).toBeCalledTimes(0);
-        });
-
         it('should trigger issue persisted if issue was successful', async () => {
-            const command = createCommand();
-            const commandPayload = command.payload as IIssueCommand<any>;
-            const event = createEvent();
+            const event = createEvent() as CertificateIssuedEvent;
             const blockchainCertificateId = 0;
             certificateServiceMock.issue.mockResolvedValueOnce({ id: blockchainCertificateId });
 
-            await issuePersistHandler.handle(event, command);
+            await issuePersistHandler.handle(event as CertificateEventEntity);
 
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(0);
             expect(certificateServiceMock.issue).toBeCalledTimes(1);
             expect(certificateServiceMock.issue).toBeCalledWith({
-                ...commandPayload,
-                fromTime: new Date(commandPayload.fromTime),
-                toTime: new Date(commandPayload.toTime)
+                ...event.payload,
+                fromTime: new Date(event.payload.fromTime),
+                toTime: new Date(event.payload.toTime)
             });
             expect(offchainCertificateServiceMock.issuePersisted).toBeCalledTimes(1);
             expect(offchainCertificateServiceMock.issuePersisted).toBeCalledWith(
@@ -140,18 +114,17 @@ describe('IssuePersistHandler', () => {
         });
 
         it('should report persist error if synchronization failed', async () => {
-            const command = createCommand();
             const event = createEvent();
-            const commandPayload = command.payload as IIssueCommand<any>;
+            const eventPayload = event.payload as IIssueCommand<any>;
             certificateServiceMock.issue.mockResolvedValueOnce(undefined);
 
-            await issuePersistHandler.handle(event, command);
+            await issuePersistHandler.handle(event);
 
             expect(certificateServiceMock.issue).toBeCalledTimes(1);
             expect(certificateServiceMock.issue).toBeCalledWith({
-                ...commandPayload,
-                fromTime: new Date(commandPayload.fromTime),
-                toTime: new Date(commandPayload.toTime)
+                ...eventPayload,
+                fromTime: new Date(eventPayload.fromTime),
+                toTime: new Date(eventPayload.toTime)
             });
             expect(offchainCertificateServiceMock.issuePersisted).toBeCalledTimes(0);
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(1);
@@ -163,24 +136,23 @@ describe('IssuePersistHandler', () => {
 
     describe('#handleBatch', () => {
         it('should trigger issue persisted for all events if batchIssue was successful', async () => {
-            const command = createCommand();
-            const commandPayload = command.payload as IIssueCommand<any>;
-            const expectedCommandPayloadCall = {
-                ...commandPayload,
-                fromTime: new Date(commandPayload.fromTime),
-                toTime: new Date(commandPayload.toTime)
-            };
             const event = createEvent();
+            const eventPayload = event.payload as IIssueCommand<any>;
+            const expectedEventPayloadCall = {
+                ...eventPayload,
+                fromTime: new Date(eventPayload.fromTime),
+                toTime: new Date(eventPayload.toTime)
+            };
             const resolvedCertificateIds = [0, 1];
             certificateServiceMock.batchIssue.mockResolvedValueOnce(resolvedCertificateIds);
 
-            await issuePersistHandler.handleBatch([event, event], [command, command]);
+            await issuePersistHandler.handleBatch([event, event]);
 
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(0);
             expect(certificateServiceMock.batchIssue).toBeCalledTimes(1);
             expect(certificateServiceMock.batchIssue).toBeCalledWith([
-                expectedCommandPayloadCall,
-                expectedCommandPayloadCall
+                expectedEventPayloadCall,
+                expectedEventPayloadCall
             ]);
             expect(offchainCertificateServiceMock.issuePersisted).toBeCalledTimes(2);
             expect(offchainCertificateServiceMock.issuePersisted).nthCalledWith(
@@ -200,23 +172,22 @@ describe('IssuePersistHandler', () => {
         });
 
         it('should report persist error for all events if synchronization failed', async () => {
-            const command = createCommand();
             const event = createEvent();
             certificateServiceMock.batchIssue.mockResolvedValueOnce(undefined);
-            const commandPayload = command.payload as IIssueCommand<any>;
-            const expectedCommandPayloadCall = {
-                ...commandPayload,
-                fromTime: new Date(commandPayload.fromTime),
-                toTime: new Date(commandPayload.toTime)
+            const eventPayload = event.payload as IIssueCommand<any>;
+            const expectedEventPayloadCall = {
+                ...eventPayload,
+                fromTime: new Date(eventPayload.fromTime),
+                toTime: new Date(eventPayload.toTime)
             };
 
-            await issuePersistHandler.handleBatch([event, event], [command, command]);
+            await issuePersistHandler.handleBatch([event, event]);
 
             expect(offchainCertificateServiceMock.issuePersisted).toBeCalledTimes(0);
             expect(certificateServiceMock.batchIssue).toBeCalledTimes(1);
             expect(certificateServiceMock.batchIssue).toBeCalledWith([
-                expectedCommandPayloadCall,
-                expectedCommandPayloadCall
+                expectedEventPayloadCall,
+                expectedEventPayloadCall
             ]);
             expect(offchainCertificateServiceMock.persistError).toBeCalledTimes(2);
             expect(offchainCertificateServiceMock.persistError).nthCalledWith(
