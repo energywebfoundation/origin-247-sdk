@@ -1,17 +1,17 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import {
-    EXCESS_GENERATION_REPOSITORY,
     ExcessGenerationRepository,
+    EXCESS_GENERATION_REPOSITORY,
     NewExcessGeneration
 } from './repositories/ExcessGeneration/ExcessGeneration.repository';
 import {
-    LEFTOVER_CONSUMPTION_REPOSITORY,
     LeftoverConsumptionRepository,
+    LEFTOVER_CONSUMPTION_REPOSITORY,
     NewLeftoverConsumption
 } from './repositories/LeftoverConsumption/LeftoverConsumption.repository';
 import {
-    MATCH_RESULT_REPOSITORY,
     MatchResultRepository,
+    MATCH_RESULT_REPOSITORY,
     NewMatchResult
 } from './repositories/MatchResult/MatchResult.repository';
 import {
@@ -23,9 +23,9 @@ import {
     ITimeFrame
 } from './interfaces';
 import {
-    IClaimCommand,
-    OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    OffchainCertificateService
+    CertificateService,
+    CERTIFICATE_SERVICE_TOKEN,
+    IClaimCommand
 } from '@energyweb/origin-247-certificate';
 
 import { omit } from 'lodash';
@@ -52,8 +52,8 @@ export class ClaimService {
         private leftoverConsumptionRepo: LeftoverConsumptionRepository,
         @Inject(EXCESS_GENERATION_REPOSITORY)
         private excessGenerationRepo: ExcessGenerationRepository,
-        @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
-        private certificateService: OffchainCertificateService
+        @Inject(CERTIFICATE_SERVICE_TOKEN)
+        private certificateService: CertificateService<unknown>
     ) {}
 
     public async claim(input: IClaimInput) {
