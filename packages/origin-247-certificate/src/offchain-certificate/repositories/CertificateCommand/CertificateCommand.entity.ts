@@ -13,5 +13,5 @@ export class CertificateCommandEntity {
     createdAt: Date;
 
     @Column({ type: 'simple-json' })
-    payload: IIssueCommand<unknown> | ITransferCommand | IClaimCommand | IClaimPersistedCommand;
+    payload: unknown; // each command has different type and we save this using generic `persistError` message
 }

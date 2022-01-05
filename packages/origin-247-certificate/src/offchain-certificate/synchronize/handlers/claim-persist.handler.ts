@@ -27,12 +27,14 @@ export class ClaimPersistHandler implements SynchronizeHandler {
         if (result.success) {
             await this.offchainCertificateService.claimPersisted(
                 claimedEvent.internalCertificateId,
-                {}
+                { persistedEventId: event.id }
             );
             return { success: true };
         } else {
             await this.offchainCertificateService.persistError(claimedEvent.internalCertificateId, {
-                errorMessage: `[${result.statusCode}] ${result.message}`
+                errorMessage: `[${result.statusCode}] ${result.message}`,
+                internalCertificateId: event.internalCertificateId,
+                type: CertificateEventType.ClaimPersisted
             });
             return { success: false };
         }
@@ -51,13 +53,15 @@ export class ClaimPersistHandler implements SynchronizeHandler {
                 if (result.success) {
                     await this.offchainCertificateService.claimPersisted(
                         event.internalCertificateId,
-                        {}
+                        { persistedEventId: event.id }
                     );
                 } else {
                     await this.offchainCertificateService.persistError(
                         event.internalCertificateId,
                         {
-                            errorMessage: `[${result.statusCode}] ${result.message}`
+                            errorMessage: `[${result.statusCode}] ${result.message}`,
+                            internalCertificateId: event.internalCertificateId,
+                            type: CertificateEventType.ClaimPersisted
                         }
                     );
 

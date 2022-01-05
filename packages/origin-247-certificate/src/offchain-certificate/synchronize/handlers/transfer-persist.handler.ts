@@ -31,14 +31,15 @@ export class TransferPersistHandler implements SynchronizeHandler {
         const result = await this.certificateService.transfer(transferredEvent.payload);
 
         if (result.success) {
-            await this.offchainCertificateService.transferPersisted(
-                event.internalCertificateId,
-                {}
-            );
+            await this.offchainCertificateService.transferPersisted(event.internalCertificateId, {
+                persistedEventId: event.id
+            });
             return { success: true };
         } else {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: `[${result.statusCode}] ${result.message}`
+                errorMessage: `[${result.statusCode}] ${result.message}`,
+                internalCertificateId: event.internalCertificateId,
+                type: CertificateEventType.TransferPersisted
             });
             return { success: false };
         }
@@ -57,12 +58,14 @@ export class TransferPersistHandler implements SynchronizeHandler {
                 if (result.success) {
                     await this.offchainCertificateService.transferPersisted(
                         event.internalCertificateId,
-                        {}
+                        { persistedEventId: event.id }
                     );
                 } else {
                     await this.offchainCertificateService.persistError(
                         event.internalCertificateId,
                         {
+                            internalCertificateId: event.internalCertificateId,
+                            type: CertificateEventType.TransferPersisted,
                             errorMessage: `[${result.statusCode}] ${result.message}`
                         }
                     );

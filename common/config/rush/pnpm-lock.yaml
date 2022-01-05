@@ -7,6 +7,7 @@ specifiers:
   '@energyweb/issuer': 4.1.1-alpha.1636552048.0
   '@energyweb/issuer-api': 0.4.1-alpha.1636552048.0
   '@energyweb/origin-247-certificate': ^1.0.0
+  '@energyweb/origin-247-claim': 3.2.1-alpha.1641400265.0
   '@energyweb/origin-backend-utils': 1.6.2-alpha.1636552048.0
   '@energyweb/utils-general': 11.0.5-alpha.1636552048.0
   '@ethersproject/abi': 5.3.1
@@ -58,6 +59,7 @@ specifiers:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2
   jest: 27.0.5
+  lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
   pg: 8.7.1
@@ -85,6 +87,7 @@ dependencies:
   '@energyweb/issuer': 4.1.1-alpha.1636552048.0
   '@energyweb/issuer-api': 0.4.1-alpha.1636552048.0_06ee26c3f28761c98392d14242f2b1f4
   '@energyweb/origin-247-certificate': 1.0.0_f6e036f70896a99eede718b4a314d9c0
+  '@energyweb/origin-247-claim': 3.2.1-alpha.1641400265.0_b46627ad111958052bb91b9b8ecd282a
   '@energyweb/origin-backend-utils': 1.6.2-alpha.1636552048.0_c9bf75915863e03340a011f20790fbe6
   '@energyweb/utils-general': 11.0.5-alpha.1636552048.0
   '@ethersproject/abi': 5.3.1
@@ -107,13 +110,13 @@ dependencies:
   '@nestjs/typeorm': 8.0.2_21fafc1ad40aee5295760495ea02e464
   '@nomiclabs/hardhat-ethers': 2.0.2_ethers@5.3.1+hardhat@2.6.4
   '@nomiclabs/hardhat-waffle': 2.0.1_e287bdd856f41d76f4d514aeeec101d1
-  '@rush-temp/247-matching-demo': file:projects/247-matching-demo.tgz
+  '@rush-temp/247-matching-demo': file:projects/247-matching-demo.tgz_b46627ad111958052bb91b9b8ecd282a
   '@rush-temp/origin-247-certificate': file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c
   '@rush-temp/origin-247-claim': file:projects/origin-247-claim.tgz_e1b6b095d9b08b2fe53e813c4c2c16ed
   '@rush-temp/origin-247-energy-api': file:projects/origin-247-energy-api.tgz_c70c36eb34bb288ea7f47d1c20b8c460
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.5.0
   '@typechain/ethers-v5': 7.1.0_8e93b6e8d98cb9a74a36e053ec23ff7e
-  '@typechain/hardhat': 2.3.1_hardhat@2.6.4+typechain@5.1.2
+  '@typechain/hardhat': 2.3.1_512973f51e7672eecf86f542b17ea4fd
   '@types/bull': 3.15.1
   '@types/cache-manager': 3.4.2
   '@types/cache-manager-ioredis': 2.0.2
@@ -136,6 +139,7 @@ dependencies:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2_webpack@5.51.1
   jest: 27.0.5_ts-node@9.1.1
+  lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
   pg: 8.7.1
@@ -774,6 +778,43 @@ packages:
       - rxjs
       - supports-color
       - utf-8-validate
+    dev: false
+
+  /@energyweb/origin-247-claim/3.2.1-alpha.1641400265.0_b46627ad111958052bb91b9b8ecd282a:
+    resolution: {integrity: sha512-ISxHKHSjcPXk4ErDDFawUzTiMIhfyNfuyEEgYg4Q58f3LDt+ERqlSDbEw7NGve0JjApBwl2f7Hqs9PXLww5HEQ==}
+    peerDependencies:
+      '@energyweb/origin-247-certificate': ^1.0.0
+      '@nestjs/common': 8.1.1
+      '@nestjs/core': 8.1.1
+      '@nestjs/cqrs': 8.0.0
+      '@nestjs/typeorm': 8.0.2
+    dependencies:
+      '@energyweb/origin-247-certificate': 1.0.0_f6e036f70896a99eede718b4a314d9c0
+      '@ethersproject/bignumber': 5.3.0
+      '@nestjs/common': 8.1.1_dbe81b9c124a4a10925175ba43da462c
+      '@nestjs/core': 8.1.1_c61325c549df9179cfcf0b654c38155b
+      '@nestjs/cqrs': 8.0.0_b457605c9b03e3cb14f0ae0de25590d0
+      '@nestjs/typeorm': 8.0.2_21fafc1ad40aee5295760495ea02e464
+      lodash: 4.17.21
+      luxon: 2.0.2
+      pg: 8.7.1
+      typeorm: 0.2.39_pg@8.7.1
+    transitivePeerDependencies:
+      - '@sap/hana-client'
+      - better-sqlite3
+      - hdb-pool
+      - ioredis
+      - mongodb
+      - mssql
+      - mysql2
+      - oracledb
+      - pg-native
+      - pg-query-stream
+      - redis
+      - sql.js
+      - sqlite3
+      - supports-color
+      - typeorm-aurora-data-api-driver
     dev: false
 
   /@energyweb/origin-backend-core/8.0.4-alpha.1636552048.0:
@@ -2667,18 +2708,6 @@ packages:
       fs-extra: 9.1.0
       hardhat: 2.6.4
       lodash: 4.17.21
-      typechain: 5.1.2_typescript@4.3.4
-    dev: false
-
-  /@typechain/hardhat/2.3.1_hardhat@2.6.4+typechain@5.1.2:
-    resolution: {integrity: sha512-BQV8OKQi0KAzLXCdsPO0pZBNQQ6ra8A2ucC26uFX/kquRBtJu1yEyWnVSmtr07b5hyRoJRpzUeINLnyqz4/MAw==}
-    peerDependencies:
-      hardhat: ^2.0.10
-      lodash: ^4.17.15
-      typechain: ^5.1.2
-    dependencies:
-      fs-extra: 9.1.0
-      hardhat: 2.6.4
       typechain: 5.1.2_typescript@4.3.4
     dev: false
 
@@ -13575,13 +13604,15 @@ packages:
     resolution: {integrity: sha512-PQ2PC7R9rslx84ndNBZB/Dkv8V8fZEpk83RLgXtYd0fwUgEjseMn1Dgajh2x6S8QbZAFa9p2qVCEuYZNgve0dQ==}
     dev: false
 
-  file:projects/247-matching-demo.tgz:
-    resolution: {integrity: sha512-Y7W6d4eIkDRxgXOhtpvWygAAxNtLHxUrasu+JACZUZkyrv1mx6DiiefQibO6O3VHWMHBRNyMzeSxhgKNd/KfIQ==, tarball: file:projects/247-matching-demo.tgz}
+  file:projects/247-matching-demo.tgz_b46627ad111958052bb91b9b8ecd282a:
+    resolution: {integrity: sha512-Qh2mrB943ELmShhknri5Yrbduk51zmjOXmi0aH+hR/ZvYNV/IAQWL1IlSHByWRi7YY8a7qS3P0pu0VZq3SZHkQ==, tarball: file:projects/247-matching-demo.tgz}
+    id: file:projects/247-matching-demo.tgz
     name: '@rush-temp/247-matching-demo'
     version: 0.0.0
     dependencies:
       '@emotion/react': 11.4.1_4cd822c6044f4c1a7e1f1fea0e728f12
       '@emotion/styled': 11.3.0_4a13a1c8be6e32a351380640be5b202d
+      '@energyweb/origin-247-claim': 3.2.1-alpha.1641400265.0_b46627ad111958052bb91b9b8ecd282a
       '@ethersproject/bignumber': 5.3.0
       '@material-ui/core': 5.0.0-beta.4_4b3229e895aa2d1f531244063c252253
       '@types/lodash': 4.14.176
@@ -13601,17 +13632,37 @@ packages:
       webpack-cli: 4.8.0_webpack@5.51.1
     transitivePeerDependencies:
       - '@babel/core'
+      - '@energyweb/origin-247-certificate'
+      - '@nestjs/common'
+      - '@nestjs/core'
+      - '@nestjs/cqrs'
+      - '@nestjs/typeorm'
+      - '@sap/hana-client'
       - '@swc/core'
       - '@webpack-cli/generators'
       - '@webpack-cli/migrate'
+      - better-sqlite3
       - esbuild
+      - hdb-pool
+      - ioredis
+      - mongodb
+      - mssql
+      - mysql2
+      - oracledb
+      - pg-native
+      - pg-query-stream
+      - redis
+      - sql.js
+      - sqlite3
+      - supports-color
+      - typeorm-aurora-data-api-driver
       - uglify-js
       - webpack-bundle-analyzer
       - webpack-dev-server
     dev: false
 
   file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c:
-    resolution: {integrity: sha512-8ux57n0BjCiHHUD7eA7eoGaEvWQ5QWmJuuWvnRwzjrxxNajvDyqEXsol4Xi+xNNSvhIIreZhyoEOov5Cn0S5VQ==, tarball: file:projects/origin-247-certificate.tgz}
+    resolution: {integrity: sha512-4u/sJrVH3r8hIym6HgY0X1DFvLmTCV5SQvCtdK4OhRM663KbrlmwCs6mOFHXVPz3uLeOhLpzw27MXHrXktCcZg==, tarball: file:projects/origin-247-certificate.tgz}
     id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
@@ -13680,7 +13731,7 @@ packages:
     dev: false
 
   file:projects/origin-247-claim.tgz_e1b6b095d9b08b2fe53e813c4c2c16ed:
-    resolution: {integrity: sha512-Awuurw/oLgKifw+LvnzL4RfVLbowjzMuiRlRaGMPOpDmQ2XEKH9Vj/r/ueqZJO5FVF/6s90J5ESqNmKrK9zgkA==, tarball: file:projects/origin-247-claim.tgz}
+    resolution: {integrity: sha512-wA3zASYBybE9IYbEAdcfceZ43HnDFgmcY7CJ5+U3jf6do1psDoYpBDmB/meT/poxAffIVhS5ciLom96LSWHjNA==, tarball: file:projects/origin-247-claim.tgz}
     id: file:projects/origin-247-claim.tgz
     name: '@rush-temp/origin-247-claim'
     version: 0.0.0
@@ -13828,7 +13879,7 @@ packages:
     dev: false
 
   file:projects/origin-247-transfer.tgz_passport@0.5.0:
-    resolution: {integrity: sha512-ufc8YBpwfkgcLm9O/1j1fvv0wkehyQspYLRJo0X9hGFMpshxdu7AlcchLLPmYyDcOsGSbjFh2T7sP6ISqR8vxw==, tarball: file:projects/origin-247-transfer.tgz}
+    resolution: {integrity: sha512-u25watJZ8HuMjFSw083e4Jr7vKrvORKFCu24fbJ1S/Rg2cZUl2ICTtOIavIgXHq/KrR5sR20m4kU7nV169Ln1A==, tarball: file:projects/origin-247-transfer.tgz}
     id: file:projects/origin-247-transfer.tgz
     name: '@rush-temp/origin-247-transfer'
     version: 0.0.0

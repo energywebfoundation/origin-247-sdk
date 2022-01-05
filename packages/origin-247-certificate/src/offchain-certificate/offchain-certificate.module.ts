@@ -68,7 +68,7 @@ import { CertificateReadModelInMemoryRepository } from './repositories/Certifica
         SynchronizeManager,
         CertificateEventService
     ],
-    exports: [OffChainCertificateService],
+    exports: [OffChainCertificateService, BlockchainSynchronizeService],
     imports: [
         OnChainCertificateModule,
         CqrsModule,
@@ -117,7 +117,7 @@ export class OffChainCertificateModule {}
         SynchronizeManager,
         CertificateEventService
     ],
-    exports: [OffChainCertificateService],
+    exports: [OffChainCertificateService, BlockchainSynchronizeService],
     imports: [OnChainCertificateForUnitTestsModule, CqrsModule]
 })
 export class OffChainCertificateForUnitTestsModule {}

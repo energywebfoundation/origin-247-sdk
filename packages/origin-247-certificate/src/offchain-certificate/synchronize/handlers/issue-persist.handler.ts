@@ -40,12 +40,15 @@ export class IssuePersistHandler implements SynchronizeHandler {
 
         if (IssuePersistHandler.isCertificateIdValid(certificate?.id)) {
             await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
-                blockchainCertificateId: certificate.id
+                blockchainCertificateId: certificate.id,
+                persistedEventId: event.id
             });
             return { success: true };
         } else {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`
+                errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`,
+                internalCertificateId: event.internalCertificateId,
+                type: CertificateEventType.IssuancePersisted
             });
             return { success: false };
         }
@@ -78,14 +81,17 @@ export class IssuePersistHandler implements SynchronizeHandler {
                     await this.offchainCertificateService.issuePersisted(
                         event.internalCertificateId,
                         {
-                            blockchainCertificateId: certificateIds[index]
+                            blockchainCertificateId: certificateIds[index],
+                            persistedEventId: event.id
                         }
                     );
                 } else {
                     await this.offchainCertificateService.persistError(
                         event.internalCertificateId,
                         {
-                            errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`
+                            errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`,
+                            internalCertificateId: event.internalCertificateId,
+                            type: CertificateEventType.IssuancePersisted
                         }
                     );
                     return event.internalCertificateId;

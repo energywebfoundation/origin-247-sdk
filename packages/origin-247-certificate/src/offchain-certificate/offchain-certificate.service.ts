@@ -13,12 +13,14 @@ import {
 import {
     CertificateClaimedEvent,
     CertificateClaimPersistedEvent,
+    CertificateEventType,
     CertificateIssuancePersistedEvent,
     CertificateIssuedEvent,
     CertificatePersistErrorEvent,
     CertificateTransferPersistedEvent,
     CertificateTransferredEvent,
-    ICertificateEvent
+    ICertificateEvent,
+    PersistedEvent
 } from './events/Certificate.events';
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
@@ -30,7 +32,7 @@ import {
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from './repositories/repository.keys';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
-import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
+import { CertificateEvent, IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 
 @Injectable()
 export class OffChainCertificateService<T = null> {
@@ -109,7 +111,7 @@ export class OffChainCertificateService<T = null> {
     ): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
 
-        const event = new CertificateClaimPersistedEvent(internalCertificateId, {});
+        const event = new CertificateClaimPersistedEvent(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
@@ -237,12 +239,21 @@ export class OffChainCertificateService<T = null> {
         errorMessage?: string
     ): Promise<void> {
         await this.eventBus.publish(event);
-        const savedEvent = await this.certificateEventService.save(event, command.id);
         await this.readModelRepo.save(aggregate.getCertificate()!);
-        await this.certEventRepo.updateAttempt({
-            eventId: savedEvent.id,
-            error: errorMessage
-        });
+        const savedEvent = await this.certificateEventService.save(event, command.id);
+
+        if (
+            [
+                CertificateEventType.ClaimPersisted,
+                CertificateEventType.IssuancePersisted,
+                CertificateEventType.TransferPersisted
+            ].includes(event.type)
+        ) {
+            await this.certEventRepo.updateAttempt({
+                eventId: (savedEvent as PersistedEvent).payload.persistedEventId,
+                error: errorMessage
+            });
+        }
     }
 
     private groupCommandsByCertificate<T extends { certificateId }>(

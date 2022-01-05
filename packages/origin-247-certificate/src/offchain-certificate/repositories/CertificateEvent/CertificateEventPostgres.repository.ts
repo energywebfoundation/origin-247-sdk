@@ -88,7 +88,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 'attempt',
                 'attempt.eventId = event.id'
             )
-            .where('(attempt.error IS NULL AND attempt.attempts_count = 0)')
+            .where('(attempt.attempts_count = 0)')
             .orWhere(
                 `(attempt.error IS NOT NULL AND attempt.attempts_count < ${MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT})`
             );
