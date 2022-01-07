@@ -176,8 +176,8 @@ describe('Certificate service', () => {
     });
 
     it('Properly processes empty batches', async () => {
-        expect(await certificateService.batchClaim([])).toEqual({ success: true });
-        expect(await certificateService.batchTransfer([])).toEqual({ success: true });
         expect(await certificateService.batchIssue([])).toEqual([]);
+        expect(() => certificateService.batchClaim([])).not.toThrow();
+        expect(() => certificateService.batchTransfer([])).not.toThrow();
     });
 });

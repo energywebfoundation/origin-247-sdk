@@ -4,15 +4,21 @@ import { CertificateClaimedEvent, CertificateEventType } from '../../events/Cert
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { compact } from 'lodash';
+import { chunk, compact } from 'lodash';
 import { SynchronizeHandler } from './synchronize.handler';
+import {
+    BatchConfiguration,
+    BATCH_CONFIGURATION_TOKEN
+} from '../strategies/batch/batch.configuration';
 
 @Injectable()
 export class ClaimPersistHandler implements SynchronizeHandler {
     constructor(
         @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: OnChainCertificateService,
-        private readonly offchainCertificateService: OffChainCertificateService
+        private readonly offchainCertificateService: OffChainCertificateService,
+        @Inject(BATCH_CONFIGURATION_TOKEN)
+        private batchConfiguration: BatchConfiguration
     ) {}
 
     public canHandle(event: CertificateEventEntity) {
@@ -22,58 +28,69 @@ export class ClaimPersistHandler implements SynchronizeHandler {
     public async handle(event: CertificateEventEntity) {
         const claimedEvent = event as CertificateClaimedEvent;
 
-        const result = await this.certificateService.claim(claimedEvent.payload);
+        try {
+            await this.certificateService.claim(claimedEvent.payload);
 
-        if (result.success) {
             await this.offchainCertificateService.claimPersisted(
                 claimedEvent.internalCertificateId,
                 { persistedEventId: event.id }
             );
+
             return { success: true };
-        } else {
+        } catch (e) {
             await this.offchainCertificateService.persistError(claimedEvent.internalCertificateId, {
-                errorMessage: `[${result.statusCode}] ${result.message}`,
+                errorMessage: `${e.message}`,
                 internalCertificateId: event.internalCertificateId,
                 type: CertificateEventType.ClaimPersisted
             });
+
             return { success: false };
         }
+    }
+
+    public async handleBatch(events: CertificateEventEntity[]) {
+        const eventsBlocks = chunk(events, this.batchConfiguration.claimBatchSize);
+        const failedCertificateIds: number[] = [];
+
+        for (const eventsBlock of eventsBlocks) {
+            const result = await this.synchronizeBatchBlock(eventsBlock);
+            failedCertificateIds.push(...result.failedCertificateIds);
+        }
+
+        return { failedCertificateIds };
     }
 
     private async synchronizeBatchBlock(
         events: CertificateEventEntity[]
     ): Promise<{ failedCertificateIds: number[] }> {
         const claimedEvents = events as CertificateClaimedEvent[];
-        const result = await this.certificateService.batchClaim(
-            claimedEvents.map((event) => event.payload)
-        );
 
-        const failedCertificateIds = await Promise.all(
-            events.map(async (event) => {
-                if (result.success) {
-                    await this.offchainCertificateService.claimPersisted(
-                        event.internalCertificateId,
-                        { persistedEventId: event.id }
-                    );
-                } else {
-                    await this.offchainCertificateService.persistError(
-                        event.internalCertificateId,
-                        {
-                            errorMessage: `[${result.statusCode}] ${result.message}`,
-                            internalCertificateId: event.internalCertificateId,
-                            type: CertificateEventType.ClaimPersisted
-                        }
-                    );
+        try {
+            await this.certificateService.batchClaim(claimedEvents.map((event) => event.payload));
 
-                    return event.internalCertificateId;
-                }
-            })
-        );
+            const promises = events.map(async (event) => {
+                await this.offchainCertificateService.claimPersisted(event.internalCertificateId, {
+                    persistedEventId: event.id
+                });
+            });
 
-        return { failedCertificateIds: compact(failedCertificateIds) };
-    }
+            await Promise.all(promises);
 
-    async handleBatch(events: CertificateEventEntity[]) {
-        return await this.synchronizeBatchBlock(events);
+            return { failedCertificateIds: [] };
+        } catch (e) {
+            const promises = events.map(async (event) => {
+                await this.offchainCertificateService.persistError(event.internalCertificateId, {
+                    errorMessage: `${e.message}`,
+                    internalCertificateId: event.internalCertificateId,
+                    type: CertificateEventType.ClaimPersisted
+                });
+
+                return event.internalCertificateId;
+            });
+
+            await Promise.all(promises);
+
+            return { failedCertificateIds: events.map((e) => e.internalCertificateId) };
+        }
     }
 }

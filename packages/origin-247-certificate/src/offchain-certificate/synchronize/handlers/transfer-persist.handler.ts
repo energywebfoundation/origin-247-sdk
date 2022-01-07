@@ -28,67 +28,70 @@ export class TransferPersistHandler implements SynchronizeHandler {
     public async handle(event: CertificateEventEntity) {
         const transferredEvent = event as CertificateTransferredEvent;
 
-        const result = await this.certificateService.transfer(transferredEvent.payload);
+        try {
+            await this.certificateService.transfer(transferredEvent.payload);
 
-        if (result.success) {
             await this.offchainCertificateService.transferPersisted(event.internalCertificateId, {
                 persistedEventId: event.id
             });
+
             return { success: true };
-        } else {
+        } catch (e) {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: `[${result.statusCode}] ${result.message}`,
+                errorMessage: `${e.message}`,
                 internalCertificateId: event.internalCertificateId,
                 type: CertificateEventType.TransferPersisted
             });
+
             return { success: false };
         }
+    }
+
+    public async handleBatch(events: CertificateEventEntity[]) {
+        const eventsBlocks = chunk(events, this.batchConfiguration.transferBatchSize);
+        const failedCertificateIds: number[] = [];
+
+        for (const eventsBlock of eventsBlocks) {
+            const result = await this.synchronizeBatchBlock(eventsBlock);
+            failedCertificateIds.push(...result.failedCertificateIds);
+        }
+
+        return { failedCertificateIds };
     }
 
     private async synchronizeBatchBlock(
         events: CertificateEventEntity[]
     ): Promise<{ failedCertificateIds: number[] }> {
         const transferredEvents = events as CertificateTransferredEvent[];
-        const result = await this.certificateService.batchTransfer(
-            transferredEvents.map((event) => event.payload)
-        );
 
-        const failedCertificateIds = await Promise.all(
-            events.map(async (event) => {
-                if (result.success) {
-                    await this.offchainCertificateService.transferPersisted(
-                        event.internalCertificateId,
-                        { persistedEventId: event.id }
-                    );
-                } else {
-                    await this.offchainCertificateService.persistError(
-                        event.internalCertificateId,
-                        {
-                            internalCertificateId: event.internalCertificateId,
-                            type: CertificateEventType.TransferPersisted,
-                            errorMessage: `[${result.statusCode}] ${result.message}`
-                        }
-                    );
-                    return event.internalCertificateId;
-                }
-            })
-        );
-        return { failedCertificateIds: compact(failedCertificateIds) };
-    }
-
-    async handleBatch(events: CertificateEventEntity[]) {
-        const eventsBlocks = chunk(events, this.batchConfiguration.transferBatchSize);
-        const failedCertificateIds: number[] = [];
-
-        for (const eventsBlock of eventsBlocks) {
-            const nonFailedEvents = eventsBlock.filter(
-                (event) => !failedCertificateIds.includes(event.internalCertificateId)
+        try {
+            await this.certificateService.batchTransfer(
+                transferredEvents.map((event) => event.payload)
             );
 
-            const result = await this.synchronizeBatchBlock(nonFailedEvents);
-            failedCertificateIds.push(...result.failedCertificateIds);
-        }
+            const promises = events.map(async (event) => {
+                await this.offchainCertificateService.transferPersisted(
+                    event.internalCertificateId,
+                    { persistedEventId: event.id }
+                );
+            });
 
-        return { failedCertificateIds };
+            await Promise.all(promises);
+
+            return { failedCertificateIds: [] };
+        } catch (e) {
+            const promises = events.map(async (event) => {
+                await this.offchainCertificateService.persistError(event.internalCertificateId, {
+                    internalCertificateId: event.internalCertificateId,
+                    type: CertificateEventType.TransferPersisted,
+                    errorMessage: `${e.message}`
+                });
+                return event.internalCertificateId;
+            });
+
+            await Promise.all(promises);
+
+            return { failedCertificateIds: events.map((e) => e.internalCertificateId) };
+        }
     }
 }

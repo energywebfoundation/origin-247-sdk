@@ -64,7 +64,7 @@ export class OnChainCertificateService<T = null> {
         return this.mapCertificate(result);
     }
 
-    public async claim(command: IClaimCommand): Promise<ISuccessResponse> {
+    public async claim(command: IClaimCommand): Promise<void> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -78,7 +78,7 @@ export class OnChainCertificateService<T = null> {
         return result;
     }
 
-    public async transfer(command: ITransferCommand): Promise<ISuccessResponse> {
+    public async transfer(command: ITransferCommand): Promise<void> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -121,11 +121,9 @@ export class OnChainCertificateService<T = null> {
         return result;
     }
 
-    public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
+    public async batchClaim(command: IClaimCommand[]): Promise<void> {
         if (command.length === 0) {
-            return {
-                success: true
-            };
+            return;
         }
 
         const job = await this.blockchainActionsQueue.add(
@@ -143,11 +141,9 @@ export class OnChainCertificateService<T = null> {
         return result;
     }
 
-    public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
+    public async batchTransfer(command: ITransferCommand[]): Promise<void> {
         if (command.length === 0) {
-            return {
-                success: true
-            };
+            return;
         }
 
         const job = await this.blockchainActionsQueue.add(
