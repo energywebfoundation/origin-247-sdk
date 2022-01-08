@@ -42,6 +42,7 @@ specifiers:
   '@types/cache-manager-ioredis': 2.0.2
   '@types/chai': 4.2.22
   '@types/jest': 26.0.23
+  '@types/lodash': 4.14.176
   '@types/mocha': 9.0.0
   '@types/node': 16.11.3
   '@types/react': 17.0.19
@@ -122,6 +123,7 @@ dependencies:
   '@types/cache-manager-ioredis': 2.0.2
   '@types/chai': 4.2.22
   '@types/jest': 26.0.23
+  '@types/lodash': 4.14.176
   '@types/mocha': 9.0.0
   '@types/node': 16.11.3
   '@types/react': 17.0.19
@@ -2856,10 +2858,6 @@ packages:
 
   /@types/lodash/4.14.176:
     resolution: {integrity: sha512-xZmuPTa3rlZoIbtDUyJKZQimJV3bxCmzMIO2c9Pz9afyDro6kr7R79GwcB6mRhuoPmV2p1Vb66WOJH7F886WKQ==}
-    dev: false
-
-  /@types/lodash/4.14.178:
-    resolution: {integrity: sha512-0d5Wd09ItQWH1qFbEyQ7oTQ3GZrMfth5JkbN3EvTKLXcHLRDSXeLnlvlOn0wvxVIwK5o2M8JzP/OWz7T3NRsbw==}
     dev: false
 
   /@types/lru-cache/5.1.1:
@@ -13662,7 +13660,7 @@ packages:
     dev: false
 
   file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c:
-    resolution: {integrity: sha512-4u/sJrVH3r8hIym6HgY0X1DFvLmTCV5SQvCtdK4OhRM663KbrlmwCs6mOFHXVPz3uLeOhLpzw27MXHrXktCcZg==, tarball: file:projects/origin-247-certificate.tgz}
+    resolution: {integrity: sha512-xeuldtkbcP7YvwwCjRDXgFHZTJBSVCvksaHK3Tn1FDVBYRcnm8W3vNenakYzZ7URH5K8m2EHDlKSGCVzrDbS7g==, tarball: file:projects/origin-247-certificate.tgz}
     id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
@@ -13681,7 +13679,7 @@ packages:
       '@nestjs/typeorm': 8.0.2_21fafc1ad40aee5295760495ea02e464
       '@types/bull': 3.15.1
       '@types/jest': 26.0.23
-      '@types/lodash': 4.14.178
+      '@types/lodash': 4.14.176
       '@types/node': 16.11.3
       bull: 3.29.3
       cache-manager-ioredis: 2.1.0
