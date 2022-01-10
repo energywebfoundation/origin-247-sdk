@@ -62,7 +62,10 @@ describe('Offchain Certificate service', () => {
 
             commands = await certificateCommandRepository.getAll();
             events = await certificateEventRepository.getAll();
-            readModels = await certificateReadModelRepository.getAll();
+            readModels = await certificateReadModelRepository.getAll({
+                generationEndFrom: new Date('2021-11-22T08:00:00.000Z'),
+                generationEndTo: new Date('2021-11-22T08:15:00.000Z')
+            });
             expect(commands).toHaveLength(1);
             expect(events).toHaveLength(1);
             expect(readModels).toHaveLength(1);

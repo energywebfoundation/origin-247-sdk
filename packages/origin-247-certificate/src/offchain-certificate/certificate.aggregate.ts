@@ -68,8 +68,8 @@ export class CertificateAggregate<T> {
             creationBlockHash: '',
             creationTime: Math.floor(Date.now() / 1000),
             deviceId: payload.deviceId,
-            generationStartTime: Math.floor(payload.fromTime / 1000),
-            generationEndTime: Math.floor(payload.toTime / 1000),
+            generationStartTime: payload.fromTime,
+            generationEndTime: payload.toTime,
             metadata: payload.metadata as any,
             owners: {
                 [payload.toAddress]: payload.energyValue
