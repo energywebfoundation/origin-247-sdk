@@ -75,7 +75,8 @@ export class ReadsService extends OriginalReadsService {
         return data.map((record) => ({
             timestamp: new Date(record._time),
             value: Number(record._value),
-            proofRootHash: record.proofRootHash
+            proofRootHash: record.proofRootHash,
+            proofLeafHash: record.proofLeafHash
         }));
     }
 }
