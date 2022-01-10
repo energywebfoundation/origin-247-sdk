@@ -39,6 +39,20 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         return entity;
     }
 
+    public async createSynchronizationAttempt(
+        eventId: number
+    ): Promise<CertificateSynchronizationAttemptEntity> {
+        const entity = {
+            eventId,
+            attemptsCount: 0,
+            createdAt: new Date()
+        };
+
+        this.attemptDb[eventId] = entity;
+
+        return entity;
+    }
+
     public async updateAttempt({
         eventId,
         error

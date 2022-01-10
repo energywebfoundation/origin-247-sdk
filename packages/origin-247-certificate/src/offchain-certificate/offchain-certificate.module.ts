@@ -36,6 +36,8 @@ import { SynchronizeManager } from './synchronize/handlers/synchronize.manager';
 import { CertificateCommandInMemoryRepository } from './repositories/CertificateCommand/CertificateCommandInMemory.repository';
 import { CertificateEventInMemoryRepository } from './repositories/CertificateEvent/CertificateEventInMemory.repository';
 import { CertificateReadModelInMemoryRepository } from './repositories/CertificateReadModel/CertificateReadModelInMemory.repository';
+import { ENTITY_MANAGER, InMemoryEntityManager } from './utils/entity-manager';
+import { EntityManager } from 'typeorm';
 
 @Module({
     providers: [
@@ -58,6 +60,10 @@ import { CertificateReadModelInMemoryRepository } from './repositories/Certifica
         {
             provide: BATCH_CONFIGURATION_TOKEN,
             useValue: batchConfiguration
+        },
+        {
+            provide: ENTITY_MANAGER,
+            useExisting: EntityManager
         },
         OffChainCertificateService,
         BlockchainSynchronizeService,
@@ -108,16 +114,18 @@ export class OffChainCertificateModule {}
             provide: BATCH_CONFIGURATION_TOKEN,
             useValue: batchConfiguration
         },
+        {
+            provide: ENTITY_MANAGER,
+            useValue: InMemoryEntityManager
+        },
         OffChainCertificateService,
-        BlockchainSynchronizeService,
-        BlockchainSynchronizeTask,
         IssuePersistHandler,
         ClaimPersistHandler,
         TransferPersistHandler,
         SynchronizeManager,
         CertificateEventService
     ],
-    exports: [OffChainCertificateService, BlockchainSynchronizeService],
+    exports: [OffChainCertificateService],
     imports: [OnChainCertificateForUnitTestsModule, CqrsModule]
 })
 export class OffChainCertificateForUnitTestsModule {}

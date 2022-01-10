@@ -28,10 +28,9 @@ import {
     EXCESS_GENERATION_REPOSITORY,
     ExcessGenerationRepository
 } from '../src/repositories/ExcessGeneration/ExcessGeneration.repository';
-import { ExcessGenerationPostgresRepository } from '../src/repositories/ExcessGeneration/ExcessGenerationPostgress.repository';
 import { ClaimModule } from '../src/claim.module';
 import {
-    OffChainCertificateModule,
+    OffChainCertificateEntities,
     OffChainCertificateService
 } from '@energyweb/origin-247-certificate';
 import { ClaimFacade } from '../src';
@@ -84,6 +83,7 @@ export const bootstrapTestInstance = async () => {
                 database: process.env.DB_DATABASE ?? 'origin',
                 entities: [
                     ...IssuerEntities,
+                    ...OffChainCertificateEntities,
                     MatchResultEntity,
                     LeftoverConsumptionEntity,
                     ExcessGenerationEntity
