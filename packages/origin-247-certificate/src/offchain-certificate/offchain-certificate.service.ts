@@ -32,7 +32,7 @@ import {
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from './repositories/repository.keys';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
-import { CertificateEvent, IGetAllCertificatesOptions } from '@energyweb/issuer-api';
+import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 
 @Injectable()
 export class OffChainCertificateService<T = null> {
@@ -246,7 +246,8 @@ export class OffChainCertificateService<T = null> {
             [
                 CertificateEventType.ClaimPersisted,
                 CertificateEventType.IssuancePersisted,
-                CertificateEventType.TransferPersisted
+                CertificateEventType.TransferPersisted,
+                CertificateEventType.PersistError
             ].includes(event.type)
         ) {
             await this.certEventRepo.updateAttempt({
@@ -256,7 +257,7 @@ export class OffChainCertificateService<T = null> {
         }
     }
 
-    private groupCommandsByCertificate<T extends { certificateId }>(
+    private groupCommandsByCertificate<T extends { certificateId: number }>(
         commands: T[]
     ): Record<number, T[]> {
         const certificates: Record<number, T[]> = {};

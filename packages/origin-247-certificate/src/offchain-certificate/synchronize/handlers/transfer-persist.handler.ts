@@ -40,7 +40,8 @@ export class TransferPersistHandler implements SynchronizeHandler {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
                 errorMessage: `${e.message}`,
                 internalCertificateId: event.internalCertificateId,
-                type: CertificateEventType.TransferPersisted
+                type: CertificateEventType.TransferPersisted,
+                persistedEventId: event.id
             });
 
             return { success: false };
@@ -84,7 +85,8 @@ export class TransferPersistHandler implements SynchronizeHandler {
                 await this.offchainCertificateService.persistError(event.internalCertificateId, {
                     internalCertificateId: event.internalCertificateId,
                     type: CertificateEventType.TransferPersisted,
-                    errorMessage: `${e.message}`
+                    errorMessage: `${e.message}`,
+                    persistedEventId: event.id
                 });
                 return event.internalCertificateId;
             });

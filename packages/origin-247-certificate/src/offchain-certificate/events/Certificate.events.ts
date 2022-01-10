@@ -24,7 +24,8 @@ export interface ICertificateEvent {
 export type PersistedEvent =
     | CertificateIssuancePersistedEvent
     | CertificateClaimPersistedEvent
-    | CertificateTransferPersistedEvent;
+    | CertificateTransferPersistedEvent
+    | CertificatePersistErrorEvent;
 
 export class CertificateIssuedEvent<MetadataType = unknown> implements IEvent {
     public readonly type = CertificateEventType.Issued;
@@ -97,5 +98,8 @@ export class CertificatePersistErrorEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public internalCertificateId: number, public payload: { errorMessage: string }) {}
+    constructor(
+        public internalCertificateId: number,
+        public payload: { errorMessage: string; persistedEventId: number }
+    ) {}
 }

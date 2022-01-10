@@ -59,6 +59,6 @@ export class CertificateEventService {
             CertificateEventType.Transferred
         ] as SynchronizableEventType[];
 
-        return synchronizableEventTypes.includes(event.type as any);
+        return synchronizableEventTypes.includes(event.type as SynchronizableEventType);
     }
 }

@@ -16,6 +16,7 @@ export interface ITransferPersistedCommand {
 
 export interface IPersistErrorCommand {
     internalCertificateId: number;
+    persistedEventId: number;
     type: CertificateEventType;
     errorMessage: string;
 }
