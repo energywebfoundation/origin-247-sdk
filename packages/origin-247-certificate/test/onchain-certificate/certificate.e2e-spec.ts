@@ -1,7 +1,7 @@
-import { bootstrapTestInstance, user2Wallet, userWallet } from './setup';
+import { bootstrapTestInstance, user2Wallet, userWallet } from '../setup';
 import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { OnChainCertificateService } from '../src';
+import { OnChainCertificateService } from '../../src';
 
 jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';

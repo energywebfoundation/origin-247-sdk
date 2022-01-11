@@ -1,16 +1,16 @@
-import { bootstrapTestInstance } from './setup';
+import { bootstrapTestInstance } from '../setup';
 import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
+import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 import {
     CertificateClaimedEvent,
     CertificateIssuedEvent,
     CertificateTransferredEvent,
     ICertificateEvent
-} from '../src/offchain-certificate/events/Certificate.events';
-import { IClaimCommand, IIssueCommand, ITransferCommand } from '../src';
-import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
-import { CertificateEventEntity } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.entity';
+} from '../../src/offchain-certificate/events/Certificate.events';
+import { IClaimCommand, IIssueCommand, ITransferCommand } from '../../src';
+import { CertificateEventService } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
+import { CertificateEventEntity } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.entity';
 
 jest.setTimeout(20 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
@@ -185,7 +185,7 @@ describe('CertificateEventRepository', () => {
             return savedEvents;
         };
 
-        it.only('should return no events when all are persisted', async () => {
+        it('should return no events when all are persisted', async () => {
             const [event] = await prepareEvents(
                 new CertificateIssuedEvent(1, createIssueCommand())
             );
@@ -197,7 +197,7 @@ describe('CertificateEventRepository', () => {
             expect(certs).toHaveLength(0);
         });
 
-        it.only('should return events with error if they did not exceed retry attempts limit', async () => {
+        it('should return events with error if they did not exceed retry attempts limit', async () => {
             const [event] = await prepareEvents(
                 new CertificateIssuedEvent(1, createIssueCommand())
             );
@@ -214,6 +214,19 @@ describe('CertificateEventRepository', () => {
             const [event] = await prepareEvents(
                 new CertificateIssuedEvent(1, createIssueCommand())
             );
+
+            // Prepare 3 failed tries
+
+            await certificateEventRepository.updateAttempt({
+                eventId: event.id,
+                error: 'some error'
+            });
+
+            await certificateEventRepository.updateAttempt({
+                eventId: event.id,
+                error: 'some error'
+            });
+
             await certificateEventRepository.updateAttempt({
                 eventId: event.id,
                 error: 'some error'

@@ -101,7 +101,7 @@ export class TransferModuleForUnitTest {
                     useValue: defaults(params.batchConfiguration ?? {}, defaultBatchConfiguration)
                 }
             ],
-            imports: [CqrsModule, OffChainCertificateForUnitTestsModule]
+            imports: [CqrsModule, OffChainCertificateForUnitTestsModule.register()]
         };
     }
 }

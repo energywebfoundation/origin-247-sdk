@@ -1,8 +1,7 @@
-import { bootstrapTestInstance } from './setup';
+import { bootstrapTestInstance } from '../setup';
 import { INestApplication } from '@nestjs/common';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { CertificateReadModelRepository } from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
-import { CertificateAggregate } from '../src/offchain-certificate/certificate.aggregate';
+import { CertificateReadModelRepository } from '../../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
 
 jest.setTimeout(20 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';

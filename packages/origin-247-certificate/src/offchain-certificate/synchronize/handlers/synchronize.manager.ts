@@ -18,16 +18,6 @@ export class SynchronizeManager {
         this.processors = [claimPersistHandler, transferPersistHandler, issuancePersistHandler];
     }
 
-    public async handle(event: SynchronizableEvent) {
-        const applicableProcessor = this.processors.find((handler) => handler.canHandle(event));
-
-        if (!applicableProcessor) {
-            throw new Error(`Cannot find handler to process event of type: ${event.type}`);
-        }
-
-        return await applicableProcessor.handle(event);
-    }
-
     public async handleBatch(events: SynchronizableEvent[]) {
         let processors: { handler: SynchronizeHandler; events: CertificateEventEntity[] }[] = [
             { handler: this.claimPersistHandler, events: [] },

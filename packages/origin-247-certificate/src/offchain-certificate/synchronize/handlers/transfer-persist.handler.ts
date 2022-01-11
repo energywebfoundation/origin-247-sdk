@@ -25,29 +25,6 @@ export class TransferPersistHandler implements SynchronizeHandler {
         return event.type === CertificateEventType.Transferred;
     }
 
-    public async handle(event: CertificateEventEntity) {
-        const transferredEvent = event as CertificateTransferredEvent;
-
-        try {
-            await this.certificateService.transfer(transferredEvent.payload);
-
-            await this.offchainCertificateService.transferPersisted(event.internalCertificateId, {
-                persistedEventId: event.id
-            });
-
-            return { success: true };
-        } catch (e) {
-            await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: `${e.message}`,
-                internalCertificateId: event.internalCertificateId,
-                type: CertificateEventType.TransferPersisted,
-                persistedEventId: event.id
-            });
-
-            return { success: false };
-        }
-    }
-
     public async handleBatch(events: CertificateEventEntity[]) {
         const eventsBlocks = chunk(events, this.batchConfiguration.transferBatchSize);
         const failedCertificateIds: number[] = [];

@@ -1,6 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Process, Processor } from '@nestjs/bull';
-import { BlockchainSynchronizeService } from './blockchain-synchronize.service';
 import {
     CERTIFICATE_EVENT_REPOSITORY,
     SYNCHRONIZE_QUEUE_NAME
@@ -16,8 +15,6 @@ export class BlockchainSynchronizeTask {
     private readonly logger = new Logger(BlockchainSynchronizeTask.name);
 
     constructor(
-        private readonly blockchainSynchronizeService: BlockchainSynchronizeService,
-
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private readonly certEventRepo: CertificateEventRepository,
 

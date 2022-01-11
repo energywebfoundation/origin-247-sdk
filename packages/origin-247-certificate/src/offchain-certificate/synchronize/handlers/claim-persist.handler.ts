@@ -4,7 +4,7 @@ import { CertificateClaimedEvent, CertificateEventType } from '../../events/Cert
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { chunk, compact } from 'lodash';
+import { chunk } from 'lodash';
 import { SynchronizeHandler } from './synchronize.handler';
 import {
     BatchConfiguration,
@@ -23,30 +23,6 @@ export class ClaimPersistHandler implements SynchronizeHandler {
 
     public canHandle(event: CertificateEventEntity) {
         return event.type === CertificateEventType.Claimed;
-    }
-
-    public async handle(event: CertificateEventEntity) {
-        const claimedEvent = event as CertificateClaimedEvent;
-
-        try {
-            await this.certificateService.claim(claimedEvent.payload);
-
-            await this.offchainCertificateService.claimPersisted(
-                claimedEvent.internalCertificateId,
-                { persistedEventId: event.id }
-            );
-
-            return { success: true };
-        } catch (e) {
-            await this.offchainCertificateService.persistError(claimedEvent.internalCertificateId, {
-                errorMessage: `${e.message}`,
-                internalCertificateId: event.internalCertificateId,
-                type: CertificateEventType.ClaimPersisted,
-                persistedEventId: event.id
-            });
-
-            return { success: false };
-        }
     }
 
     public async handleBatch(events: CertificateEventEntity[]) {

@@ -38,6 +38,8 @@ import { CertificateEventInMemoryRepository } from './repositories/CertificateEv
 import { CertificateReadModelInMemoryRepository } from './repositories/CertificateReadModel/CertificateReadModelInMemory.repository';
 import { ENTITY_MANAGER, InMemoryEntityManager } from './utils/entity-manager';
 import { EntityManager } from 'typeorm';
+import { BlockchainSynchronizeQueuedService } from './synchronize/blockchain-synchronize-queued.service';
+import { BlockchainSynchronizeSyncService } from './synchronize/blockchain-synchronize-sync.service';
 
 @Module({
     providers: [
@@ -66,7 +68,10 @@ import { EntityManager } from 'typeorm';
             useExisting: EntityManager
         },
         OffChainCertificateService,
-        BlockchainSynchronizeService,
+        {
+            provide: BlockchainSynchronizeService,
+            useClass: BlockchainSynchronizeQueuedService
+        },
         BlockchainSynchronizeTask,
         IssuePersistHandler,
         ClaimPersistHandler,
@@ -92,40 +97,49 @@ import { EntityManager } from 'typeorm';
 })
 export class OffChainCertificateModule {}
 
-@Module({
-    providers: [
-        {
-            provide: CERTIFICATE_COMMAND_REPOSITORY,
-            useClass: CertificateCommandInMemoryRepository
-        },
-        {
-            provide: CERTIFICATE_EVENT_REPOSITORY,
-            useClass: CertificateEventInMemoryRepository
-        },
-        {
-            provide: CERTIFICATE_READ_MODEL_REPOSITORY,
-            useClass: CertificateReadModelInMemoryRepository
-        },
-        {
-            provide: SYNCHRONIZE_STRATEGY,
-            useClass: BatchSynchronizeStrategy
-        },
-        {
-            provide: BATCH_CONFIGURATION_TOKEN,
-            useValue: batchConfiguration
-        },
-        {
-            provide: ENTITY_MANAGER,
-            useValue: InMemoryEntityManager
-        },
-        OffChainCertificateService,
-        IssuePersistHandler,
-        ClaimPersistHandler,
-        TransferPersistHandler,
-        SynchronizeManager,
-        CertificateEventService
-    ],
-    exports: [OffChainCertificateService],
-    imports: [OnChainCertificateForUnitTestsModule, CqrsModule]
-})
-export class OffChainCertificateForUnitTestsModule {}
+@Module({})
+export class OffChainCertificateForUnitTestsModule {
+    public static register(onChainModule = OnChainCertificateForUnitTestsModule) {
+        return {
+            module: OffChainCertificateForUnitTestsModule,
+            providers: [
+                {
+                    provide: CERTIFICATE_COMMAND_REPOSITORY,
+                    useClass: CertificateCommandInMemoryRepository
+                },
+                {
+                    provide: CERTIFICATE_EVENT_REPOSITORY,
+                    useClass: CertificateEventInMemoryRepository
+                },
+                {
+                    provide: CERTIFICATE_READ_MODEL_REPOSITORY,
+                    useClass: CertificateReadModelInMemoryRepository
+                },
+                {
+                    provide: SYNCHRONIZE_STRATEGY,
+                    useClass: BatchSynchronizeStrategy
+                },
+                {
+                    provide: BATCH_CONFIGURATION_TOKEN,
+                    useValue: batchConfiguration
+                },
+                {
+                    provide: ENTITY_MANAGER,
+                    useValue: InMemoryEntityManager
+                },
+                {
+                    provide: BlockchainSynchronizeService,
+                    useClass: BlockchainSynchronizeSyncService
+                },
+                OffChainCertificateService,
+                IssuePersistHandler,
+                ClaimPersistHandler,
+                TransferPersistHandler,
+                SynchronizeManager,
+                CertificateEventService
+            ],
+            exports: [OffChainCertificateService, BlockchainSynchronizeService],
+            imports: [onChainModule, CqrsModule]
+        };
+    }
+}

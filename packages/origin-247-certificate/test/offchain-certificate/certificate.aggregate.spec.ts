@@ -1,10 +1,10 @@
-import { CertificateAggregate } from '../certificate.aggregate';
+import { CertificateAggregate } from '../../src/offchain-certificate/certificate.aggregate';
 import {
     CertificateIssuedEvent,
     CertificateTransferredEvent,
     CertificateClaimedEvent
-} from '../events/Certificate.events';
-import { CertificateErrors } from '../errors';
+} from '../../src/offchain-certificate/events/Certificate.events';
+import { CertificateErrors } from '../../src/offchain-certificate/errors';
 
 const issuedEvent = new CertificateIssuedEvent(1, {
     toAddress: '0x1',

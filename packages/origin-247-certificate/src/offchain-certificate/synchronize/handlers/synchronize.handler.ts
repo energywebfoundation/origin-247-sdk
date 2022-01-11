@@ -3,7 +3,5 @@ import { CertificateEventEntity } from '../../repositories/CertificateEvent/Cert
 export interface SynchronizeHandler {
     canHandle(event: CertificateEventEntity): boolean;
 
-    handle(event: CertificateEventEntity): Promise<{ success: boolean }>;
-
     handleBatch(events: CertificateEventEntity[]): Promise<{ failedCertificateIds: number[] }>;
 }

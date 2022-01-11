@@ -25,34 +25,6 @@ export class IssuePersistHandler implements SynchronizeHandler {
         return event.type === CertificateEventType.Issued;
     }
 
-    public async handle(event: CertificateEventEntity) {
-        const issuedEvent = event as CertificateIssuedEvent<unknown>;
-
-        try {
-            const certificate = await this.certificateService.issue({
-                ...issuedEvent.payload,
-                fromTime: new Date(issuedEvent.payload.fromTime),
-                toTime: new Date(issuedEvent.payload.toTime)
-            });
-
-            await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
-                blockchainCertificateId: certificate.id,
-                persistedEventId: event.id
-            });
-
-            return { success: true };
-        } catch (e) {
-            await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: `${e.message}`,
-                internalCertificateId: event.internalCertificateId,
-                type: CertificateEventType.IssuancePersisted,
-                persistedEventId: event.id
-            });
-
-            return { success: false };
-        }
-    }
-
     async synchronizeBatchBlock(
         events: CertificateEventEntity[]
     ): Promise<{ failedCertificateIds: number[] }> {
@@ -62,8 +34,8 @@ export class IssuePersistHandler implements SynchronizeHandler {
                     .map((issuedEvent) => issuedEvent.payload as CertificateIssuedEvent['payload'])
                     .map((payload) => ({
                         ...payload,
-                        fromTime: new Date(payload.fromTime),
-                        toTime: new Date(payload.toTime)
+                        fromTime: new Date(payload.fromTime * 1000),
+                        toTime: new Date(payload.toTime * 1000)
                     }))
             );
 

@@ -1,6 +1,6 @@
-import { CertificateEventType } from '../events/Certificate.events';
-import { SynchronizableEvent } from '../repositories/CertificateEvent/CertificateEvent.repository';
-import { EventsBatchQueue } from '../synchronize/strategies/batch/events.batch-queue';
+import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
+import { SynchronizableEvent } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
+import { EventsBatchQueue } from '../../src/offchain-certificate/synchronize/strategies/batch/events.batch-queue';
 
 describe('EventsBatchQueue', () => {
     describe('#isEmpty', () => {

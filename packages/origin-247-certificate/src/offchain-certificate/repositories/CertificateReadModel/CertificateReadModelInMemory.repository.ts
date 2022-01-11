@@ -6,12 +6,12 @@ import { CertificateReadModelRepository } from './CertificateReadModel.repositor
 @Injectable()
 export class CertificateReadModelInMemoryRepository<T>
     implements CertificateReadModelRepository<T> {
-    private db: CertificateReadModelEntity<T>[] = [];
+    private db: Record<number, CertificateReadModelEntity<T>> = {};
 
     async save(
         certificateReadModel: CertificateReadModelEntity<T>
     ): Promise<CertificateReadModelEntity<T>> {
-        this.db.push(certificateReadModel);
+        this.db[certificateReadModel.internalCertificateId] = certificateReadModel;
 
         return certificateReadModel;
     }
@@ -19,15 +19,19 @@ export class CertificateReadModelInMemoryRepository<T>
     async getByInternalCertificateId(
         internalCertificateId: number
     ): Promise<CertificateReadModelEntity<T> | null> {
-        const found = await this.db.find((e) => e.internalCertificateId === internalCertificateId);
+        const found = Object.values(this.db).find(
+            (e) => e.internalCertificateId === internalCertificateId
+        );
 
-        return found ?? null;
+        return this.db[internalCertificateId] ?? null;
     }
 
     async getManyByInternalCertificateIds(
         internalCertificateIds: number[]
     ): Promise<CertificateReadModelEntity<T>[]> {
-        return this.db.filter((e) => internalCertificateIds.includes(e.internalCertificateId));
+        return Object.values(this.db).filter((e) =>
+            internalCertificateIds.includes(e.internalCertificateId)
+        );
     }
 
     async getAll(
@@ -42,7 +46,7 @@ export class CertificateReadModelInMemoryRepository<T>
         const creationTimeTo = options.creationTimeTo ?? lastDate;
         const deviceId = options.deviceId;
 
-        return this.db.filter((entry) => {
+        return Object.values(this.db).filter((entry) => {
             const isDateOk =
                 new Date(entry.generationStartTime * 1000) >= generationStartFrom &&
                 new Date(entry.generationStartTime * 1000) <= generationStartTo &&

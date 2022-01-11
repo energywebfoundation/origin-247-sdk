@@ -82,18 +82,22 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             return;
         }
 
+        const value =
+            command.energyValue ??
+            Object.values(certificate.owners)
+                .reduce((sum, v) => sum.add(v), BigNumber.from(0))
+                .toString();
+
         certificate.claims.push({
             claimData: command.claimData,
-            value:
-                command.energyValue ??
-                Object.values(certificate.owners)
-                    .reduce((sum, v) => sum.add(v), BigNumber.from(0))
-                    .toString(),
+            value,
             topic: '0',
-            from: '',
+            from: command.forAddress,
             id: 0,
-            to: ''
+            to: command.forAddress
         });
+
+        certificate.claimers![command.forAddress] = value;
     }
 
     public async transfer(command: ITransferCommand): Promise<void> {

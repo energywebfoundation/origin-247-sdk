@@ -49,7 +49,7 @@ import { ExcessGenerationInMemoryRepository } from './repositories/ExcessGenerat
 export class ClaimModule {}
 
 @Module({
-    imports: [OffChainCertificateForUnitTestsModule],
+    imports: [OffChainCertificateForUnitTestsModule.register()],
     providers: [
         ClaimService,
         {
