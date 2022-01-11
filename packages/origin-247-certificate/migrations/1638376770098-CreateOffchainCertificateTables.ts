@@ -14,7 +14,7 @@ export class CreateOffchainCertificateTables1638376770098 implements MigrationIn
             `CREATE INDEX "IDX_b1613d0d62da5403c6302550f2" ON "certificate_event" ("internalCertificateId") `
         );
         await queryRunner.query(
-            `CREATE TABLE "certificate_read_model" ("createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "internalCertificateId" integer NOT NULL, "blockchainCertificateId" integer, "deviceId" character varying NOT NULL, "generationStartTime" bigint NOT NULL, "generationEndTime" bigint NOT NULL, "creationTime" bigint NOT NULL, "owners" text NOT NULL, "claimers" text NOT NULL, "claims" text NOT NULL, "creationBlockHash" character varying NOT NULL, "metadata" text, "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_213ddb7ca09203210cbe84b0275" PRIMARY KEY ("internalCertificateId"))`
+            `CREATE TABLE "certificate_read_model" ("createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "internalCertificateId" integer NOT NULL, "blockchainCertificateId" integer, "deviceId" character varying NOT NULL, "generationStartTime" integer NOT NULL, "generationEndTime" integer NOT NULL, "creationTime" integer NOT NULL, "owners" text NOT NULL, "claimers" text NOT NULL, "claims" text NOT NULL, "creationBlockHash" character varying NOT NULL, "metadata" text, "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_213ddb7ca09203210cbe84b0275" PRIMARY KEY ("internalCertificateId"))`
         );
         await queryRunner.query(
             `CREATE INDEX "IDX_213ddb7ca09203210cbe84b027" ON "certificate_read_model" ("internalCertificateId") `

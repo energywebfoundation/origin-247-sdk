@@ -21,6 +21,12 @@ export interface ICertificateEvent {
     createdAt: Date;
 }
 
+export type PersistedEvent =
+    | CertificateIssuancePersistedEvent
+    | CertificateClaimPersistedEvent
+    | CertificateTransferPersistedEvent
+    | CertificatePersistErrorEvent;
+
 export class CertificateIssuedEvent<MetadataType = unknown> implements IEvent {
     public readonly type = CertificateEventType.Issued;
     public readonly version = version;
@@ -61,7 +67,7 @@ export class CertificateIssuancePersistedEvent implements IEvent {
 
     constructor(
         public readonly internalCertificateId: number,
-        public readonly payload: { blockchainCertificateId: number }
+        public readonly payload: { blockchainCertificateId: number; persistedEventId: number }
     ) {}
 }
 
@@ -70,7 +76,10 @@ export class CertificateTransferPersistedEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public readonly internalCertificateId: number, public readonly payload: {}) {}
+    constructor(
+        public readonly internalCertificateId: number,
+        public readonly payload: { persistedEventId: number }
+    ) {}
 }
 
 export class CertificateClaimPersistedEvent implements IEvent {
@@ -78,7 +87,10 @@ export class CertificateClaimPersistedEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public readonly internalCertificateId: number, public readonly payload: {}) {}
+    constructor(
+        public readonly internalCertificateId: number,
+        public readonly payload: { persistedEventId: number }
+    ) {}
 }
 
 export class CertificatePersistErrorEvent implements IEvent {
@@ -86,5 +98,8 @@ export class CertificatePersistErrorEvent implements IEvent {
     public readonly version = version;
     public readonly createdAt = new Date();
 
-    constructor(public internalCertificateId: number, public payload: { errorMessage: string }) {}
+    constructor(
+        public internalCertificateId: number,
+        public payload: { errorMessage: string; persistedEventId: number }
+    ) {}
 }

@@ -1,10 +1,9 @@
-import { EventsHandler, IEventHandler, IEvent } from '@nestjs/cqrs';
+import { EventsHandler, IEventHandler } from '@nestjs/cqrs';
 import { Inject } from '@nestjs/common';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './configuration';
 import { ValidateService } from '../validate.service';
 import { queueThrottle } from './queueThrottle';
-
-export class AwaitingValidationEvent implements IEvent {}
+import { AwaitingValidationEvent } from './events';
 
 @EventsHandler(AwaitingValidationEvent)
 export class AwaitingValidationEventHandler implements IEventHandler<AwaitingValidationEvent> {

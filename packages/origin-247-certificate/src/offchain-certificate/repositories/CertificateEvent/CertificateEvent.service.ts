@@ -8,14 +8,15 @@ import {
     SynchronizableEventType
 } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
-import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../repository.keys';
+import { ENTITY_MANAGER } from '../../utils/entity-manager';
 
 @Injectable()
 export class CertificateEventService {
     constructor(
         @Inject(CERTIFICATE_EVENT_REPOSITORY)
         private certificateEventRepository: CertificateEventRepository,
+        @Inject(ENTITY_MANAGER)
         private entityManager: EntityManager
     ) {}
 
@@ -37,15 +38,10 @@ export class CertificateEventService {
             );
 
             if (this.shouldBeSynchronized(savedEvent)) {
-                const syncRepository = txManager.getRepository(
-                    CertificateSynchronizationAttemptEntity
+                await this.certificateEventRepository.createSynchronizationAttempt(
+                    savedEvent.id,
+                    txManager
                 );
-                const synchronizationEntity = syncRepository.create({
-                    attemptsCount: 0,
-                    eventId: savedEvent.id
-                });
-
-                await syncRepository.save(synchronizationEntity);
             }
 
             return savedEvent;
@@ -59,6 +55,6 @@ export class CertificateEventService {
             CertificateEventType.Transferred
         ] as SynchronizableEventType[];
 
-        return synchronizableEventTypes.includes(event.type as any);
+        return synchronizableEventTypes.includes(event.type as SynchronizableEventType);
     }
 }

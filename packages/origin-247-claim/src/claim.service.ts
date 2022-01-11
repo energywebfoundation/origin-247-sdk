@@ -22,18 +22,14 @@ import {
     IMatchingOutput,
     ITimeFrame
 } from './interfaces';
-import {
-    CertificateService,
-    CERTIFICATE_SERVICE_TOKEN,
-    IClaimCommand
-} from '@energyweb/origin-247-certificate';
+import { OffChainCertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
 
 import { omit } from 'lodash';
 
-export interface IClaimInput {
-    algorithmFn: (input: IMatchingInput) => IMatchingOutput;
-    claimCustomizationFn: (input: IMatch<IConsumption, IGeneration>[]) => IClaimCommand[];
-    data: IMatchingInput;
+export interface IClaimInput<T extends IConsumption, U extends IGeneration> {
+    algorithmFn: (input: IMatchingInput<T, U>) => IMatchingOutput<T, U>;
+    claimCustomizationFn: (input: IMatch<T, U>[]) => IClaimCommand[];
+    data: IMatchingInput<T, U>;
     timeframe: ITimeFrame;
 }
 
@@ -52,11 +48,10 @@ export class ClaimService {
         private leftoverConsumptionRepo: LeftoverConsumptionRepository,
         @Inject(EXCESS_GENERATION_REPOSITORY)
         private excessGenerationRepo: ExcessGenerationRepository,
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
-        private certificateService: CertificateService<unknown>
+        private certificateService: OffChainCertificateService<unknown>
     ) {}
 
-    public async claim(input: IClaimInput) {
+    public async claim<T extends IConsumption, U extends IGeneration>(input: IClaimInput<T, U>) {
         const { algorithmFn, data, timeframe, claimCustomizationFn } = input;
 
         const matchingResult = algorithmFn(data);
@@ -71,19 +66,22 @@ export class ClaimService {
         return raport;
     }
 
-    private createRaport(matchingResult: IMatchingOutput, timeframe: ITimeFrame): IRaport {
+    private createRaport<T extends IConsumption, U extends IGeneration>(
+        matchingResult: IMatchingOutput<T, U>,
+        timeframe: ITimeFrame
+    ): IRaport {
         const mappedMatches: NewMatchResult[] = matchingResult.matches.map((m) => ({
             volume: m.volume.toString(),
-            consumerId: m.consumption.consumerId,
+            consumerId: m.consumption.id,
             consumerMetadata: omit(m.consumption, 'volume', 'consumerId'),
-            generatorId: m.generation.generatorId,
+            generatorId: m.generation.id,
             generatorMetadata: omit(m.generation, 'volume', 'generatorId'),
             timestamp: timeframe.to
         }));
 
         const mappedLeftoverConsumptions: NewLeftoverConsumption[] = matchingResult.leftoverConsumptions.map(
             (lc) => ({
-                consumerId: lc.consumerId,
+                consumerId: lc.id,
                 consumerMetadata: lc,
                 volume: lc.volume.toString(),
                 timestamp: timeframe.to
@@ -92,7 +90,7 @@ export class ClaimService {
 
         const mappedExcessGenerations: NewExcessGeneration[] = matchingResult.excessGenerations.map(
             (eg) => ({
-                generatorId: eg.generatorId,
+                generatorId: eg.id,
                 generatorMetadata: eg,
                 volume: eg.volume.toString(),
                 timestamp: timeframe.to
@@ -142,7 +140,9 @@ export class ClaimService {
         );
     }
 
-    private filterZeroVolumeMatches(matchingResult: IMatchingOutput): IMatchingOutput {
+    private filterZeroVolumeMatches<T extends IConsumption, U extends IGeneration>(
+        matchingResult: IMatchingOutput<T, U>
+    ): IMatchingOutput<T, U> {
         return {
             matches: matchingResult.matches.filter((m) => m.volume.gt(0)),
             leftoverConsumptions: matchingResult.leftoverConsumptions.filter((lc) =>

@@ -3,27 +3,27 @@ import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bull';
 import { IssuerModule } from '@energyweb/issuer-api';
 import { TransactionPollService } from './transaction-poll.service';
-
-import { CertificateService } from './certificate.service';
+import { CertificateForUnitTestsService } from './onchain-certificateForUnitTests.service';
+import { OnChainCertificateService } from './onchain-certificate.service';
 import { BlockchainActionsProcessor, blockchainQueueName } from './blockchain-actions.processor';
-import { CERTIFICATE_SERVICE_TOKEN } from './types';
+import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from './types';
 import { CertificateUpdatedHandler } from './certificate-updated.handler';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Configuration } from './offchain-certificate/config/config.interface';
 
-const serviceProvider = {
-    provide: CERTIFICATE_SERVICE_TOKEN,
-    useClass: CertificateService
+const realCertificateProvider = {
+    provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    useClass: OnChainCertificateService
 };
 
 @Module({
     providers: [
-        serviceProvider,
+        realCertificateProvider,
         BlockchainActionsProcessor,
         TransactionPollService,
         CertificateUpdatedHandler
     ],
-    exports: [serviceProvider],
+    exports: [realCertificateProvider],
     imports: [
         IssuerModule.register({
             enableCertificationRequest: false,
@@ -42,4 +42,16 @@ const serviceProvider = {
         })
     ]
 })
-export class CertificateModule {}
+export class OnChainCertificateModule {}
+
+const inMemoryServiceProvider = {
+    provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    useClass: CertificateForUnitTestsService
+};
+
+@Module({
+    providers: [inMemoryServiceProvider],
+    exports: [inMemoryServiceProvider],
+    imports: [CqrsModule]
+})
+export class OnChainCertificateForUnitTestsModule {}

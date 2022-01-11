@@ -1,32 +1,34 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CertificateService, CERTIFICATE_SERVICE_TOKEN } from '@energyweb/origin-247-certificate';
+import { OffChainCertificateService } from '@energyweb/origin-247-certificate';
 import {
     EnergyTransferRequestRepository,
     ENERGY_TRANSFER_REQUEST_REPOSITORY
 } from './repositories/EnergyTransferRequest.repository';
 import { EnergyTransferRequest, State } from './EnergyTransferRequest';
-import { chunk } from 'lodash';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
+import { EventBus } from '@nestjs/cqrs';
+import { AwaitingTransferEvent } from './batch/events';
 
 @Injectable()
 export class TransferService {
     constructor(
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
-        private certificateService: CertificateService<unknown>,
+        private certificateService: OffChainCertificateService<unknown>,
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private etrRepository: EnergyTransferRequestRepository,
         @Inject(BATCH_CONFIGURATION_TOKEN)
-        private batchConfiguration: BatchConfiguration
+        private batchConfiguration: BatchConfiguration,
+        private eventBus: EventBus
     ) {}
 
     public async transferTask() {
-        const etrs = await this.etrRepository.findByState(State.TransferAwaiting);
+        const etrs = await this.etrRepository.findByState(State.TransferAwaiting, {
+            limit: this.batchConfiguration.transferBatchSize
+        });
 
-        const chunkedEtrs = chunk(etrs, this.batchConfiguration.transferBatchSize);
+        await this.transferCertificates(etrs);
 
-        for (const chunk of chunkedEtrs) {
-            await this.transferCertificates(chunk);
-        }
+        // Loop
+        this.eventBus.publish(new AwaitingTransferEvent());
     }
 
     private async transferCertificates(etrs: EnergyTransferRequest[]): Promise<void> {

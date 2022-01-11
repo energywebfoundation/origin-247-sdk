@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { EnergyTransferRequest, NewAttributesParams, State } from '../EnergyTransferRequest';
-import { EnergyTransferRequestRepository } from './EnergyTransferRequest.repository';
+import {
+    EnergyTransferRequestRepository,
+    IFindByStateOptions
+} from './EnergyTransferRequest.repository';
 
 @Injectable()
 export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRequestRepository {
@@ -36,8 +39,11 @@ export class EnergyTransferRequestInMemoryRepository implements EnergyTransferRe
         return request ?? null;
     }
 
-    public async findByState(state: State): Promise<EnergyTransferRequest[]> {
-        return this.db.filter((e) => e.toAttrs().state === state);
+    public async findByState(
+        state: State,
+        options: IFindByStateOptions
+    ): Promise<EnergyTransferRequest[]> {
+        return this.db.filter((e) => e.toAttrs().state === state).slice(0, options.limit);
     }
 
     public async findById(id: number): Promise<EnergyTransferRequest | null> {

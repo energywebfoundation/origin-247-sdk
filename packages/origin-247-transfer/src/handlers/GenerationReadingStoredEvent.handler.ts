@@ -2,6 +2,7 @@ import { EventsHandler, IEventHandler, QueryBus, EventBus } from '@nestjs/cqrs';
 import { Inject, Logger } from '@nestjs/common';
 import { GenerationReadingStoredEvent } from '../events/GenerationReadingStored.event';
 import { IssueService } from '../issue.service';
+import { AwaitingIssuanceEvent } from '../batch/events';
 import {
     EnergyTransferRequestRepository,
     ENERGY_TRANSFER_REQUEST_REPOSITORY
@@ -10,7 +11,6 @@ import {
     GetTransferSitesQuery,
     IGetTransferSitesQueryResponse
 } from '../queries/GetTransferSites.query';
-import { AwaitingIssuanceEvent } from '../batch/issue.batch';
 
 @EventsHandler(GenerationReadingStoredEvent)
 export class GenerationReadingStoredEventHandler

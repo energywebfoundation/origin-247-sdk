@@ -15,9 +15,8 @@ import {
     TransferValidationStatus,
     UpdateStatusCode
 } from './EnergyTransferRequest';
-import { chunk } from 'lodash';
-import { AwaitingTransferEvent } from './batch/transfer.batch';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
+import { AwaitingValidationEvent, AwaitingTransferEvent } from './batch/events';
 
 export interface IUpdateValidationStatusCommand {
     requestId: number;
@@ -41,13 +40,14 @@ export class ValidateService {
     ) {}
 
     public async validateTask(): Promise<void> {
-        const etrs = await this.etrRepository.findByState(State.ValidationAwaiting);
+        const etrs = await this.etrRepository.findByState(State.ValidationAwaiting, {
+            limit: this.batchConfiguration.validateBatchSize
+        });
 
-        const chunkedEtrs = chunk(etrs, this.batchConfiguration.validateBatchSize);
+        await this.startValidation(etrs);
 
-        for (const chunk of chunkedEtrs) {
-            await this.startValidation(chunk);
-        }
+        // Loop
+        this.eventBus.publish(new AwaitingValidationEvent());
     }
 
     private async startValidation(etrs: EnergyTransferRequest[]): Promise<void> {
@@ -123,10 +123,9 @@ export class ValidateService {
 
             return await this.commandBus.execute(command);
         } catch (e) {
-            this.logger.error(`
-                One of validation commands (${Command.name}) returned error for request: ${request.id}:
-                "${e.message}"
-            `);
+            this.logger.error(
+                `One of validation commands (${Command.name}) returned error for request: ${request.id}: "${e.message}"`
+            );
 
             return { validationResult: TransferValidationStatus.Error };
         }

@@ -2,15 +2,13 @@ import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CertificateCommandPostgresRepository } from './repositories/CertificateCommand/CertificateCommandPostgres.repository';
 import { CertificateEventPostgresRepository } from './repositories/CertificateEvent/CertificateEventPostgres.repository';
-import { OffchainCertificateService } from './offchain-certificate.service';
-import { OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../types';
+import { OffChainCertificateService } from './offchain-certificate.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateEventEntity } from './repositories/CertificateEvent/CertificateEvent.entity';
 import { CertificateReadModelEntity } from './repositories/CertificateReadModel/CertificateReadModel.entity';
 import { CertificateReadModelPostgresRepository } from './repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
 import { BullModule } from '@nestjs/bull';
-import { blockchainQueueName } from '../blockchain-actions.processor';
 import { BlockchainSynchronizeService } from './synchronize/blockchain-synchronize.service';
 import { BlockchainSynchronizeTask } from './synchronize/blockchain-synchronize.task';
 import { SYNCHRONIZE_STRATEGY } from './synchronize/strategies/synchronize.strategy';
@@ -22,7 +20,10 @@ import {
 } from './repositories/repository.keys';
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
-import { CertificateModule } from '../certificate.module';
+import {
+    OnChainCertificateModule,
+    OnChainCertificateForUnitTestsModule
+} from '../onchain-certificate/onchain-certificate.module';
 import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 import { BatchSynchronizeStrategy } from './synchronize/strategies/batch/batch-synchronize.strategy';
@@ -32,14 +33,13 @@ import {
 } from './synchronize/strategies/batch/batch.configuration';
 import { IssuePersistHandler } from './synchronize/handlers/issue-persist.handler';
 import { SynchronizeManager } from './synchronize/handlers/synchronize.manager';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CertificateCommandInMemoryRepository } from './repositories/CertificateCommand/CertificateCommandInMemory.repository';
+import { CertificateEventInMemoryRepository } from './repositories/CertificateEvent/CertificateEventInMemory.repository';
+import { CertificateReadModelInMemoryRepository } from './repositories/CertificateReadModel/CertificateReadModelInMemory.repository';
+import { ENTITY_MANAGER, InMemoryEntityManager } from './utils/entity-manager';
+import { EntityManager } from 'typeorm';
+import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
-import { Configuration } from './config/config.interface';
-
-const serviceProvider = {
-    provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    useClass: OffchainCertificateService
-};
 
 @Module({
     providers: [
@@ -63,7 +63,11 @@ const serviceProvider = {
             provide: BATCH_CONFIGURATION_TOKEN,
             useValue: batchConfiguration
         },
-        serviceProvider,
+        {
+            provide: ENTITY_MANAGER,
+            useExisting: EntityManager
+        },
+        OffChainCertificateService,
         BlockchainSynchronizeService,
         BlockchainSynchronizeTask,
         IssuePersistHandler,
@@ -72,9 +76,9 @@ const serviceProvider = {
         SynchronizeManager,
         CertificateEventService
     ],
-    exports: [serviceProvider],
+    exports: [OffChainCertificateService, BlockchainSynchronizeService],
     imports: [
-        CertificateModule,
+        OnChainCertificateModule,
         CqrsModule,
         TypeOrmModule.forFeature([
             CertificateEventEntity,
@@ -82,23 +86,51 @@ const serviceProvider = {
             CertificateReadModelEntity,
             CertificateSynchronizationAttemptEntity
         ]),
+
         ConfigModule.forRoot({
             load: [configuration]
         }),
-        BullModule.registerQueueAsync(
-            {
-                name: SYNCHRONIZE_QUEUE_NAME
-            },
-            {
-                name: blockchainQueueName,
-                imports: [ConfigService],
-                useFactory: (configService: ConfigService<Configuration>) => ({
-                    settings: {
-                        lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
-                    }
-                })
-            }
-        )
+        BullModule.registerQueueAsync({
+            name: SYNCHRONIZE_QUEUE_NAME
+        })
     ]
 })
-export class OffchainCertificateModule {}
+export class OffChainCertificateModule {}
+
+@Module({
+    providers: [
+        {
+            provide: CERTIFICATE_COMMAND_REPOSITORY,
+            useClass: CertificateCommandInMemoryRepository
+        },
+        {
+            provide: CERTIFICATE_EVENT_REPOSITORY,
+            useClass: CertificateEventInMemoryRepository
+        },
+        {
+            provide: CERTIFICATE_READ_MODEL_REPOSITORY,
+            useClass: CertificateReadModelInMemoryRepository
+        },
+        {
+            provide: SYNCHRONIZE_STRATEGY,
+            useClass: BatchSynchronizeStrategy
+        },
+        {
+            provide: BATCH_CONFIGURATION_TOKEN,
+            useValue: batchConfiguration
+        },
+        {
+            provide: ENTITY_MANAGER,
+            useValue: InMemoryEntityManager
+        },
+        OffChainCertificateService,
+        IssuePersistHandler,
+        ClaimPersistHandler,
+        TransferPersistHandler,
+        SynchronizeManager,
+        CertificateEventService
+    ],
+    exports: [OffChainCertificateService],
+    imports: [OnChainCertificateForUnitTestsModule, CqrsModule]
+})
+export class OffChainCertificateForUnitTestsModule {}

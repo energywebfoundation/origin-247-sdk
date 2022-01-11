@@ -1,10 +1,6 @@
 import { CreateDateColumn, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import {
-    IIssueCommand,
-    ITransferCommand,
-    IClaimCommand,
-    IClaimPersistedCommand
-} from '../../../types';
+import { IIssueCommand, ITransferCommand, IClaimCommand } from '../../../types';
+import { IClaimPersistedCommand } from '../../types';
 
 export const tableName = 'certificate_command';
 
@@ -17,5 +13,5 @@ export class CertificateCommandEntity {
     createdAt: Date;
 
     @Column({ type: 'simple-json' })
-    payload: IIssueCommand<unknown> | ITransferCommand | IClaimCommand | IClaimPersistedCommand;
+    payload: unknown; // each command has different type and we save this using generic `persistError` message
 }

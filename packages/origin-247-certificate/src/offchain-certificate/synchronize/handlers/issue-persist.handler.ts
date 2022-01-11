@@ -1,12 +1,10 @@
-import { CERTIFICATE_SERVICE_TOKEN, OFFCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../types';
-import { CertificateEventRepository } from '../../repositories/CertificateEvent/CertificateEvent.repository';
+import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../onchain-certificate/types';
+import { OnChainCertificateService } from '../../../onchain-certificate/onchain-certificate.service';
 import { CertificateEventType, CertificateIssuedEvent } from '../../events/Certificate.events';
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
-import { CertificateService } from '../../../certificate.service';
-import { OffchainCertificateService } from '../../offchain-certificate.service';
+import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { CERTIFICATE_EVENT_REPOSITORY } from '../../repositories/repository.keys';
-import { chunk, compact } from 'lodash';
+import { chunk } from 'lodash';
 import { SynchronizeHandler } from './synchronize.handler';
 import {
     BATCH_CONFIGURATION_TOKEN,
@@ -16,12 +14,9 @@ import {
 @Injectable()
 export class IssuePersistHandler implements SynchronizeHandler {
     constructor(
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
-        private readonly certificateService: CertificateService,
-        @Inject(OFFCHAIN_CERTIFICATE_SERVICE_TOKEN)
-        private readonly offchainCertificateService: OffchainCertificateService,
-        @Inject(CERTIFICATE_EVENT_REPOSITORY)
-        private readonly certEventRepo: CertificateEventRepository,
+        @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
+        private readonly certificateService: OnChainCertificateService<unknown>,
+        private readonly offchainCertificateService: OffChainCertificateService,
         @Inject(BATCH_CONFIGURATION_TOKEN)
         private batchConfiguration: BatchConfiguration
     ) {}
@@ -31,23 +26,29 @@ export class IssuePersistHandler implements SynchronizeHandler {
     }
 
     public async handle(event: CertificateEventEntity) {
-        const issuedEvent = event as CertificateIssuedEvent<null>;
+        const issuedEvent = event as CertificateIssuedEvent<unknown>;
 
-        const certificate = await this.certificateService.issue({
-            ...issuedEvent.payload,
-            fromTime: new Date(issuedEvent.payload.fromTime),
-            toTime: new Date(issuedEvent.payload.toTime)
-        });
+        try {
+            const certificate = await this.certificateService.issue({
+                ...issuedEvent.payload,
+                fromTime: new Date(issuedEvent.payload.fromTime),
+                toTime: new Date(issuedEvent.payload.toTime)
+            });
 
-        if (IssuePersistHandler.isCertificateIdValid(certificate?.id)) {
             await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
-                blockchainCertificateId: certificate.id
+                blockchainCertificateId: certificate.id,
+                persistedEventId: event.id
             });
+
             return { success: true };
-        } else {
+        } catch (e) {
             await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`
+                errorMessage: `${e.message}`,
+                internalCertificateId: event.internalCertificateId,
+                type: CertificateEventType.IssuancePersisted,
+                persistedEventId: event.id
             });
+
             return { success: false };
         }
     }
@@ -55,46 +56,41 @@ export class IssuePersistHandler implements SynchronizeHandler {
     async synchronizeBatchBlock(
         events: CertificateEventEntity[]
     ): Promise<{ failedCertificateIds: number[] }> {
-        const issuedEvents = events as CertificateIssuedEvent<null>[];
+        try {
+            const certificateIds = await this.certificateService.batchIssue(
+                events
+                    .map((issuedEvent) => issuedEvent.payload as CertificateIssuedEvent['payload'])
+                    .map((payload) => ({
+                        ...payload,
+                        fromTime: new Date(payload.fromTime),
+                        toTime: new Date(payload.toTime)
+                    }))
+            );
 
-        const certificateIds = await this.certificateService.batchIssue(
-            issuedEvents
-                .map((issuedEvent) => issuedEvent.payload)
-                .map((payload) => ({
-                    ...payload,
-                    fromTime: new Date(payload.fromTime),
-                    toTime: new Date(payload.toTime)
-                }))
-        );
+            const promises = events.map(async (event, index) => {
+                await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
+                    blockchainCertificateId: certificateIds[index],
+                    persistedEventId: event.id
+                });
+            });
 
-        const failedCertificateIds = await Promise.all(
-            events.map(async (event, index) => {
-                const areCertificateIdsValid =
-                    certificateIds &&
-                    certificateIds.every((certificateId) =>
-                        IssuePersistHandler.isCertificateIdValid(certificateId)
-                    );
+            await Promise.all(promises);
 
-                if (areCertificateIdsValid) {
-                    await this.offchainCertificateService.issuePersisted(
-                        event.internalCertificateId,
-                        {
-                            blockchainCertificateId: certificateIds[index]
-                        }
-                    );
-                } else {
-                    await this.offchainCertificateService.persistError(
-                        event.internalCertificateId,
-                        {
-                            errorMessage: `Cannot issue certificate for certificate id: ${event.internalCertificateId}`
-                        }
-                    );
-                    return event.internalCertificateId;
-                }
-            })
-        );
+            return { failedCertificateIds: [] };
+        } catch (e) {
+            const promises = events.map(async (event) => {
+                await this.offchainCertificateService.persistError(event.internalCertificateId, {
+                    errorMessage: `${e.error}`,
+                    internalCertificateId: event.internalCertificateId,
+                    type: CertificateEventType.IssuancePersisted,
+                    persistedEventId: event.id
+                });
+            });
 
-        return { failedCertificateIds: compact(failedCertificateIds) };
+            await Promise.all(promises);
+
+            return { failedCertificateIds: events.map((e) => e.internalCertificateId) };
+        }
     }
 
     async handleBatch(events: CertificateEventEntity[]) {
@@ -111,9 +107,5 @@ export class IssuePersistHandler implements SynchronizeHandler {
         }
 
         return { failedCertificateIds };
-    }
-
-    private static isCertificateIdValid(certificateId: number): boolean {
-        return !Number.isNaN(parseInt(`${certificateId}`, 10));
     }
 }

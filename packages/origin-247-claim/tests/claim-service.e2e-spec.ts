@@ -11,7 +11,7 @@ import {
     IMatchingOutput
 } from '../src/interfaces';
 import { BigNumber } from '@ethersproject/bignumber';
-import { CertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
+import { OffChainCertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
 
 jest.setTimeout(60 * 1000);
 import { ClaimFacade } from '../src';
@@ -20,7 +20,7 @@ describe('Claiming - e2e', () => {
     let app: INestApplication;
     let matchResultRepository: MatchResultRepository;
     let databaseService: DatabaseService;
-    let certificateService: CertificateService;
+    let certificateService: OffChainCertificateService;
     let claimFacade: ClaimFacade;
 
     beforeAll(async () => {
@@ -53,16 +53,16 @@ describe('Claiming - e2e', () => {
             ]
         ];
         const consumptions = [
-            { consumerId: 'consumerA', volume: BigNumber.from(100) },
-            { consumerId: 'consumerB', volume: BigNumber.from(100) }
+            { id: 'consumerA', volume: BigNumber.from(100) },
+            { id: 'consumerB', volume: BigNumber.from(100) }
         ];
         const generations = [
-            { generatorId: 'generatorA', volume: BigNumber.from(100), certificateId: 1 },
-            { generatorId: 'generatorB', volume: BigNumber.from(100), certificateId: 2 }
+            { id: 'generatorA', volume: BigNumber.from(100), certificateId: 1 },
+            { id: 'generatorB', volume: BigNumber.from(100), certificateId: 2 }
         ];
         const batchClaimSpy = jest
             .spyOn(certificateService, 'batchClaim')
-            .mockImplementation(async () => ({ success: true }));
+            .mockImplementation(async () => {});
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
         const res = await claimFacade.claim({
@@ -99,17 +99,17 @@ describe('Claiming - e2e', () => {
         ];
         const consumptions = [
             {
-                consumerId: 'consumerA',
+                id: 'consumerA',
                 volume: BigNumber.from(100),
                 customProperty: 'I want to have this',
                 anotherCustomProperty: 42
             },
-            { consumerId: 'consumerB', volume: BigNumber.from(100) }
+            { id: 'consumerB', volume: BigNumber.from(100) }
         ];
         const generations = [
-            { generatorId: 'generatorA', volume: BigNumber.from(100), certificateId: 1 },
+            { id: 'generatorA', volume: BigNumber.from(100), certificateId: 1 },
             {
-                generatorId: 'generatorB',
+                id: 'generatorB',
                 volume: BigNumber.from(100),
                 certificateId: 2,
                 propForMeta: {}
@@ -117,7 +117,7 @@ describe('Claiming - e2e', () => {
         ];
         const batchClaimSpy = jest
             .spyOn(certificateService, 'batchClaim')
-            .mockImplementation(async () => ({ success: true }));
+            .mockImplementation(async () => {});
         const matchRepoSpy = jest.spyOn(matchResultRepository, 'create');
 
         const res = await claimFacade.claim({
@@ -152,14 +152,15 @@ describe('Claiming - e2e', () => {
     });
 });
 
-const spreadMatcherAlgo = (groupPriority: any): ((input: IMatchingInput) => IMatchingOutput) => {
-    return (input: IMatchingInput) => {
+const spreadMatcherAlgo = (
+    groupPriority: any
+): ((
+    input: IMatchingInput<IConsumption, IGeneration>
+) => IMatchingOutput<IConsumption, IGeneration>) => {
+    return (input: IMatchingInput<IConsumption, IGeneration>) => {
         const res = SpreadMatcher.spreadMatcher({
             groupPriority: groupPriority,
-            entityGroups: [
-                input.consumptions.map((c) => ({ ...c, id: c.consumerId })),
-                input.generations.map((g) => ({ ...g, id: g.generatorId }))
-            ]
+            entityGroups: [input.consumptions, input.generations]
         });
 
         return {

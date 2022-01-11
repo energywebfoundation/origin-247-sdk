@@ -1,6 +1,6 @@
 {
     "name": "@energyweb/origin-247-claim",
-    "version": "3.1.5",
+    "version": "3.2.0",
     "main": "./dist/js/src/index.js",
     "types": "./dist/js/src/index.d.ts",
     "scripts": {
@@ -8,13 +8,15 @@
         "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8547 && yarn drop && yarn migrate && yarn test:e2e:jest\"",
         "test:e2e:jest": "WEB3=http://localhost:8547 jest --maxWorkers 1 --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
         "build": "tsc -b tsconfig.json",
-        "migrate": "yarn typeorm:run && yarn typeorm:run:issuer",
-        "drop": "yarn typeorm:drop && yarn typeorm:drop:issuer",
+        "migrate": "yarn typeorm:run && yarn typeorm:run:issuer && yarn typeorm:run:certificate",
+        "drop": "yarn typeorm:drop && yarn typeorm:drop:issuer && yarn typeorm:drop:certificate",
         "typeorm": "ts-node -r tsconfig-paths/register node_modules/typeorm/cli.js --config ormconfig-dev.ts",
         "typeorm:drop": "yarn typeorm schema:drop",
         "typeorm:run": "yarn typeorm migration:run",
         "typeorm:run:issuer": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",
+        "typeorm:run:certificate": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/origin-247-certificate/dist/js/ormconfig.js",
         "typeorm:drop:issuer": "node_modules/typeorm/cli.js schema:drop --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",
+        "typeorm:drop:certificate": "node_modules/typeorm/cli.js schema:drop --config node_modules/@energyweb/origin-247-certificate/dist/js/ormconfig.js",
         "run:ganache": "ganache-cli -q -m 'govern long helmet alert stay supply kick knife boss until buzz unlock' -l 8000000 -e 1000000 -a 20 -p 8547",
         "publish:canary": "lerna publish --yes --skip-git --exact --cd-version=prerelease --pre-dist-tag canary --preid=alpha.$BUILD_ID",
         "publish:release": "lerna version --create-release github --conventional-commits --exact --yes --message \"chore(release): publish /skip-deploy\" && lerna publish from-git --yes"
@@ -36,7 +38,7 @@
     "devDependencies": {
         "@energyweb/issuer": "4.1.1-alpha.1636552048.0",
         "@energyweb/issuer-api": "0.4.1-alpha.1636552048.0",
-        "@energyweb/origin-247-certificate": "2.1.3",
+        "@energyweb/origin-247-certificate": "2.2.0",
         "@energyweb/origin-backend-utils": "1.6.2-alpha.1636552048.0",
         "@energyweb/utils-general": "11.0.5-alpha.1636552048.0",
         "@nestjs/bull": "0.4.2",

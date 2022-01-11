@@ -17,6 +17,11 @@ export interface CertificateEventRepository {
         txManager: EntityManager | null
     ): Promise<CertificateEventEntity>;
 
+    createSynchronizationAttempt(
+        eventId: number,
+        txManager: EntityManager | null
+    ): Promise<CertificateSynchronizationAttemptEntity>;
+
     getByInternalCertificateId(internalCertId: number): Promise<CertificateEventEntity[]>;
 
     updateAttempt(updateData: {

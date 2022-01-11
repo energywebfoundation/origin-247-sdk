@@ -10,7 +10,7 @@ process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 describe('CertificateReadModelRepository', () => {
     let app: INestApplication;
     let databaseService: DatabaseService;
-    let certificateReadModelRepository: CertificateReadModelRepository;
+    let certificateReadModelRepository: CertificateReadModelRepository<unknown>;
 
     beforeAll(async () => {
         ({ app, databaseService, certificateReadModelRepository } = await bootstrapTestInstance());
@@ -40,8 +40,8 @@ describe('CertificateReadModelRepository', () => {
             creationBlockHash: '',
             creationTime: Math.floor(Date.now() / 1000),
             deviceId: 'someDevice',
-            generationStartTime: 1637278545811 - 1000,
-            generationEndTime: 1637278545811,
+            generationStartTime: Math.floor((1637278545811 - 1000) / 1000),
+            generationEndTime: Math.floor(1637278545811 / 1000),
             metadata: {},
             owners: {
                 '0x1': '100'
@@ -62,8 +62,8 @@ describe('CertificateReadModelRepository', () => {
             creationBlockHash: '',
             creationTime: Math.floor(Date.now() / 1000),
             deviceId: 'someDevice',
-            generationStartTime: 1637278545811 - 1000,
-            generationEndTime: 1637278545811,
+            generationStartTime: Math.floor((1637278545811 - 1000) / 1000),
+            generationEndTime: Math.floor(1637278545811 / 1000),
             metadata: {},
             owners: {
                 '0x1': '100'

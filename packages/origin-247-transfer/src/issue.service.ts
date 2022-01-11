@@ -1,20 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CertificateService, CERTIFICATE_SERVICE_TOKEN } from '@energyweb/origin-247-certificate';
+import { OffChainCertificateService } from '@energyweb/origin-247-certificate';
 import {
     EnergyTransferRequestRepository,
     ENERGY_TRANSFER_REQUEST_REPOSITORY
 } from './repositories/EnergyTransferRequest.repository';
 import { EventBus } from '@nestjs/cqrs';
 import { EnergyTransferRequest, State } from './EnergyTransferRequest';
-import { chunk } from 'lodash';
-import { AwaitingValidationEvent } from './batch/validate.batch';
 import { BatchConfiguration, BATCH_CONFIGURATION_TOKEN } from './batch/configuration';
+import { AwaitingValidationEvent, AwaitingIssuanceEvent } from './batch/events';
 
 @Injectable()
 export class IssueService {
     constructor(
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
-        private certificateService: CertificateService<unknown>,
+        private certificateService: OffChainCertificateService<unknown>,
         @Inject(ENERGY_TRANSFER_REQUEST_REPOSITORY)
         private etrRepository: EnergyTransferRequestRepository,
         @Inject(BATCH_CONFIGURATION_TOKEN)
@@ -23,13 +21,14 @@ export class IssueService {
     ) {}
 
     public async issueTask() {
-        const etrs = await this.etrRepository.findByState(State.IssuanceAwaiting);
+        const etrs = await this.etrRepository.findByState(State.IssuanceAwaiting, {
+            limit: this.batchConfiguration.issueBatchSize
+        });
 
-        const etrGroups = chunk(etrs, this.batchConfiguration.issueBatchSize);
+        await this.issueCertificates(etrs);
 
-        for (const group of etrGroups) {
-            await this.issueCertificates(group);
-        }
+        // Loop
+        this.eventBus.publish(new AwaitingIssuanceEvent());
     }
 
     private async issueCertificates(etrs: EnergyTransferRequest[]) {

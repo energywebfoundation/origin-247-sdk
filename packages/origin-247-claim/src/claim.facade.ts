@@ -15,6 +15,7 @@ import {
     EXCESS_GENERATION_REPOSITORY,
     FindOptions as FindExcessOptions
 } from './repositories/ExcessGeneration/ExcessGeneration.repository';
+import { IConsumption, IGeneration } from './interfaces';
 
 @Injectable()
 export class ClaimFacade {
@@ -28,7 +29,7 @@ export class ClaimFacade {
         private excessGenerationRepository: ExcessGenerationRepository
     ) {}
 
-    public async claim(input: IClaimInput) {
+    public async claim<T extends IConsumption, U extends IGeneration>(input: IClaimInput<T, U>) {
         return await this.claimService.claim(input);
     }
 
