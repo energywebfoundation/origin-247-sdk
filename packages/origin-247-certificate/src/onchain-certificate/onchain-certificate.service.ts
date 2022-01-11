@@ -7,18 +7,16 @@ import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
 import { IClaim } from '@energyweb/issuer';
-import { Queue, Job } from 'bull';
+import { Job, Queue } from 'bull';
+import { BlockchainAction, BlockchainActionType, ICertificate, ISuccessResponse } from './types';
 import {
-    ICertificate,
     IClaimCommand,
     IIssueCommand,
-    ITransferCommand,
-    ISuccessResponse,
-    BlockchainActionType,
-    BlockchainAction,
+    IIssueCommandParams,
     IIssuedCertificate,
-    IIssueCommandParams
-} from './types';
+    ITransferCommand
+} from '../types';
+import { blockchainQueueName } from './blockchain-actions.processor';
 
 const jobOptions = {
     // redis cleanup
@@ -27,10 +25,10 @@ const jobOptions = {
 };
 
 @Injectable()
-export class CertificateService<T = null> {
+export class OnChainCertificateService<T = null> {
     constructor(
         private readonly queryBus: QueryBus,
-        @InjectQueue('blockchain-actions')
+        @InjectQueue(blockchainQueueName)
         private readonly blockchainActionsQueue: Queue<BlockchainAction>
     ) {}
 
@@ -66,7 +64,7 @@ export class CertificateService<T = null> {
         return this.mapCertificate(result);
     }
 
-    public async claim(command: IClaimCommand): Promise<ISuccessResponse> {
+    public async claim(command: IClaimCommand): Promise<void> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -80,7 +78,7 @@ export class CertificateService<T = null> {
         return result;
     }
 
-    public async transfer(command: ITransferCommand): Promise<ISuccessResponse> {
+    public async transfer(command: ITransferCommand): Promise<void> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -123,11 +121,9 @@ export class CertificateService<T = null> {
         return result;
     }
 
-    public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
+    public async batchClaim(command: IClaimCommand[]): Promise<void> {
         if (command.length === 0) {
-            return {
-                success: true
-            };
+            return;
         }
 
         const job = await this.blockchainActionsQueue.add(
@@ -145,11 +141,9 @@ export class CertificateService<T = null> {
         return result;
     }
 
-    public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
+    public async batchTransfer(command: ITransferCommand[]): Promise<void> {
         if (command.length === 0) {
-            return {
-                success: true
-            };
+            return;
         }
 
         const job = await this.blockchainActionsQueue.add(

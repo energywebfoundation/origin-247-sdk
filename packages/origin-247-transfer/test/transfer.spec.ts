@@ -159,7 +159,7 @@ const doTest = async (data: DoTestData, cb: (etr: EnergyTransferRequestAttrs) =>
     await app.init();
 
     publishStart(eventBus);
-    await wait(5);
+    await wait(10);
 
     const etr = (await getEtr())?.toAttrs();
 

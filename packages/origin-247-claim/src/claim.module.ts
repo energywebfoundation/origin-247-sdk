@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import {
-    CertificateModule,
-    CertificateForUnitTestsModule
+    OffChainCertificateModule,
+    OffChainCertificateForUnitTestsModule
 } from '@energyweb/origin-247-certificate';
 import { ClaimService } from './claim.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -26,7 +26,7 @@ import { ExcessGenerationInMemoryRepository } from './repositories/ExcessGenerat
             LeftoverConsumptionEntity,
             ExcessGenerationEntity
         ]),
-        CertificateModule
+        OffChainCertificateModule
     ],
     providers: [
         ClaimService,
@@ -49,7 +49,7 @@ import { ExcessGenerationInMemoryRepository } from './repositories/ExcessGenerat
 export class ClaimModule {}
 
 @Module({
-    imports: [CertificateForUnitTestsModule],
+    imports: [OffChainCertificateForUnitTestsModule.register()],
     providers: [
         ClaimService,
         {

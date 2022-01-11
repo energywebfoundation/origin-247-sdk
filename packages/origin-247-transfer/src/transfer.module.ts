@@ -1,6 +1,6 @@
 import {
-    CertificateModule,
-    CertificateForUnitTestsModule
+    OffChainCertificateModule,
+    OffChainCertificateForUnitTestsModule
 } from '@energyweb/origin-247-certificate';
 import { Module, DynamicModule } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
@@ -73,7 +73,7 @@ export class TransferModule {
             imports: [
                 TypeOrmModule.forFeature([EnergyTransferRequestEntity]),
                 CqrsModule,
-                CertificateModule
+                OffChainCertificateModule
             ]
         };
     }
@@ -101,7 +101,7 @@ export class TransferModuleForUnitTest {
                     useValue: defaults(params.batchConfiguration ?? {}, defaultBatchConfiguration)
                 }
             ],
-            imports: [CqrsModule, CertificateForUnitTestsModule]
+            imports: [CqrsModule, OffChainCertificateForUnitTestsModule.register()]
         };
     }
 }

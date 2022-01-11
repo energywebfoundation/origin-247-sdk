@@ -44,6 +44,9 @@ jobs:
               with:
                   node-version: '14'
 
+            - name: Install Redis tools
+              run: sudo apt install redis-tools
+
             - name: Check dependency versions
               run: node common/scripts/install-run-rush.js check
 

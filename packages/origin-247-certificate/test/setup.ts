@@ -1,14 +1,32 @@
-import { Contracts, CertificateUtils } from '@energyweb/issuer';
-import { BlockchainPropertiesService, BlockchainPropertiesModule } from '@energyweb/issuer-api';
+import { CertificateUtils, Contracts } from '@energyweb/issuer';
+import {
+    BlockchainPropertiesModule,
+    BlockchainPropertiesService,
+    entities as IssuerEntities
+} from '@energyweb/issuer-api';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
-import { CertificateModule, CertificateService, CERTIFICATE_SERVICE_TOKEN } from '../src';
-import { entities as IssuerEntities } from '@energyweb/issuer-api';
+import {
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    OffChainCertificateEntities,
+    OnChainCertificateService,
+    OffChainCertificateModule,
+    OffChainCertificateService
+} from '../src';
 import { PassportModule } from '@nestjs/passport';
+import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
+import { CertificateReadModelRepository } from '../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
+import { CertificateCommandRepository } from '../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.repository';
+import {
+    CERTIFICATE_COMMAND_REPOSITORY,
+    CERTIFICATE_EVENT_REPOSITORY,
+    CERTIFICATE_READ_MODEL_REPOSITORY
+} from '../src/offchain-certificate/repositories/repository.keys';
+import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
 
 const testLogger = new Logger('e2e');
 
@@ -57,11 +75,11 @@ export const bootstrapTestInstance: any = async () => {
                 username: process.env.DB_USERNAME ?? 'postgres',
                 password: process.env.DB_PASSWORD ?? 'postgres',
                 database: process.env.DB_DATABASE ?? 'origin',
-                entities: IssuerEntities,
                 logging: ['info'],
-                keepConnectionAlive: true
+                keepConnectionAlive: true,
+                entities: [...IssuerEntities, ...OffChainCertificateEntities]
             }),
-            CertificateModule,
+            OffChainCertificateModule,
             QueueingModule(),
             BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' })
@@ -71,12 +89,26 @@ export const bootstrapTestInstance: any = async () => {
 
     const app = moduleFixture.createNestApplication();
 
-    const certificateService = await app.resolve<CertificateService>(CERTIFICATE_SERVICE_TOKEN);
+    const certificateService = await app.resolve<OnChainCertificateService>(
+        ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    );
     const databaseService = await app.resolve<DatabaseService>(DatabaseService);
     const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(
         BlockchainPropertiesService
     );
-
+    const certificateEventRepository = await app.resolve<CertificateEventRepository>(
+        CERTIFICATE_EVENT_REPOSITORY
+    );
+    const certificateEventService = await app.resolve(CertificateEventService);
+    const certificateReadModelRepository = await app.resolve<
+        CertificateReadModelRepository<unknown>
+    >(CERTIFICATE_READ_MODEL_REPOSITORY);
+    const offchainCertificateService = await app.resolve<OffChainCertificateService>(
+        OffChainCertificateService
+    );
+    const certificateCommandRepository = await app.resolve<CertificateCommandRepository>(
+        CERTIFICATE_COMMAND_REPOSITORY
+    );
     const blockchainProperties = await blockchainPropertiesService.create(
         provider.network.chainId,
         registry.address,
@@ -101,6 +133,11 @@ export const bootstrapTestInstance: any = async () => {
     return {
         databaseService,
         certificateService,
+        certificateEventRepository,
+        certificateCommandRepository,
+        certificateReadModelRepository,
+        certificateEventService,
+        offchainCertificateService,
         app
     };
 };

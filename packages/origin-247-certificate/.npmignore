@@ -1,2 +1,5 @@
 *
 !dist/js/src/**/*
+!dist/js/ormconfig.js
+!dist/js/ormconfig-dev.js
+!dist/js/migrations/**/*

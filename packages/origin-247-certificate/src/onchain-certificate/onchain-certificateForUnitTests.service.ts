@@ -1,19 +1,13 @@
-import { CertificateService } from './certificate.service';
+import { OnChainCertificateService } from './onchain-certificate.service';
 import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { BigNumber } from 'ethers';
-import {
-    ICertificate,
-    IClaimCommand,
-    ITransferCommand,
-    ISuccessResponse,
-    IIssuedCertificate,
-    IIssueCommandParams
-} from './types';
+import { ICertificate, ISuccessResponse } from './types';
+import { IIssuedCertificate, IIssueCommandParams, IClaimCommand, ITransferCommand } from '../types';
 import { Injectable } from '@nestjs/common';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
 @Injectable()
-export class CertificateForUnitTestsService<T> implements PublicPart<CertificateService<T>> {
+export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCertificateService<T>> {
     private serial = 0;
     private db: ICertificate<T>[] = [];
 
@@ -81,42 +75,36 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
         };
     }
 
-    public async claim(command: IClaimCommand): Promise<ISuccessResponse> {
+    public async claim(command: IClaimCommand): Promise<void> {
         const certificate = this.db.find((c) => c.id === command.certificateId);
 
         if (!certificate) {
-            return {
-                success: false,
-                message: `No certificate of ${command.certificateId} found`
-            };
+            return;
         }
+
+        const value =
+            command.energyValue ??
+            Object.values(certificate.owners)
+                .reduce((sum, v) => sum.add(v), BigNumber.from(0))
+                .toString();
 
         certificate.claims.push({
             claimData: command.claimData,
-            value:
-                command.energyValue ??
-                Object.values(certificate.owners)
-                    .reduce((sum, v) => sum.add(v), BigNumber.from(0))
-                    .toString(),
+            value,
             topic: '0',
-            from: '',
+            from: command.forAddress,
             id: 0,
-            to: ''
+            to: command.forAddress
         });
 
-        return {
-            success: true
-        };
+        certificate.claimers![command.forAddress] = value;
     }
 
-    public async transfer(command: ITransferCommand): Promise<ISuccessResponse> {
+    public async transfer(command: ITransferCommand): Promise<void> {
         const certificate = this.db.find((c) => c.id === command.certificateId);
 
         if (!certificate) {
-            return {
-                success: false,
-                message: `No certificate of ${command.certificateId} found`
-            };
+            return;
         }
 
         const value = Number(command.energyValue ?? certificate.owners[command.fromAddress]);
@@ -127,10 +115,6 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
         certificate.owners[command.toAddress] = (
             Number(certificate.owners[command.toAddress] ?? 0) + value
         ).toString();
-
-        return {
-            success: true
-        };
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
@@ -145,31 +129,19 @@ export class CertificateForUnitTestsService<T> implements PublicPart<Certificate
         return result.map((r) => r.id);
     }
 
-    public async batchClaim(command: IClaimCommand[]): Promise<ISuccessResponse> {
+    public async batchClaim(command: IClaimCommand[]): Promise<void> {
         if (command.length === 0) {
-            return {
-                success: true
-            };
+            return;
         }
 
-        const result = await Promise.all(command.map((claim) => this.claim(claim)));
-
-        return {
-            success: result.every((r) => r.success)
-        };
+        await Promise.all(command.map((claim) => this.claim(claim)));
     }
 
-    public async batchTransfer(command: ITransferCommand[]): Promise<ISuccessResponse> {
+    public async batchTransfer(command: ITransferCommand[]): Promise<void> {
         if (command.length === 0) {
-            return {
-                success: true
-            };
+            return;
         }
 
-        const result = await Promise.all(command.map((transfer) => this.transfer(transfer)));
-
-        return {
-            success: result.every((r) => r.success)
-        };
+        await Promise.all(command.map((transfer) => this.transfer(transfer)));
     }
 }

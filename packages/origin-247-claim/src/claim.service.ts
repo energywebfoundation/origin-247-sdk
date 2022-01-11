@@ -22,11 +22,7 @@ import {
     IMatchingOutput,
     ITimeFrame
 } from './interfaces';
-import {
-    CertificateService,
-    CERTIFICATE_SERVICE_TOKEN,
-    IClaimCommand
-} from '@energyweb/origin-247-certificate';
+import { OffChainCertificateService, IClaimCommand } from '@energyweb/origin-247-certificate';
 
 import { omit } from 'lodash';
 
@@ -52,8 +48,7 @@ export class ClaimService {
         private leftoverConsumptionRepo: LeftoverConsumptionRepository,
         @Inject(EXCESS_GENERATION_REPOSITORY)
         private excessGenerationRepo: ExcessGenerationRepository,
-        @Inject(CERTIFICATE_SERVICE_TOKEN)
-        private certificateService: CertificateService<unknown>
+        private certificateService: OffChainCertificateService<unknown>
     ) {}
 
     public async claim<T extends IConsumption, U extends IGeneration>(input: IClaimInput<T, U>) {
