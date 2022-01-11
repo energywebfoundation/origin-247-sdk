@@ -11,8 +11,9 @@ const configuration = (): Configuration => ({
     CERTIFICATE_QUEUE_LOCK_DURATION:
         Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION) ?? 240 * 1000,
     REDIS_URL: process.env.REDIS_URL ?? { host: 'localhost', port: 6379 },
-    MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT:
-        Number(process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT) ?? 3
+    MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT: process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT
+        ? Number(process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT)
+        : 3
 });
 
 export default configuration;

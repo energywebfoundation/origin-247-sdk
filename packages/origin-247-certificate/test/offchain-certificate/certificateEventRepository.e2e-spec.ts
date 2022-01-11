@@ -138,6 +138,17 @@ describe('CertificateEventRepository', () => {
     });
 
     describe('#getAllNotProcessed', () => {
+        let initialMaxTries: string | undefined;
+
+        beforeEach(async () => {
+            initialMaxTries = process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT;
+            process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT = '1';
+        });
+
+        afterEach(async () => {
+            process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT = initialMaxTries;
+        });
+
         it('should return empty list for no events to process', async () => {
             const certs = await certificateEventRepository.getAllNotProcessed();
             expect(certs).toHaveLength(0);
@@ -233,7 +244,6 @@ describe('CertificateEventRepository', () => {
             });
 
             const certs = await certificateEventRepository.getAllNotProcessed();
-
             expect(certs).toHaveLength(0);
         });
 
