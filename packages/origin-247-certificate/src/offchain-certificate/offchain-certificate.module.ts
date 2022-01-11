@@ -32,6 +32,9 @@ import {
 } from './synchronize/strategies/batch/batch.configuration';
 import { IssuePersistHandler } from './synchronize/handlers/issue-persist.handler';
 import { SynchronizeManager } from './synchronize/handlers/synchronize.manager';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import configuration from './config/configuration';
+import { Configuration } from './config/config.interface';
 
 const serviceProvider = {
     provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -79,16 +82,21 @@ const serviceProvider = {
             CertificateReadModelEntity,
             CertificateSynchronizationAttemptEntity
         ]),
-
-        BullModule.registerQueue(
+        ConfigModule.forRoot({
+            load: [configuration]
+        }),
+        BullModule.registerQueueAsync(
             {
                 name: SYNCHRONIZE_QUEUE_NAME
             },
             {
                 name: blockchainQueueName,
-                settings: {
-                    lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
-                }
+                imports: [ConfigService],
+                useFactory: (configService: ConfigService<Configuration>) => ({
+                    settings: {
+                        lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
+                    }
+                })
             }
         )
     ]

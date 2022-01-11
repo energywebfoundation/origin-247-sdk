@@ -6,16 +6,24 @@ import { CertificateEventEntity } from './CertificateEvent.entity';
 import { CertificateEventRepository, SynchronizableEvent } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
-import { MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT } from '../../synchronize/blockchain-synchronize.const';
+import { ConfigService } from '@nestjs/config';
+import { Configuration } from '../../config/config.interface';
 
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {
+    private readonly maxSynchronizationAttemptsForEvent: number;
+
     constructor(
         @InjectRepository(CertificateEventEntity)
         private repository: Repository<CertificateEventEntity>,
         @InjectRepository(CertificateSynchronizationAttemptEntity)
-        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>
-    ) {}
+        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>,
+        private configService: ConfigService<Configuration>
+    ) {
+        this.maxSynchronizationAttemptsForEvent = configService.get(
+            'MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT'
+        )!;
+    }
 
     public async getAll(): Promise<CertificateEventEntity[]> {
         return await this.repository.find();
@@ -90,7 +98,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
             )
             .where('(attempt.error IS NULL AND attempt.attempts_count = 0)')
             .orWhere(
-                `(attempt.error IS NOT NULL AND attempt.attempts_count < ${MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT})`
+                `(attempt.error IS NOT NULL AND attempt.attempts_count < ${this.maxSynchronizationAttemptsForEvent})`
             );
 
         return (await query.getMany()) as SynchronizableEvent[];

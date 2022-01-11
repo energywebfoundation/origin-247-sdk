@@ -185,7 +185,7 @@ describe('CertificateEventRepository', () => {
             return savedEvents;
         };
 
-        it.only('should return no events when all are persisted', async () => {
+        it('should return no events when all are persisted', async () => {
             const [event] = await prepareEvents(
                 new CertificateIssuedEvent(1, createIssueCommand())
             );
@@ -197,7 +197,7 @@ describe('CertificateEventRepository', () => {
             expect(certs).toHaveLength(0);
         });
 
-        it.only('should return events with error if they did not exceed retry attempts limit', async () => {
+        it('should return events with error if they did not exceed retry attempts limit', async () => {
             const [event] = await prepareEvents(
                 new CertificateIssuedEvent(1, createIssueCommand())
             );

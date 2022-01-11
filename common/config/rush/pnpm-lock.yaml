@@ -20,7 +20,6 @@ specifiers:
   '@material-ui/core': v5.0.0-beta.4
   '@nestjs/bull': 0.4.2
   '@nestjs/common': 8.1.1
-  '@nestjs/config': 1.0.2
   '@nestjs/core': 8.1.1
   '@nestjs/cqrs': 8.0.0
   '@nestjs/passport': 8.0.1
@@ -58,6 +57,7 @@ specifiers:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2
   jest: 27.0.5
+  lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
   pg: 8.7.1
@@ -98,7 +98,6 @@ dependencies:
   '@material-ui/core': 5.0.0-beta.4_4b3229e895aa2d1f531244063c252253
   '@nestjs/bull': 0.4.2_8f8d273ac0a7b5eb0ebd21a8e6d9cacc
   '@nestjs/common': 8.1.1_dbe81b9c124a4a10925175ba43da462c
-  '@nestjs/config': 1.0.2_@nestjs+common@8.1.1+rxjs@7.4.0
   '@nestjs/core': 8.1.1_c61325c549df9179cfcf0b654c38155b
   '@nestjs/cqrs': 8.0.0_b457605c9b03e3cb14f0ae0de25590d0
   '@nestjs/passport': 8.0.1_ffae082f76a0d650160489d0fb86ad44
@@ -113,7 +112,7 @@ dependencies:
   '@rush-temp/origin-247-energy-api': file:projects/origin-247-energy-api.tgz_c70c36eb34bb288ea7f47d1c20b8c460
   '@rush-temp/origin-247-transfer': file:projects/origin-247-transfer.tgz_passport@0.5.0
   '@typechain/ethers-v5': 7.1.0_8e93b6e8d98cb9a74a36e053ec23ff7e
-  '@typechain/hardhat': 2.3.1_hardhat@2.6.4+typechain@5.1.2
+  '@typechain/hardhat': 2.3.1_512973f51e7672eecf86f542b17ea4fd
   '@types/bull': 3.15.1
   '@types/cache-manager': 3.4.2
   '@types/cache-manager-ioredis': 2.0.2
@@ -136,6 +135,7 @@ dependencies:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2_webpack@5.51.1
   jest: 27.0.5_ts-node@9.1.1
+  lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
   pg: 8.7.1
@@ -2122,6 +2122,21 @@ packages:
       uuid: 8.3.2
     dev: false
 
+  /@nestjs/config/1.1.6_@nestjs+common@8.1.1+rxjs@7.4.0:
+    resolution: {integrity: sha512-HYizKt6Dr6gcZl8FmZbTfQxP0MG8oXMh+gVFT0XCwYDAq26BOKyhPsIxrKsryicVeKViRgetCUhlJY9EqaekZA==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0
+      reflect-metadata: ^0.1.13
+      rxjs: ^6.0.0 || ^7.2.0
+    dependencies:
+      '@nestjs/common': 8.1.1_dbe81b9c124a4a10925175ba43da462c
+      dotenv: 10.0.0
+      dotenv-expand: 5.1.0
+      lodash: 4.17.21
+      rxjs: 7.4.0
+      uuid: 8.3.2
+    dev: false
+
   /@nestjs/core/7.6.18_c27b02aa1c64641ce77becec162a9d95:
     resolution: {integrity: sha512-CGu20OjIxgFDY7RJT5t1TDGL8wSlTSlbZEkn8U5OlICZEB3WIpi98G7ajJpnRWmEgW8S4aDJmRKGjT+Ntj5U4A==}
     requiresBuild: true
@@ -2667,18 +2682,6 @@ packages:
       fs-extra: 9.1.0
       hardhat: 2.6.4
       lodash: 4.17.21
-      typechain: 5.1.2_typescript@4.3.4
-    dev: false
-
-  /@typechain/hardhat/2.3.1_hardhat@2.6.4+typechain@5.1.2:
-    resolution: {integrity: sha512-BQV8OKQi0KAzLXCdsPO0pZBNQQ6ra8A2ucC26uFX/kquRBtJu1yEyWnVSmtr07b5hyRoJRpzUeINLnyqz4/MAw==}
-    peerDependencies:
-      hardhat: ^2.0.10
-      lodash: ^4.17.15
-      typechain: ^5.1.2
-    dependencies:
-      fs-extra: 9.1.0
-      hardhat: 2.6.4
       typechain: 5.1.2_typescript@4.3.4
     dev: false
 
@@ -13611,7 +13614,7 @@ packages:
     dev: false
 
   file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c:
-    resolution: {integrity: sha512-8ux57n0BjCiHHUD7eA7eoGaEvWQ5QWmJuuWvnRwzjrxxNajvDyqEXsol4Xi+xNNSvhIIreZhyoEOov5Cn0S5VQ==, tarball: file:projects/origin-247-certificate.tgz}
+    resolution: {integrity: sha512-LiOwsU5v5jG2AFBOCmfAigvmNbN1M5ydxGccBm038RYF8QCrHMrz7x3spbxGUVJJh4V9ZXjOpgnxFRyvcwFkLQ==, tarball: file:projects/origin-247-certificate.tgz}
     id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
@@ -13622,6 +13625,7 @@ packages:
       '@energyweb/utils-general': 11.0.5-alpha.1636552048.0
       '@nestjs/bull': 0.4.2_8f8d273ac0a7b5eb0ebd21a8e6d9cacc
       '@nestjs/common': 8.1.1_dbe81b9c124a4a10925175ba43da462c
+      '@nestjs/config': 1.1.6_@nestjs+common@8.1.1+rxjs@7.4.0
       '@nestjs/core': 8.1.1_c61325c549df9179cfcf0b654c38155b
       '@nestjs/cqrs': 8.0.0_b457605c9b03e3cb14f0ae0de25590d0
       '@nestjs/passport': 8.0.1_ffae082f76a0d650160489d0fb86ad44
