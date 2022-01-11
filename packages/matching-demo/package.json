@@ -1,7 +1,7 @@
 {
     "name": "@energyweb/247-matching-demo",
     "private": true,
-    "version": "0.0.9-alpha.1641816268.0",
+    "version": "1.0.0-alpha.0",
     "scripts": {
         "build": "NODE_ENV=production webpack --config webpack.config.js",
         "start:dev": "concurrently --success first --kill-others -n serve,webpack \"yarn serve dist\" \"NODE_ENV=development webpack --config webpack.config.js --watch\""

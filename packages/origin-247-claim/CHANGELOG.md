@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@3.2.0...@energyweb/origin-247-claim@4.0.0) (2022-01-11)
+
+
+### Bug Fixes
+
+* **origin-247-claim:** fix error when two entities had the same id ([54eeab7](https://github.com/energywebfoundation/origin-247-sdk/commit/54eeab701d88aeb0b70c6bf4ab3d9a26d9dce7ed))
+* make claimCustomizationFn generic as well ([a4801c7](https://github.com/energywebfoundation/origin-247-sdk/commit/a4801c78c41f9e5a46cf67a91a08873626807c22))
+
+
+### Features
+
+* **origin-247-certificate:** add offchain implementation ([109d636](https://github.com/energywebfoundation/origin-247-sdk/commit/109d63658684285e61f046998b31f146a59c5c1e))
+* add ClaimForUnitTestsModule ([897492f](https://github.com/energywebfoundation/origin-247-sdk/commit/897492f737c42a992f203c53e1f9c4ec8837848a))
+* allow to customize claim facade input type ([c706d2c](https://github.com/energywebfoundation/origin-247-sdk/commit/c706d2cfd02bb43a8401219f8accbf7a09b7ac19))
+
+
+### BREAKING CHANGES
+
+* **origin-247-certificate:** because of introduction of offchain-certificate module,
+to standarize naming anything related to "classic" certificate module is now prefixed with
+"OnChain" - this includes module, service, service injection token and so on
+* claim facade now accepts consumer and generator ids as generic `id` field. This way it is inline with matching algorithms, and requires less mapping
+
+
+
+
+
 # [3.2.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-claim@3.1.5...@energyweb/origin-247-claim@3.2.0) (2021-11-24)
 
 

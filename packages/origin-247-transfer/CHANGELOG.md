@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.1.0...@energyweb/origin-247-transfer@2.0.0) (2022-01-11)
+
+
+### Features
+
+* **origin-247-certificate:** add offchain implementation ([109d636](https://github.com/energywebfoundation/origin-247-sdk/commit/109d63658684285e61f046998b31f146a59c5c1e))
+* skip validation and transfer if both sites are equal ([01acdc3](https://github.com/energywebfoundation/origin-247-sdk/commit/01acdc3b40b57ca4ef455c5a8a3d7da3253f9018))
+
+
+### BREAKING CHANGES
+
+* **origin-247-certificate:** because of introduction of offchain-certificate module,
+to standarize naming anything related to "classic" certificate module is now prefixed with
+"OnChain" - this includes module, service, service injection token and so on
+
+
+
+
+
 # [1.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.0.7...@energyweb/origin-247-transfer@1.1.0) (2021-11-24)
 
 

@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.2.0...@energyweb/origin-247-certificate@3.0.0) (2022-01-11)
+
+
+### Bug Fixes
+
+* certificateForUnitTests.getAll filtering by device id ([5961662](https://github.com/energywebfoundation/origin-247-sdk/commit/596166280d899bc5f2fb5253d15429799071f489))
+
+
+### Features
+
+* **origin-247-certificate:** add offchain implementation ([109d636](https://github.com/energywebfoundation/origin-247-sdk/commit/109d63658684285e61f046998b31f146a59c5c1e))
+
+
+### BREAKING CHANGES
+
+* **origin-247-certificate:** because of introduction of offchain-certificate module,
+to standarize naming anything related to "classic" certificate module is now prefixed with
+"OnChain" - this includes module, service, service injection token and so on
+
+
+
+
+
 # [2.2.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.1.3...@energyweb/origin-247-certificate@2.2.0) (2021-11-24)
 
 
