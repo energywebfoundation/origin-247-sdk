@@ -21,8 +21,8 @@ import {
 import { ClaimPersistHandler } from './synchronize/handlers/claim-persist.handler';
 import { TransferPersistHandler } from './synchronize/handlers/transfer-persist.handler';
 import {
-    OnChainCertificateModule,
-    OnChainCertificateForUnitTestsModule
+    OnChainCertificateForUnitTestsModule,
+    OnChainCertificateModule
 } from '../onchain-certificate/onchain-certificate.module';
 import { CertificateSynchronizationAttemptEntity } from './repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
