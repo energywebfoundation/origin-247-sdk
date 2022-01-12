@@ -10,14 +10,6 @@ export namespace CertificateErrors {
     }
 
     export namespace Transfer {
-        export class CertificateNotIssued extends Error {
-            constructor(internalCertificateId: number) {
-                super(
-                    `Transfer for internalCertificateId: ${internalCertificateId} failed. Certificate was not issued.`
-                );
-            }
-        }
-
         export class FromZeroAddress extends Error {
             constructor(internalCertificateId: number) {
                 super(
@@ -44,14 +36,6 @@ export namespace CertificateErrors {
     }
 
     export namespace Claim {
-        export class CertificateNotIssued extends Error {
-            constructor(internalCertificateId: number) {
-                super(
-                    `Claim for internalCertificateId: ${internalCertificateId} failed. Certificate was not issued.`
-                );
-            }
-        }
-
         export class ForZeroAddress extends Error {
             constructor(internalCertificateId: number) {
                 super(
@@ -72,6 +56,24 @@ export namespace CertificateErrors {
     export class BatchError extends Error {
         constructor(originError: Error) {
             super(`Batch operation failed. Failing operation message: ${originError.message}`);
+        }
+    }
+
+    export class UnknownEventType extends Error {
+        constructor(internalCertificateId: number, eventType: string) {
+            super(`Unknown event type ${eventType} for certificate ${internalCertificateId}.`);
+        }
+    }
+
+    export class CertificateNotIssued extends Error {
+        constructor(internalCertificateId: number) {
+            super(`First event for certificate: ${internalCertificateId} is not issuance.`);
+        }
+    }
+
+    export class CertificateNoEvents extends Error {
+        constructor() {
+            super(`Tried to create certificate without events.`);
         }
     }
 }

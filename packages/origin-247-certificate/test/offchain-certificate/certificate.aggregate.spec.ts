@@ -44,7 +44,7 @@ const toZeroTransferredEvent = new CertificateTransferredEvent(1, {
     energyValue: '100'
 });
 
-const tooBigValueransferredEvent = new CertificateTransferredEvent(1, {
+const tooBigValueTransferredEvent = new CertificateTransferredEvent(1, {
     certificateId: 1,
     fromAddress: '0x1',
     toAddress: '0x2',
@@ -109,11 +109,6 @@ const tooBigValueClaimedEvent = new CertificateClaimedEvent(1, {
 
 describe('CertificateAggregate', () => {
     describe('creation', () => {
-        it('should create aggregate from empty events', () => {
-            const aggregate = CertificateAggregate.fromEvents([]);
-            expect(aggregate.getCertificate()).toBe(null);
-        });
-
         it('should create aggregate from events', () => {
             const aggregate = CertificateAggregate.fromEvents([
                 issuedEvent,
@@ -197,15 +192,22 @@ describe('CertificateAggregate', () => {
                 claimers: {}
             });
         });
+
+        it('should throw error when certificate was not issued beforehand', () => {
+            const getAggregate = () => CertificateAggregate.fromEvents([transferredEvent]);
+            expect(getAggregate).toThrow(CertificateErrors.CertificateNotIssued);
+        });
+
+        it('should throw error if no events were provided', () => {
+            const getAggregate = () => CertificateAggregate.fromEvents([]);
+            expect(getAggregate).toThrow(CertificateErrors.CertificateNoEvents);
+        });
     });
 
     describe('Issue', () => {
         it('should throw an error when certificate is issued twice', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
-            const apply = () => {
-                aggregate.apply(issuedEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Issuance.CertificateAlreadyIssued);
+            const getAggregate = () => CertificateAggregate.fromEvents([issuedEvent, issuedEvent]);
+            expect(getAggregate).toThrow(CertificateErrors.Issuance.CertificateAlreadyIssued);
         });
 
         it('should issue a certificate', () => {
@@ -226,13 +228,6 @@ describe('CertificateAggregate', () => {
     });
 
     describe('Transfer', () => {
-        it('should throw error when certificate was not issued beforehand', () => {
-            const apply = () => {
-                const aggregate = CertificateAggregate.fromEvents([transferredEvent]);
-            };
-            expect(apply).toThrow(CertificateErrors.Transfer.CertificateNotIssued);
-        });
-
         it('should apply transfer when from account has enough balance', () => {
             const aggregate = CertificateAggregate.fromEvents([issuedEvent, transferredEvent]);
 
@@ -254,42 +249,38 @@ describe('CertificateAggregate', () => {
         });
 
         it('should throw error when from account is zero address', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
+            const getAggregate = () =>
+                CertificateAggregate.fromEvents([issuedEvent, fromZeroTransferredEvent]);
 
-            const apply = () => {
-                aggregate.apply(fromZeroTransferredEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Transfer.FromZeroAddress);
+            expect(getAggregate).toThrow(CertificateErrors.Transfer.FromZeroAddress);
         });
 
         it('should throw error when to account is zero address', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
+            const getAggregate = () =>
+                CertificateAggregate.fromEvents([issuedEvent, toZeroTransferredEvent]);
 
-            const apply = () => {
-                aggregate.apply(toZeroTransferredEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Transfer.ToZeroAddress);
+            expect(getAggregate).toThrow(CertificateErrors.Transfer.ToZeroAddress);
         });
 
         it('should throw error when from account has not enough balance', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
+            const getAggregate = () =>
+                CertificateAggregate.fromEvents([issuedEvent, tooBigValueTransferredEvent]);
 
-            const apply = () => {
-                aggregate.apply(tooBigValueransferredEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Transfer.NotEnoughBalance);
+            expect(getAggregate).toThrow(CertificateErrors.Transfer.NotEnoughBalance);
         });
 
         it('should transfer all available balance when no energyValue is spiecified', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
-
             const noValuetransferredEvent = new CertificateTransferredEvent(1, {
                 certificateId: 1,
                 fromAddress: '0x1',
                 toAddress: '0x2'
             });
 
-            aggregate.apply(noValuetransferredEvent);
+            const aggregate = CertificateAggregate.fromEvents([
+                issuedEvent,
+                noValuetransferredEvent
+            ]);
+
             expect(aggregate.getCertificate()).toMatchObject({
                 internalCertificateId: 1,
                 blockchainCertificateId: null,
@@ -308,28 +299,20 @@ describe('CertificateAggregate', () => {
         });
 
         it('it should throw error when there is no energyValue and no owned volume', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
             const noVolumestransferredEvent = new CertificateTransferredEvent(1, {
                 certificateId: 1,
                 fromAddress: '0x2',
                 toAddress: '0x3'
             });
 
-            const apply = () => {
-                aggregate.apply(noVolumestransferredEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Transfer.NotEnoughBalance);
+            const getAggregate = () =>
+                CertificateAggregate.fromEvents([issuedEvent, noVolumestransferredEvent]);
+
+            expect(getAggregate).toThrow(CertificateErrors.Transfer.NotEnoughBalance);
         });
     });
 
     describe('Claim', () => {
-        it('should throw error when certificate was not issued beforehand', () => {
-            const apply = () => {
-                const aggregate = CertificateAggregate.fromEvents([claimedEvent]);
-            };
-            expect(apply).toThrow(CertificateErrors.Claim.CertificateNotIssued);
-        });
-
         it('should apply claim when for account has enough balance', () => {
             const aggregate = CertificateAggregate.fromEvents([issuedEvent, claimedEvent]);
 
@@ -367,25 +350,20 @@ describe('CertificateAggregate', () => {
         });
 
         it('should throw error when forAccount is zero address', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
+            const getAggregate = () =>
+                CertificateAggregate.fromEvents([issuedEvent, forZeroAddressClaimedEvent]);
 
-            const apply = () => {
-                aggregate.apply(forZeroAddressClaimedEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Claim.ForZeroAddress);
+            expect(getAggregate).toThrow(CertificateErrors.Claim.ForZeroAddress);
         });
 
         it('should throw error when forAccount has not enough balance', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
+            const getAggregate = () =>
+                CertificateAggregate.fromEvents([issuedEvent, tooBigValueClaimedEvent]);
 
-            const apply = () => {
-                aggregate.apply(tooBigValueClaimedEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Claim.NotEnoughBalance);
+            expect(getAggregate).toThrow(CertificateErrors.Claim.NotEnoughBalance);
         });
 
         it('should claim all available balance when no energyValue was specified', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
             const claimedEvent = new CertificateClaimedEvent(1, {
                 certificateId: 1,
                 claimData: {
@@ -398,7 +376,8 @@ describe('CertificateAggregate', () => {
                 },
                 forAddress: '0x1'
             });
-            aggregate.apply(claimedEvent);
+
+            const aggregate = CertificateAggregate.fromEvents([issuedEvent, claimedEvent]);
 
             expect(aggregate.getCertificate()).toMatchObject({
                 internalCertificateId: 1,
@@ -434,7 +413,6 @@ describe('CertificateAggregate', () => {
         });
 
         it('it should throw error when there is no energyValue and no owned volume', () => {
-            const aggregate = CertificateAggregate.fromEvents([issuedEvent]);
             const claimedEvent = new CertificateClaimedEvent(1, {
                 certificateId: 1,
                 claimData: {
@@ -448,10 +426,9 @@ describe('CertificateAggregate', () => {
                 forAddress: '0x2'
             });
 
-            const apply = () => {
-                aggregate.apply(claimedEvent);
-            };
-            expect(apply).toThrow(CertificateErrors.Claim.NotEnoughBalance);
+            const geAggregate = () => CertificateAggregate.fromEvents([issuedEvent, claimedEvent]);
+
+            expect(geAggregate).toThrow(CertificateErrors.Claim.NotEnoughBalance);
         });
     });
 });
