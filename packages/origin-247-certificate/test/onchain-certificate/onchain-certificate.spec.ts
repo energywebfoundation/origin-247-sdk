@@ -1,50 +1,41 @@
-import { Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
     IIssueCommandParams,
-    OffChainCertificateForUnitTestsModule,
-    OffChainCertificateService,
-    BlockchainSynchronizeService,
-    OnChainCertificateService,
     ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    OnChainCertificateForUnitTestsModule
+    OnChainCertificateForUnitTestsModule,
+    OnChainCertificateService
 } from '../../src';
-import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
-import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
-import { CERTIFICATE_EVENT_REPOSITORY } from '../../src/offchain-certificate/repositories/repository.keys';
 
 describe('OnchainCertificateService', () => {
     let app: TestingModule;
     let onChainCertificateService: OnChainCertificateService;
 
-    describe('Working OnChain module', () => {
-        beforeEach(async () => {
-            app = await Test.createTestingModule({
-                imports: [OnChainCertificateForUnitTestsModule]
-            }).compile();
+    beforeEach(async () => {
+        app = await Test.createTestingModule({
+            imports: [OnChainCertificateForUnitTestsModule]
+        }).compile();
 
-            onChainCertificateService = await app.resolve(ONCHAIN_CERTIFICATE_SERVICE_TOKEN);
+        onChainCertificateService = await app.resolve(ONCHAIN_CERTIFICATE_SERVICE_TOKEN);
 
-            await app.init();
+        await app.init();
+    });
+
+    afterEach(async () => {
+        await app.close();
+    });
+
+    it('should issue and claim a certificate and have valid volumes in claimers and owners', async () => {
+        const certificate = await onChainCertificateService.issue(issueCommand);
+
+        await onChainCertificateService.claim({
+            certificateId: certificate.id,
+            ...claimCommand
         });
 
-        afterEach(async () => {
-            await app.close();
-        });
+        const claimedCertificate = await onChainCertificateService.getById(certificate.id);
 
-        it('should issue, transfer, and claim a certificate, and then synchronize it', async () => {
-            const certificate = await onChainCertificateService.issue(issueCommand);
-
-            await onChainCertificateService.claim({
-                certificateId: certificate.id,
-                ...claimCommand
-            });
-
-            const claimedCertificate = await onChainCertificateService.getById(certificate.id);
-
-            expect(claimedCertificate?.claimers).toEqual({ [issueCommand.toAddress]: '1000' });
-            expect(claimedCertificate?.owners).toEqual({ [issueCommand.toAddress]: '0' });
-        });
+        expect(claimedCertificate?.claimers).toEqual({ [issueCommand.toAddress]: '1000' });
+        expect(claimedCertificate?.owners).toEqual({ [issueCommand.toAddress]: '0' });
     });
 });
 
