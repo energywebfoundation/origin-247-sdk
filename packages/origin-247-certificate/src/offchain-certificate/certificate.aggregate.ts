@@ -28,12 +28,18 @@ export class CertificateAggregate<T> {
         }
 
         if (firstEvent.type !== CertificateEventType.Issued) {
-            throw new CertificateErrors.CertificateNotIssued(firstEvent.internalCertificateId);
+            throw new CertificateErrors.CertificateNotIssuanceEvent(
+                firstEvent.internalCertificateId,
+                firstEvent.type
+            );
         }
 
         const initialCertificate = this.createCertificate(firstEvent as CertificateIssuedEvent<T>);
 
-        this.certificate = restEvents.reduce(this.apply.bind(this), initialCertificate);
+        this.certificate = {
+            ...restEvents.reduce(this.apply.bind(this), initialCertificate),
+            isSynced: this.reduceIsSynced(events)
+        };
     }
 
     private apply(certificate: Cert<T>, event: ICertificateEvent): Cert<T> {
@@ -66,7 +72,7 @@ export class CertificateAggregate<T> {
         }
     }
 
-    public getCertificate(): Cert<T> | null {
+    public getCertificate(): Cert<T> {
         return this.certificate;
     }
 
@@ -90,7 +96,8 @@ export class CertificateAggregate<T> {
             owners: {
                 [payload.toAddress]: payload.energyValue
             },
-            claimers: {}
+            claimers: {},
+            isSynced: false
         };
     }
 
@@ -245,5 +252,38 @@ export class CertificateAggregate<T> {
             addressBalance !== undefined &&
             BigNumber.from(addressBalance).gte(BigNumber.from(volume))
         );
+    }
+
+    private reduceIsSynced(events: ICertificateEvent[]): boolean {
+        const toPersistCounter = events.reduce((toPersistCounter, event) => {
+            switch (event.type) {
+                case CertificateEventType.Issued:
+                case CertificateEventType.Transferred:
+                case CertificateEventType.Claimed:
+                    return toPersistCounter + 1;
+                case CertificateEventType.ClaimPersisted:
+                case CertificateEventType.IssuancePersisted:
+                case CertificateEventType.TransferPersisted:
+                    return toPersistCounter - 1;
+                case CertificateEventType.PersistError:
+                    return toPersistCounter;
+                default:
+                    throw new CertificateErrors.UnknownEventType(
+                        event.internalCertificateId,
+                        event.type
+                    );
+            }
+        }, 0);
+
+        if (toPersistCounter > 0) {
+            return false;
+        } else if (toPersistCounter === 0) {
+            return true;
+        } else {
+            throw new CertificateErrors.CertificateTooManyPersisted(
+                events[0].internalCertificateId,
+                Math.abs(toPersistCounter)
+            );
+        }
     }
 }

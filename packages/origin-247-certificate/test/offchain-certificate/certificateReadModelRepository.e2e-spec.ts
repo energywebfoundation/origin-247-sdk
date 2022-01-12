@@ -1,6 +1,5 @@
 import { bootstrapTestInstance } from '../setup';
 import { INestApplication } from '@nestjs/common';
-import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { CertificateReadModelRepository } from '../../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
 
 jest.setTimeout(20 * 1000);
@@ -8,24 +7,25 @@ process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
 describe('CertificateReadModelRepository', () => {
     let app: INestApplication;
-    let databaseService: DatabaseService;
+    let cleanDB: () => Promise<void>;
     let certificateReadModelRepository: CertificateReadModelRepository<unknown>;
 
     beforeAll(async () => {
-        ({ app, databaseService, certificateReadModelRepository } = await bootstrapTestInstance());
+        ({ app, cleanDB, certificateReadModelRepository } = await bootstrapTestInstance());
 
         await app.init();
-        await databaseService.cleanUp();
+        await cleanDB();
     });
 
     afterAll(async () => {
-        await databaseService.cleanUp();
+        await cleanDB();
         await app.close();
     });
 
     afterEach(async () => {
-        await databaseService.cleanUp();
+        await cleanDB();
     });
+
     it('should return empty array when there are no readModels', async () => {
         const certs = await certificateReadModelRepository.getAll();
         expect(certs).toHaveLength(0);
@@ -45,7 +45,8 @@ describe('CertificateReadModelRepository', () => {
             owners: {
                 '0x1': '100'
             },
-            claimers: {}
+            claimers: {},
+            isSynced: false
         };
         await certificateReadModelRepository.save(certificateReadModel);
         const saved = await certificateReadModelRepository.getByInternalCertificateId(1);
@@ -67,7 +68,8 @@ describe('CertificateReadModelRepository', () => {
             owners: {
                 '0x1': '100'
             },
-            claimers: {}
+            claimers: {},
+            isSynced: false
         };
         await certificateReadModelRepository.save(certificateReadModel);
         certificateReadModel.owners = { '0x1': '50' };

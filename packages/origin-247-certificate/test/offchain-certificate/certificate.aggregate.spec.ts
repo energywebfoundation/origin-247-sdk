@@ -2,7 +2,9 @@ import { CertificateAggregate } from '../../src/offchain-certificate/certificate
 import {
     CertificateIssuedEvent,
     CertificateTransferredEvent,
-    CertificateClaimedEvent
+    CertificateClaimedEvent,
+    CertificateIssuancePersistedEvent,
+    CertificateTransferPersistedEvent
 } from '../../src/offchain-certificate/events/Certificate.events';
 import { CertificateErrors } from '../../src/offchain-certificate/errors';
 
@@ -107,6 +109,15 @@ const tooBigValueClaimedEvent = new CertificateClaimedEvent(1, {
     energyValue: '200'
 });
 
+const issuancePersistedEvent = new CertificateIssuancePersistedEvent(1, {
+    blockchainCertificateId: 1,
+    persistedEventId: -1
+});
+
+const transferPersistedEvent = new CertificateTransferPersistedEvent(1, {
+    persistedEventId: -1
+});
+
 describe('CertificateAggregate', () => {
     describe('creation', () => {
         it('should create aggregate from events', () => {
@@ -195,7 +206,7 @@ describe('CertificateAggregate', () => {
 
         it('should throw error when certificate was not issued beforehand', () => {
             const getAggregate = () => CertificateAggregate.fromEvents([transferredEvent]);
-            expect(getAggregate).toThrow(CertificateErrors.CertificateNotIssued);
+            expect(getAggregate).toThrow(CertificateErrors.CertificateNotIssuanceEvent);
         });
 
         it('should throw error if no events were provided', () => {
@@ -224,6 +235,15 @@ describe('CertificateAggregate', () => {
                 owners: { '0x1': '100' },
                 claimers: {}
             });
+        });
+
+        it('should persist blockchain id upon persistance', () => {
+            const certificate = CertificateAggregate.fromEvents([
+                issuedEvent,
+                issuancePersistedEvent
+            ]).getCertificate();
+
+            expect(certificate.blockchainCertificateId).toBe(1);
         });
     });
 
@@ -429,6 +449,44 @@ describe('CertificateAggregate', () => {
             const geAggregate = () => CertificateAggregate.fromEvents([issuedEvent, claimedEvent]);
 
             expect(geAggregate).toThrow(CertificateErrors.Claim.NotEnoughBalance);
+        });
+    });
+
+    describe('isSynced', () => {
+        it('should properly compute if there are events to persist', () => {
+            const certificate1 = CertificateAggregate.fromEvents([issuedEvent]).getCertificate();
+
+            const certificate2 = CertificateAggregate.fromEvents([
+                issuedEvent,
+                transferredEvent
+            ]).getCertificate();
+
+            const certificate3 = CertificateAggregate.fromEvents([
+                issuedEvent,
+                issuancePersistedEvent,
+                transferredEvent
+            ]).getCertificate();
+
+            expect(certificate1.isSynced).toBe(false);
+            expect(certificate2.isSynced).toBe(false);
+            expect(certificate3.isSynced).toBe(false);
+        });
+
+        it('should properly compute if all events are persisted', () => {
+            const certificate1 = CertificateAggregate.fromEvents([
+                issuedEvent,
+                issuancePersistedEvent
+            ]).getCertificate();
+
+            const certificate2 = CertificateAggregate.fromEvents([
+                issuedEvent,
+                issuancePersistedEvent,
+                transferredEvent,
+                transferPersistedEvent
+            ]).getCertificate();
+
+            expect(certificate1.isSynced).toBe(true);
+            expect(certificate2.isSynced).toBe(true);
         });
     });
 });

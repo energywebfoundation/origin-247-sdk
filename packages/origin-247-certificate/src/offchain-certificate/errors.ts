@@ -1,9 +1,11 @@
+/** @NOTE [CRITICAL ERROR] means bug in our application */
+
 export namespace CertificateErrors {
     export namespace Issuance {
         export class CertificateAlreadyIssued extends Error {
             constructor(internalCertificateId: number) {
                 super(
-                    `Issuance for internalCertificateId: ${internalCertificateId} failed. Certificate already issued.`
+                    `[CRITICAL ERROR] Issuance for internalCertificateId: ${internalCertificateId} failed. Certificate already issued.`
                 );
             }
         }
@@ -61,19 +63,31 @@ export namespace CertificateErrors {
 
     export class UnknownEventType extends Error {
         constructor(internalCertificateId: number, eventType: string) {
-            super(`Unknown event type ${eventType} for certificate ${internalCertificateId}.`);
+            super(
+                `[CRITICAL ERROR] Unknown event type ${eventType} for certificate ${internalCertificateId}.`
+            );
         }
     }
 
-    export class CertificateNotIssued extends Error {
-        constructor(internalCertificateId: number) {
-            super(`First event for certificate: ${internalCertificateId} is not issuance.`);
+    export class CertificateNotIssuanceEvent extends Error {
+        constructor(internalCertificateId: number, type: string) {
+            super(
+                `[CRITICAL ERROR] First event for certificate: ${internalCertificateId} is not issuance but ${type}.`
+            );
         }
     }
 
     export class CertificateNoEvents extends Error {
         constructor() {
-            super(`Tried to create certificate without events.`);
+            super(`[CRITICAL ERROR] Tried to create certificate without events.`);
+        }
+    }
+
+    export class CertificateTooManyPersisted extends Error {
+        constructor(internalCertificateId: number, toPersistCounter: number) {
+            super(
+                `[CRITICAL ERROR] Certificate ${internalCertificateId} has too many (${toPersistCounter}) persisted events.`
+            );
         }
     }
 }

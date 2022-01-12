@@ -43,6 +43,9 @@ export class CertificateReadModelEntity<T> implements ICertificateReadModel<T> {
     @Column({ type: 'simple-json', nullable: true })
     metadata: T;
 
+    @Column()
+    isSynced: boolean;
+
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
 }

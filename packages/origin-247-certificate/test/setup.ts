@@ -4,7 +4,7 @@ import {
     BlockchainPropertiesService,
     entities as IssuerEntities
 } from '@energyweb/issuer-api';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, getConnectionToken } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { getProviderWithFallback } from '@energyweb/utils-general';
@@ -15,7 +15,8 @@ import {
     OffChainCertificateEntities,
     OnChainCertificateService,
     OffChainCertificateModule,
-    OffChainCertificateService
+    OffChainCertificateService,
+    BlockchainSynchronizeService
 } from '../src';
 import { PassportModule } from '@nestjs/passport';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -27,6 +28,7 @@ import {
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from '../src/offchain-certificate/repositories/repository.keys';
 import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
+import { Connection } from 'typeorm';
 
 const testLogger = new Logger('e2e');
 
@@ -106,9 +108,23 @@ export const bootstrapTestInstance: any = async () => {
     const offchainCertificateService = await app.resolve<OffChainCertificateService>(
         OffChainCertificateService
     );
+    const blockchainSynchronizeService = await app.resolve<BlockchainSynchronizeService>(
+        BlockchainSynchronizeService
+    );
     const certificateCommandRepository = await app.resolve<CertificateCommandRepository>(
         CERTIFICATE_COMMAND_REPOSITORY
     );
+
+    const connection = await app.resolve<Connection>(getConnectionToken());
+    const tables = connection.entityMetadatas
+        .filter((e) => e.tableName !== 'issuer_blockchain_properties')
+        .map((e) => `"${e.tableName}"`)
+        .join(', ');
+
+    const cleanDB = async () => {
+        await connection.query(`TRUNCATE ${tables} RESTART IDENTITY CASCADE;`);
+    };
+
     const blockchainProperties = await blockchainPropertiesService.create(
         provider.network.chainId,
         registry.address,
@@ -138,6 +154,8 @@ export const bootstrapTestInstance: any = async () => {
         certificateReadModelRepository,
         certificateEventService,
         offchainCertificateService,
-        app
+        blockchainSynchronizeService,
+        app,
+        cleanDB
     };
 };
