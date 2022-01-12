@@ -96,6 +96,11 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             id: 0,
             to: command.forAddress
         });
+        const ownedValue = certificate.owners[command.forAddress];
+
+        certificate.owners[command.forAddress] = BigNumber.from(ownedValue)
+            .sub(BigNumber.from(value))
+            .toString();
 
         certificate.claimers![command.forAddress] = value;
     }

@@ -315,7 +315,7 @@ const expectedCertificate = {
     creationTime: expect.any(Number),
     owners: {
         [issueCommand.toAddress]: '0',
-        [transferCommand.toAddress]: issueCommand.energyValue
+        [transferCommand.toAddress]: '0'
     },
     claimers: {
         [claimCommand.forAddress]: issueCommand.energyValue
