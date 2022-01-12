@@ -69,7 +69,7 @@ export namespace CertificateErrors {
         }
     }
 
-    export class CertificateNotIssuanceEvent extends Error {
+    export class FirstCertificateEventIsNotIssuance extends Error {
         constructor(internalCertificateId: number, type: string) {
             super(
                 `[CRITICAL ERROR] First event for certificate: ${internalCertificateId} is not issuance but ${type}.`

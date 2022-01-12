@@ -28,7 +28,7 @@ export class CertificateAggregate<T> {
         }
 
         if (firstEvent.type !== CertificateEventType.Issued) {
-            throw new CertificateErrors.CertificateNotIssuanceEvent(
+            throw new CertificateErrors.FirstCertificateEventIsNotIssuance(
                 firstEvent.internalCertificateId,
                 firstEvent.type
             );

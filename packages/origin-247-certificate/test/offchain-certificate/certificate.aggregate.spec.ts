@@ -206,7 +206,7 @@ describe('CertificateAggregate', () => {
 
         it('should throw error when certificate was not issued beforehand', () => {
             const getAggregate = () => CertificateAggregate.fromEvents([transferredEvent]);
-            expect(getAggregate).toThrow(CertificateErrors.CertificateNotIssuanceEvent);
+            expect(getAggregate).toThrow(CertificateErrors.FirstCertificateEventIsNotIssuance);
         });
 
         it('should throw error if no events were provided', () => {
