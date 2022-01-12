@@ -17,14 +17,14 @@ process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
 describe('CertificateEventRepository', () => {
     let app: INestApplication;
-    let databaseService: DatabaseService;
+    let cleanDB: () => Promise<void>;
     let certificateEventRepository: CertificateEventRepository;
     let certificateEventService: CertificateEventService;
 
     beforeAll(async () => {
         ({
             app,
-            databaseService,
+            cleanDB,
             certificateEventRepository,
             certificateEventService
         } = await bootstrapTestInstance());
@@ -33,12 +33,12 @@ describe('CertificateEventRepository', () => {
     });
 
     afterAll(async () => {
-        await databaseService.cleanUp();
+        await cleanDB();
         await app.close();
     });
 
     afterEach(async () => {
-        await databaseService.cleanUp();
+        await cleanDB();
     });
 
     it('should return no certificates', async () => {

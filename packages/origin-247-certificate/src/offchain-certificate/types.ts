@@ -33,4 +33,5 @@ export interface ICertificateReadModel<T> {
     claims: IClaim[];
     owners: Record<string, string>;
     claimers: Record<string, string> | null;
+    isSynced: boolean;
 }

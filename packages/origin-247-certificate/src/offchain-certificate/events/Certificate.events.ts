@@ -1,4 +1,3 @@
-import { IEvent } from '@nestjs/cqrs';
 import { IClaimCommand, IIssueCommand, ITransferCommand } from '../../types';
 
 const version = 1;
@@ -27,7 +26,7 @@ export type PersistedEvent =
     | CertificateTransferPersistedEvent
     | CertificatePersistErrorEvent;
 
-export class CertificateIssuedEvent<MetadataType = unknown> implements IEvent {
+export class CertificateIssuedEvent<MetadataType = unknown> implements ICertificateEvent {
     public readonly type = CertificateEventType.Issued;
     public readonly version = version;
     public readonly createdAt = new Date();
@@ -38,7 +37,7 @@ export class CertificateIssuedEvent<MetadataType = unknown> implements IEvent {
     ) {}
 }
 
-export class CertificateTransferredEvent implements IEvent {
+export class CertificateTransferredEvent implements ICertificateEvent {
     public readonly type = CertificateEventType.Transferred;
     public readonly version = version;
     public readonly createdAt = new Date();
@@ -49,7 +48,7 @@ export class CertificateTransferredEvent implements IEvent {
     ) {}
 }
 
-export class CertificateClaimedEvent implements IEvent {
+export class CertificateClaimedEvent implements ICertificateEvent {
     public readonly type = CertificateEventType.Claimed;
     public readonly version = version;
     public readonly createdAt = new Date();
@@ -60,7 +59,7 @@ export class CertificateClaimedEvent implements IEvent {
     ) {}
 }
 
-export class CertificateIssuancePersistedEvent implements IEvent {
+export class CertificateIssuancePersistedEvent implements ICertificateEvent {
     public readonly type = CertificateEventType.IssuancePersisted;
     public readonly version = version;
     public readonly createdAt = new Date();
@@ -71,7 +70,7 @@ export class CertificateIssuancePersistedEvent implements IEvent {
     ) {}
 }
 
-export class CertificateTransferPersistedEvent implements IEvent {
+export class CertificateTransferPersistedEvent implements ICertificateEvent {
     public readonly type = CertificateEventType.TransferPersisted;
     public readonly version = version;
     public readonly createdAt = new Date();
@@ -82,7 +81,7 @@ export class CertificateTransferPersistedEvent implements IEvent {
     ) {}
 }
 
-export class CertificateClaimPersistedEvent implements IEvent {
+export class CertificateClaimPersistedEvent implements ICertificateEvent {
     public readonly type = CertificateEventType.ClaimPersisted;
     public readonly version = version;
     public readonly createdAt = new Date();
@@ -93,7 +92,7 @@ export class CertificateClaimPersistedEvent implements IEvent {
     ) {}
 }
 
-export class CertificatePersistErrorEvent implements IEvent {
+export class CertificatePersistErrorEvent implements ICertificateEvent {
     public readonly type = CertificateEventType.PersistError;
     public readonly version = version;
     public readonly createdAt = new Date();

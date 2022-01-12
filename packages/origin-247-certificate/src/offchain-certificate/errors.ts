@@ -1,23 +1,17 @@
+/** @NOTE [CRITICAL ERROR] means bug in our application */
+
 export namespace CertificateErrors {
     export namespace Issuance {
         export class CertificateAlreadyIssued extends Error {
             constructor(internalCertificateId: number) {
                 super(
-                    `Issuance for internalCertificateId: ${internalCertificateId} failed. Certificate already issued.`
+                    `[CRITICAL ERROR] Issuance for internalCertificateId: ${internalCertificateId} failed. Certificate already issued.`
                 );
             }
         }
     }
 
     export namespace Transfer {
-        export class CertificateNotIssued extends Error {
-            constructor(internalCertificateId: number) {
-                super(
-                    `Transfer for internalCertificateId: ${internalCertificateId} failed. Certificate was not issued.`
-                );
-            }
-        }
-
         export class FromZeroAddress extends Error {
             constructor(internalCertificateId: number) {
                 super(
@@ -44,14 +38,6 @@ export namespace CertificateErrors {
     }
 
     export namespace Claim {
-        export class CertificateNotIssued extends Error {
-            constructor(internalCertificateId: number) {
-                super(
-                    `Claim for internalCertificateId: ${internalCertificateId} failed. Certificate was not issued.`
-                );
-            }
-        }
-
         export class ForZeroAddress extends Error {
             constructor(internalCertificateId: number) {
                 super(
@@ -72,6 +58,36 @@ export namespace CertificateErrors {
     export class BatchError extends Error {
         constructor(originError: Error) {
             super(`Batch operation failed. Failing operation message: ${originError.message}`);
+        }
+    }
+
+    export class UnknownEventType extends Error {
+        constructor(internalCertificateId: number, eventType: string) {
+            super(
+                `[CRITICAL ERROR] Unknown event type ${eventType} for certificate ${internalCertificateId}.`
+            );
+        }
+    }
+
+    export class FirstCertificateEventIsNotIssuance extends Error {
+        constructor(internalCertificateId: number, type: string) {
+            super(
+                `[CRITICAL ERROR] First event for certificate: ${internalCertificateId} is not issuance but ${type}.`
+            );
+        }
+    }
+
+    export class CertificateNoEvents extends Error {
+        constructor() {
+            super(`[CRITICAL ERROR] Tried to create certificate without events.`);
+        }
+    }
+
+    export class CertificateTooManyPersisted extends Error {
+        constructor(internalCertificateId: number, toPersistCounter: number) {
+            super(
+                `[CRITICAL ERROR] Certificate ${internalCertificateId} has too many (${toPersistCounter}) persisted events.`
+            );
         }
     }
 }
