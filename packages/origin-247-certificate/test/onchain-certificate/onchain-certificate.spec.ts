@@ -60,5 +60,3 @@ const claimCommand = {
         purpose: 'purpose'
     }
 };
-
-type PublicPart<T> = { [K in keyof T]: T[K] };
