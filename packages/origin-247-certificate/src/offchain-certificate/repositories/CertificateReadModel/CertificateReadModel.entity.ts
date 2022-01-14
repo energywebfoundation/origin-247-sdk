@@ -1,11 +1,13 @@
 import { CreateDateColumn, Entity, Column, Index, UpdateDateColumn, PrimaryColumn } from 'typeorm';
 import { IClaim } from '@energyweb/issuer';
 import { ICertificateReadModel } from '../../types';
+import { CertificateEventType } from '../../events/Certificate.events';
 
 export const tableName = 'certificate_read_model';
 
 @Entity(tableName)
-export class CertificateReadModelEntity<T> implements ICertificateReadModel<T> {
+export class CertificateReadModelEntity<MetadataType>
+    implements ICertificateReadModel<MetadataType> {
     @CreateDateColumn({ type: 'timestamptz' })
     createdAt: Date;
 
@@ -41,11 +43,20 @@ export class CertificateReadModelEntity<T> implements ICertificateReadModel<T> {
     creationBlockHash: string;
 
     @Column({ type: 'simple-json', nullable: true })
-    metadata: T;
+    metadata: MetadataType;
 
     @Column()
     isSynced: boolean;
 
+    @Column({ type: 'simple-json', default: [] })
+    transactions: CertificateTransaction[];
+
     @UpdateDateColumn({ type: 'timestamptz' })
     updatedAt: Date;
+}
+
+export interface CertificateTransaction {
+    transactionHash: string;
+    eventType: CertificateEventType;
+    timestamp: Date;
 }

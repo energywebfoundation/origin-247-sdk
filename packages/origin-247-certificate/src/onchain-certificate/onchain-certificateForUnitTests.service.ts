@@ -3,7 +3,7 @@ import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { BigNumber } from 'ethers';
 import { ICertificate, ISuccessResponse } from './types';
 import { IIssuedCertificate, IIssueCommandParams, IClaimCommand, ITransferCommand } from '../types';
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotImplementedException } from '@nestjs/common';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
 @Injectable()
@@ -148,5 +148,41 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
         }
 
         await Promise.all(command.map((transfer) => this.transfer(transfer)));
+    }
+
+    public async batchIssueWithTxHash(command: IIssueCommandParams<T>[]) {
+        throw new NotImplementedException();
+
+        return {} as any;
+    }
+
+    public async batchTransferWithTxHash(command: ITransferCommand[]) {
+        throw new NotImplementedException();
+
+        return {} as any;
+    }
+
+    public async batchClaimWithTxHash(command: IClaimCommand[]) {
+        throw new NotImplementedException();
+
+        return {} as any;
+    }
+
+    public async issueWithTxHash(command: IIssueCommandParams<T>) {
+        throw new NotImplementedException();
+
+        return {} as any;
+    }
+
+    public async transferWithTxHash(command: ITransferCommand) {
+        throw new NotImplementedException();
+
+        return {} as any;
+    }
+
+    public async claimWithTxHash(command: IClaimCommand) {
+        throw new NotImplementedException();
+
+        return {} as any;
     }
 }

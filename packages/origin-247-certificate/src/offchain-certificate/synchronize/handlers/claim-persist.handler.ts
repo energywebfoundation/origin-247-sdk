@@ -43,11 +43,14 @@ export class ClaimPersistHandler implements SynchronizeHandler {
         const claimedEvents = events as CertificateClaimedEvent[];
 
         try {
-            await this.certificateService.batchClaim(claimedEvents.map((event) => event.payload));
+            const { transactionHash } = await this.certificateService.batchClaimWithTxHash(
+                claimedEvents.map((event) => event.payload)
+            );
 
             const promises = events.map(async (event) => {
                 await this.offchainCertificateService.claimPersisted(event.internalCertificateId, {
-                    persistedEventId: event.id
+                    persistedEventId: event.id,
+                    transactionHash
                 });
             });
 

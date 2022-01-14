@@ -97,7 +97,8 @@ export class CertificateAggregate<T> {
                 [payload.toAddress]: payload.energyValue
             },
             claimers: {},
-            isSynced: false
+            isSynced: false,
+            transactions: []
         };
     }
 
@@ -117,7 +118,15 @@ export class CertificateAggregate<T> {
 
         return {
             ...certificate,
-            blockchainCertificateId
+            blockchainCertificateId,
+            transactions: [
+                ...certificate.transactions,
+                {
+                    eventType: CertificateEventType.IssuancePersisted,
+                    timestamp: event.createdAt,
+                    transactionHash: event.payload.transactionHash
+                }
+            ]
         };
     }
 
@@ -147,7 +156,17 @@ export class CertificateAggregate<T> {
         certificate: Cert<T>,
         event: CertificateTransferPersistedEvent
     ): Cert<T> {
-        return certificate;
+        return {
+            ...certificate,
+            transactions: [
+                ...certificate.transactions,
+                {
+                    eventType: CertificateEventType.TransferPersisted,
+                    timestamp: event.createdAt,
+                    transactionHash: event.payload.transactionHash
+                }
+            ]
+        };
     }
 
     private claim(certificate: Cert<T>, event: CertificateClaimedEvent): Cert<T> {
@@ -190,7 +209,17 @@ export class CertificateAggregate<T> {
     }
 
     private claimPersisted(certificate: Cert<T>, event: CertificateClaimPersistedEvent): Cert<T> {
-        return certificate;
+        return {
+            ...certificate,
+            transactions: [
+                ...certificate.transactions,
+                {
+                    eventType: CertificateEventType.ClaimPersisted,
+                    timestamp: event.createdAt,
+                    transactionHash: event.payload.transactionHash
+                }
+            ]
+        };
     }
 
     private validateTransfer(certificate: Cert<T>, event: CertificateTransferredEvent): void {

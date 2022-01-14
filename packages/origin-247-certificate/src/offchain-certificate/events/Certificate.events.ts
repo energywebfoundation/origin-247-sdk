@@ -66,7 +66,11 @@ export class CertificateIssuancePersistedEvent implements ICertificateEvent {
 
     constructor(
         public readonly internalCertificateId: number,
-        public readonly payload: { blockchainCertificateId: number; persistedEventId: number }
+        public readonly payload: {
+            blockchainCertificateId: number;
+            persistedEventId: number;
+            transactionHash: string;
+        }
     ) {}
 }
 
@@ -77,7 +81,7 @@ export class CertificateTransferPersistedEvent implements ICertificateEvent {
 
     constructor(
         public readonly internalCertificateId: number,
-        public readonly payload: { persistedEventId: number }
+        public readonly payload: { persistedEventId: number; transactionHash: string }
     ) {}
 }
 
@@ -88,7 +92,7 @@ export class CertificateClaimPersistedEvent implements ICertificateEvent {
 
     constructor(
         public readonly internalCertificateId: number,
-        public readonly payload: { persistedEventId: number }
+        public readonly payload: { persistedEventId: number; transactionHash: string }
     ) {}
 }
 

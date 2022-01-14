@@ -41,6 +41,10 @@ export class SynchronizeManager {
         for (let processor of processors) {
             const eventsBatch = processor.events;
 
+            if (eventsBatch.length === 0) {
+                continue;
+            }
+
             const result = await processor.handler.handleBatch(eventsBatch);
             failedCertificateIds.push(...result.failedCertificateIds);
         }
