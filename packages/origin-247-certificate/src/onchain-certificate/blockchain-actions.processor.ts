@@ -8,7 +8,6 @@ import {
     BatchClaimCertificatesCommand,
     BatchIssueCertificatesCommand,
     BatchTransferCertificatesCommand,
-    Certificate,
     ClaimCertificateCommand,
     IssueCertificateCommand,
     TransferCertificateCommand
@@ -81,7 +80,6 @@ export class BlockchainActionsProcessor {
                 );
 
                 return {
-                    // TODO: Actual type returned was Certificate, but callers expect IIssuedCertificate
                     certificate: (issuanceCertificates[0] as unknown) as IIssuedCertificate,
                     transactionHash: issuanceTx.hash
                 };

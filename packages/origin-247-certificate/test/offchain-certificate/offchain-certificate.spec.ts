@@ -1,4 +1,4 @@
-import { Injectable, Module } from '@nestjs/common';
+import { Injectable, Module, NotImplementedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
     IIssueCommandParams,
@@ -6,7 +6,9 @@ import {
     OffChainCertificateService,
     BlockchainSynchronizeService,
     OnChainCertificateService,
-    ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    ITransferCommand,
+    IClaimCommand
 } from '../../src';
 import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
 import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -406,6 +408,40 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
 
         public async batchTransfer(): Promise<void> {
             await this.transfer();
+        }
+
+        public async batchIssueWithTxHash(command: IIssueCommandParams<T>[]) {
+            return { certificateIds: await this.batchIssue(command), transactionHash: 'txHash' };
+        }
+
+        public async batchTransferWithTxHash() {
+            await this.batchTransfer();
+
+            return { transactionHash: 'txHash' };
+        }
+
+        public async batchClaimWithTxHash(command: IClaimCommand[]) {
+            await this.batchClaim();
+
+            return { transactionHash: 'txHash' };
+        }
+
+        public async issueWithTxHash(command: IIssueCommandParams<T>) {
+            await this.issue();
+
+            return { certificate: {} as any, transactionHash: 'txHash' };
+        }
+
+        public async transferWithTxHash(command: ITransferCommand) {
+            await this.transfer();
+
+            return { transactionHash: 'txHash' };
+        }
+
+        public async claimWithTxHash(command: IClaimCommand) {
+            await this.claim();
+
+            return { transactionHash: 'txHash' };
         }
     }
 

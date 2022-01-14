@@ -1,9 +1,9 @@
 import { OnChainCertificateService } from './onchain-certificate.service';
 import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { BigNumber } from 'ethers';
-import { ICertificate, ISuccessResponse } from './types';
-import { IIssuedCertificate, IIssueCommandParams, IClaimCommand, ITransferCommand } from '../types';
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { ICertificate } from './types';
+import { IClaimCommand, IIssueCommandParams, IIssuedCertificate, ITransferCommand } from '../types';
+import { Injectable } from '@nestjs/common';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
 @Injectable()
@@ -151,38 +151,39 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
     }
 
     public async batchIssueWithTxHash(command: IIssueCommandParams<T>[]) {
-        throw new NotImplementedException();
-
-        return {} as any;
+        return { certificateIds: await this.batchIssue(command), transactionHash: 'txHash' };
     }
 
     public async batchTransferWithTxHash(command: ITransferCommand[]) {
-        throw new NotImplementedException();
-
-        return {} as any;
+        await this.batchTransfer(command);
+        return { transactionHash: 'txHash' };
     }
 
     public async batchClaimWithTxHash(command: IClaimCommand[]) {
-        throw new NotImplementedException();
-
-        return {} as any;
+        await this.batchClaim(command);
+        return { transactionHash: 'txHash' };
     }
 
-    public async issueWithTxHash(command: IIssueCommandParams<T>) {
-        throw new NotImplementedException();
+    public async issueWithTxHash<T>(command: IIssueCommandParams<T>) {
+        await this.issue(command as any);
 
-        return {} as any;
+        return {
+            certificate: (this.db.find(
+                (c) => c.deviceId === command.deviceId
+            )! as unknown) as IIssuedCertificate<T>,
+            transactionHash: 'txHash'
+        };
     }
 
     public async transferWithTxHash(command: ITransferCommand) {
-        throw new NotImplementedException();
+        await this.transfer(command);
 
-        return {} as any;
+        return { transactionHash: 'txHash' };
     }
 
     public async claimWithTxHash(command: IClaimCommand) {
-        throw new NotImplementedException();
+        await this.claim(command);
 
-        return {} as any;
+        return { transactionHash: 'txHash' };
     }
 }
