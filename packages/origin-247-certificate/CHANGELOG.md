@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.0.0...@energyweb/origin-247-certificate@3.1.0) (2022-01-14)
+
+
+### Bug Fixes
+
+* Remove claimed volume from owners ([#68](https://github.com/energywebfoundation/origin-247-sdk/issues/68)) ([39a213e](https://github.com/energywebfoundation/origin-247-sdk/commit/39a213e0b4bcb9311b1c5dae0b1982122dc0385b))
+
+
+### Features
+
+* add `isSynced` property to read model ([af0e4e4](https://github.com/energywebfoundation/origin-247-sdk/commit/af0e4e43e548e318570add1eec7f1a01bcb53bcf))
+
+
+
+
+
 # [3.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@2.2.0...@energyweb/origin-247-certificate@3.0.0) (2022-01-11)
 
 

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@2.0.0...@energyweb/origin-247-transfer@2.0.1) (2022-01-14)
+
+**Note:** Version bump only for package @energyweb/origin-247-transfer
+
+
+
+
+
 # [2.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@1.1.0...@energyweb/origin-247-transfer@2.0.0) (2022-01-11)
 
 
