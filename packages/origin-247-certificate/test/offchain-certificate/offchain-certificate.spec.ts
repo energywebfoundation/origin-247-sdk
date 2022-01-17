@@ -8,7 +8,8 @@ import {
     OnChainCertificateService,
     ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
     ITransferCommand,
-    IClaimCommand
+    IClaimCommand,
+    IIssuedCertificate
 } from '../../src';
 import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
 import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -427,9 +428,34 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
         }
 
         public async issueWithTxHash(command: IIssueCommandParams<T>) {
-            await this.issue();
+            const { id } = await this.issue();
 
-            return { certificate: {} as any, transactionHash: 'txHash' };
+            return {
+                certificate: {
+                    id,
+                    claims: [],
+                    claimers: {},
+                    creationBlockHash: '',
+                    creationTime: Math.floor(Date.now() / 1000),
+                    deviceId: command.deviceId,
+                    generationStartTime: Math.floor(command.fromTime.getTime() / 1000),
+                    generationEndTime: Math.floor(command.toTime.getTime() / 1000),
+                    issuedPrivately: false,
+                    metadata: command.metadata,
+                    owners: {
+                        [command.toAddress]: command.energyValue
+                    },
+                    isClaimed: false,
+                    isOwned: true,
+                    myClaims: [],
+                    energy: {
+                        claimedVolume: '0',
+                        privateVolume: '0',
+                        publicVolume: command.energyValue
+                    }
+                } as IIssuedCertificate<T>,
+                transactionHash: 'txHash'
+            };
         }
 
         public async transferWithTxHash(command: ITransferCommand) {
