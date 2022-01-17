@@ -34,7 +34,7 @@ describe('EventsBatchQueue', () => {
                 payload: {},
                 createdAt: new Date()
             } as SynchronizableEvent;
-            const otherEventStup = {
+            const otherEventStub = {
                 id: 0,
                 internalCertificateId: 1,
                 type: CertificateEventType.Issued,
@@ -42,7 +42,7 @@ describe('EventsBatchQueue', () => {
                 payload: {},
                 createdAt: new Date()
             } as SynchronizableEvent;
-            const events = [eventStub, otherEventStup];
+            const events = [eventStub, otherEventStub];
 
             const eventsBatchQueue = new EventsBatchQueue(events);
 

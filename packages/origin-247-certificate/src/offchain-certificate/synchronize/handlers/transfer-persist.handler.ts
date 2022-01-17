@@ -4,7 +4,7 @@ import { CertificateEventType, CertificateTransferredEvent } from '../../events/
 import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
-import { chunk, compact } from 'lodash';
+import { chunk } from 'lodash';
 import { SynchronizeHandler } from './synchronize.handler';
 import {
     BATCH_CONFIGURATION_TOKEN,
@@ -43,14 +43,14 @@ export class TransferPersistHandler implements SynchronizeHandler {
         const transferredEvents = events as CertificateTransferredEvent[];
 
         try {
-            await this.certificateService.batchTransfer(
+            const { transactionHash } = await this.certificateService.batchTransferWithTxHash(
                 transferredEvents.map((event) => event.payload)
             );
 
             const promises = events.map(async (event) => {
                 await this.offchainCertificateService.transferPersisted(
                     event.internalCertificateId,
-                    { persistedEventId: event.id }
+                    { persistedEventId: event.id, transactionHash }
                 );
             });
 

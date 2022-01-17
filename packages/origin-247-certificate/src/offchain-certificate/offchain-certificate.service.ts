@@ -61,6 +61,12 @@ export class OffChainCertificateService<T = null> {
         return certificate;
     }
 
+    public async getByIds(ids: number[]): Promise<ICertificateReadModel<T>[]> {
+        const certificates = await this.readModelRepo.getManyByInternalCertificateIds(ids);
+
+        return certificates;
+    }
+
     public async issue(params: IIssueCommandParams<T>): Promise<number> {
         const command = {
             ...params,

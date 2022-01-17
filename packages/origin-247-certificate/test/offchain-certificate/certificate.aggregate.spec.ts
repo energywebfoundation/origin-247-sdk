@@ -111,11 +111,13 @@ const tooBigValueClaimedEvent = new CertificateClaimedEvent(1, {
 
 const issuancePersistedEvent = new CertificateIssuancePersistedEvent(1, {
     blockchainCertificateId: 1,
-    persistedEventId: -1
+    persistedEventId: -1,
+    transactionHash: 'issuance-persisted-hash'
 });
 
 const transferPersistedEvent = new CertificateTransferPersistedEvent(1, {
-    persistedEventId: -1
+    persistedEventId: -1,
+    transactionHash: 'transfer-persisted-hash'
 });
 
 describe('CertificateAggregate', () => {
@@ -487,6 +489,28 @@ describe('CertificateAggregate', () => {
 
             expect(certificate1.isSynced).toBe(true);
             expect(certificate2.isSynced).toBe(true);
+        });
+
+        it('should construct transaction log for persisted events', () => {
+            const certificate = CertificateAggregate.fromEvents([
+                issuedEvent,
+                transferredEvent,
+                issuancePersistedEvent,
+                transferPersistedEvent
+            ]).getCertificate();
+
+            expect(certificate.transactions).toEqual([
+                {
+                    transactionHash: issuancePersistedEvent.payload.transactionHash,
+                    timestamp: issuancePersistedEvent.createdAt,
+                    eventType: issuancePersistedEvent.type
+                },
+                {
+                    transactionHash: transferPersistedEvent.payload.transactionHash,
+                    timestamp: transferPersistedEvent.createdAt,
+                    eventType: transferPersistedEvent.type
+                }
+            ]);
         });
     });
 });

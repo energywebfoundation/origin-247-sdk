@@ -1,11 +1,13 @@
-import { bootstrapTestInstance, userWallet, user2Wallet } from '../setup';
+import { bootstrapTestInstance, user2Wallet, userWallet } from '../setup';
 import { INestApplication } from '@nestjs/common';
 import {
-    OffChainCertificateService,
     BlockchainSynchronizeService,
     IIssueCommandParams,
+    OffChainCertificateService,
     OnChainCertificateService
 } from '../../src';
+import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
+import { CertificateReadModelEntity } from '../../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
 
 jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
@@ -64,6 +66,7 @@ describe('OffchainCertificate', () => {
         const certificate = await certificateService.getById(readModel!.blockchainCertificateId!);
 
         expect(certificate).toEqual(expectedCertificate);
+        expect(readModel).toEqual(expectedReadModel);
     });
 });
 
@@ -122,4 +125,52 @@ const expectedCertificate = {
     ],
     issuedPrivately: expect.any(Boolean),
     metadata: null
+};
+
+const expectedReadModel: CertificateReadModelEntity<null> = {
+    blockchainCertificateId: expect.any(Number),
+    claimers: {
+        [claimCommand.forAddress]: issueCommand.energyValue
+    },
+    claims: [
+        {
+            id: expect.any(Number),
+            from: claimCommand.forAddress,
+            to: claimCommand.forAddress,
+            value: issueCommand.energyValue,
+            claimData: claimCommand.claimData,
+            topic: expect.any(String)
+        }
+    ],
+    creationBlockHash: expect.any(String),
+    creationTime: expect.any(Number),
+    deviceId: issueCommand.deviceId,
+    generationStartTime: Math.floor(issueCommand.fromTime.getTime() / 1000),
+    generationEndTime: Math.floor(issueCommand.toTime.getTime() / 1000),
+    internalCertificateId: expect.any(Number),
+    isSynced: true,
+    metadata: null,
+    owners: {
+        [issueCommand.toAddress]: '0',
+        [transferCommand.toAddress]: '0'
+    },
+    transactions: [
+        {
+            eventType: CertificateEventType.IssuancePersisted,
+            timestamp: expect.any(String),
+            transactionHash: expect.any(String)
+        },
+        {
+            eventType: CertificateEventType.TransferPersisted,
+            timestamp: expect.any(String),
+            transactionHash: expect.any(String)
+        },
+        {
+            eventType: CertificateEventType.ClaimPersisted,
+            timestamp: expect.any(String),
+            transactionHash: expect.any(String)
+        }
+    ],
+    updatedAt: expect.any(Date),
+    createdAt: expect.any(Date)
 };

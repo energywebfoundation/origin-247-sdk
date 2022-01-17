@@ -1,12 +1,14 @@
 import { Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
+    BlockchainSynchronizeService,
+    IClaimCommand,
     IIssueCommandParams,
+    ITransferCommand,
     OffChainCertificateForUnitTestsModule,
     OffChainCertificateService,
-    BlockchainSynchronizeService,
-    OnChainCertificateService,
-    ONCHAIN_CERTIFICATE_SERVICE_TOKEN
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    OnChainCertificateService
 } from '../../src';
 import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
 import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -352,7 +354,7 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
             throw new Error('Not implemented');
         }
 
-        public async issue(): Promise<any> {
+        public async issue(command: IIssueCommandParams<any>): Promise<any> {
             if (failingOn === 'issue') {
                 failedCalls += 1;
 
@@ -364,7 +366,27 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
             this.serial += 1;
 
             return {
-                id: this.serial
+                id: this.serial,
+                claims: [],
+                claimers: {},
+                creationBlockHash: '',
+                creationTime: Math.floor(Date.now() / 1000),
+                deviceId: command.deviceId,
+                generationStartTime: Math.floor(command.fromTime.getTime() / 1000),
+                generationEndTime: Math.floor(command.toTime.getTime() / 1000),
+                issuedPrivately: false,
+                metadata: command.metadata,
+                owners: {
+                    [command.toAddress]: command.energyValue
+                },
+                isClaimed: false,
+                isOwned: true,
+                myClaims: [],
+                energy: {
+                    claimedVolume: '0',
+                    privateVolume: '0',
+                    publicVolume: command.energyValue
+                }
             };
         }
 
@@ -406,6 +428,43 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
 
         public async batchTransfer(): Promise<void> {
             await this.transfer();
+        }
+
+        public async batchIssueWithTxHash(command: IIssueCommandParams<T>[]) {
+            return { certificateIds: await this.batchIssue(command), transactionHash: 'txHash' };
+        }
+
+        public async batchTransferWithTxHash() {
+            await this.batchTransfer();
+
+            return { transactionHash: 'txHash' };
+        }
+
+        public async batchClaimWithTxHash(command: IClaimCommand[]) {
+            await this.batchClaim();
+
+            return { transactionHash: 'txHash' };
+        }
+
+        public async issueWithTxHash(command: IIssueCommandParams<T>) {
+            const certificate = await this.issue(command);
+
+            return {
+                certificate,
+                transactionHash: 'txHash'
+            };
+        }
+
+        public async transferWithTxHash(command: ITransferCommand) {
+            await this.transfer();
+
+            return { transactionHash: 'txHash' };
+        }
+
+        public async claimWithTxHash(command: IClaimCommand) {
+            await this.claim();
+
+            return { transactionHash: 'txHash' };
         }
     }
 

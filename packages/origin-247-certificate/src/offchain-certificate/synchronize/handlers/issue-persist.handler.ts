@@ -29,7 +29,10 @@ export class IssuePersistHandler implements SynchronizeHandler {
         events: CertificateEventEntity[]
     ): Promise<{ failedCertificateIds: number[] }> {
         try {
-            const certificateIds = await this.certificateService.batchIssue(
+            const {
+                certificateIds,
+                transactionHash
+            } = await this.certificateService.batchIssueWithTxHash(
                 events
                     .map((issuedEvent) => issuedEvent.payload as CertificateIssuedEvent['payload'])
                     .map((payload) => ({
@@ -42,7 +45,8 @@ export class IssuePersistHandler implements SynchronizeHandler {
             const promises = events.map(async (event, index) => {
                 await this.offchainCertificateService.issuePersisted(event.internalCertificateId, {
                     blockchainCertificateId: certificateIds[index],
-                    persistedEventId: event.id
+                    persistedEventId: event.id,
+                    transactionHash
                 });
             });
 

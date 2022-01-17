@@ -1,8 +1,8 @@
 import { OnChainCertificateService } from './onchain-certificate.service';
 import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { BigNumber } from 'ethers';
-import { ICertificate, ISuccessResponse } from './types';
-import { IIssuedCertificate, IIssueCommandParams, IClaimCommand, ITransferCommand } from '../types';
+import { ICertificate } from './types';
+import { IClaimCommand, IIssueCommandParams, IIssuedCertificate, ITransferCommand } from '../types';
 import { Injectable } from '@nestjs/common';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
@@ -148,5 +148,42 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
         }
 
         await Promise.all(command.map((transfer) => this.transfer(transfer)));
+    }
+
+    public async batchIssueWithTxHash(command: IIssueCommandParams<T>[]) {
+        return { certificateIds: await this.batchIssue(command), transactionHash: 'txHash' };
+    }
+
+    public async batchTransferWithTxHash(command: ITransferCommand[]) {
+        await this.batchTransfer(command);
+        return { transactionHash: 'txHash' };
+    }
+
+    public async batchClaimWithTxHash(command: IClaimCommand[]) {
+        await this.batchClaim(command);
+        return { transactionHash: 'txHash' };
+    }
+
+    public async issueWithTxHash<T>(command: IIssueCommandParams<T>) {
+        await this.issue(command as any);
+
+        return {
+            certificate: (this.db.find(
+                (c) => c.deviceId === command.deviceId
+            )! as unknown) as IIssuedCertificate<T>,
+            transactionHash: 'txHash'
+        };
+    }
+
+    public async transferWithTxHash(command: ITransferCommand) {
+        await this.transfer(command);
+
+        return { transactionHash: 'txHash' };
+    }
+
+    public async claimWithTxHash(command: IClaimCommand) {
+        await this.claim(command);
+
+        return { transactionHash: 'txHash' };
     }
 }

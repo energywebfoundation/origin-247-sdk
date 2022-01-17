@@ -13,6 +13,7 @@ import {
     TransferCertificateCommand
 } from '@energyweb/issuer-api';
 import { TransactionPollService } from './transaction-poll.service';
+import { IIssuedCertificate } from '../types';
 
 export const blockchainQueueName = 'blockchain-actions';
 
@@ -46,7 +47,16 @@ export class BlockchainActionsProcessor {
         }
     }
 
-    async process({ data }: Job<BlockchainAction>): Promise<unknown> {
+    async process({
+        data
+    }: Job<BlockchainAction>): Promise<
+        | BatchIssuanceActionResult
+        | BatchTransferActionResult
+        | BatchClaimActionResult
+        | IssuanceActionResult<any>
+        | TransferActionResult
+        | ClaimActionResult
+    > {
         switch (data.type) {
             case BlockchainActionType.Issuance:
                 const issuanceParams = data.payload;
@@ -69,7 +79,10 @@ export class BlockchainActionsProcessor {
                     issuanceTx.hash
                 );
 
-                return issuanceCertificates[0];
+                return {
+                    certificate: (issuanceCertificates[0] as unknown) as IIssuedCertificate,
+                    transactionHash: issuanceTx.hash
+                };
 
             case BlockchainActionType.Transfer:
                 const transferParams = data.payload;
@@ -84,7 +97,9 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
-                return await this.transactionPoll.waitForTransaction(transferTx.hash);
+                await this.transactionPoll.waitForTransaction(transferTx.hash);
+
+                return { transactionHash: transferTx.hash };
 
             case BlockchainActionType.Claim:
                 const claimParams = data.payload;
@@ -99,7 +114,9 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
-                return await this.transactionPoll.waitForTransaction(claimTx.hash);
+                await this.transactionPoll.waitForTransaction(claimTx.hash);
+
+                return { transactionHash: claimTx.hash };
 
             case BlockchainActionType.BatchIssuance:
                 const batchIssuanceParams = data.payload;
@@ -124,7 +141,10 @@ export class BlockchainActionsProcessor {
                     batchIssuanceTx.hash
                 );
 
-                return batchIssuanceCertificates.map((c) => c.id);
+                return {
+                    certificateIds: batchIssuanceCertificates.map((c) => c.id),
+                    transactionHash: batchIssuanceTx.hash
+                };
 
             case BlockchainActionType.BatchTransfer:
                 const batchTransferParams = data.payload;
@@ -143,7 +163,11 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
-                return await this.transactionPoll.waitForTransaction(batchTransferTx.hash);
+                await this.transactionPoll.waitForTransaction(batchTransferTx.hash);
+
+                return {
+                    transactionHash: batchTransferTx.hash
+                };
 
             case BlockchainActionType.BatchClaim:
                 const batchClaimParams = data.payload;
@@ -162,7 +186,29 @@ export class BlockchainActionsProcessor {
                     )
                 );
 
-                return await this.transactionPoll.waitForTransaction(batchClaimTx.hash);
+                await this.transactionPoll.waitForTransaction(batchClaimTx.hash);
+
+                return {
+                    transactionHash: batchClaimTx.hash
+                };
         }
     }
 }
+
+type TransactionHashResult = {
+    transactionHash: string;
+};
+
+export type BatchIssuanceActionResult = { certificateIds: number[] } & TransactionHashResult;
+
+export type BatchTransferActionResult = TransactionHashResult;
+
+export type BatchClaimActionResult = TransactionHashResult;
+
+export type IssuanceActionResult<MetadataType> = {
+    certificate: IIssuedCertificate<MetadataType>;
+} & TransactionHashResult;
+
+export type TransferActionResult = TransactionHashResult;
+
+export type ClaimActionResult = TransactionHashResult;

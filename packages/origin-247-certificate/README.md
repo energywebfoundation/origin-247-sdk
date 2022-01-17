@@ -131,14 +131,25 @@ and then on-request to synchronize it with a blockchain (internally it uses `OnC
 
 ### Usage
 
-`OffChainCertificateService` exposes interface identical to on-chain version.
-The only difference is returned certificate interface. It returns _read model_, which is off-chain representation.
+`OffChainCertificateService` exposes interface extending on-chain version.
+The main difference is the returned certificate interface. It returns _read model_, which is off-chain representation.
 
 It has two fields: `internalCertificateId: number` and `blockchainCertificateId: number | null` instead of one `certificateId`. `internalCertificateId` is used for any communication through `OffChainCertificateService`. But if you want to find certificate in `OnChainCertificateService` you need to use `blockchainCertificateId` which is it's on-chain id. `blockchainCertificateId` can be null if it was not synchronized yet.
 
 **Synchronization doesn't happen automatically.** You need to manually call `BlockchainSynchronizationService.synchronize` in your application. This gives you the flexibility to synchronize everything in cron or manually after some set of events happen.
 
 Off-chain implementation performs few retries if _persisting_ events on blockchain fails (e.g. due to network problems)
+
+Additional `OffChainCertificateService` methods not available in on-chain version:
+
+-   `issueWithTxHash`
+-   `claimWithTxHash`
+-   `transferWithTxHash`
+-   `batchIssueWithTxHash`
+-   `batchClaimWithTxHash`
+-   `batchTransferWithTxHash`
+
+They trigger regular methods under the hood, except that they return transaction hash alongside of regular return value.
 
 ### Testing
 

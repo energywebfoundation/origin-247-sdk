@@ -8,7 +8,7 @@ import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
 import { IClaim } from '@energyweb/issuer';
 import { Job, Queue } from 'bull';
-import { BlockchainAction, BlockchainActionType, ICertificate, ISuccessResponse } from './types';
+import { BlockchainAction, BlockchainActionType, ICertificate } from './types';
 import {
     IClaimCommand,
     IIssueCommand,
@@ -16,7 +16,15 @@ import {
     IIssuedCertificate,
     ITransferCommand
 } from '../types';
-import { blockchainQueueName } from './blockchain-actions.processor';
+import {
+    BatchClaimActionResult,
+    BatchIssuanceActionResult,
+    BatchTransferActionResult,
+    blockchainQueueName,
+    ClaimActionResult,
+    IssuanceActionResult,
+    TransferActionResult
+} from './blockchain-actions.processor';
 
 const jobOptions = {
     // redis cleanup
@@ -44,7 +52,7 @@ export class OnChainCertificateService<T = null> {
         return certificate ? this.mapCertificate(certificate) : null;
     }
 
-    public async issue(params: IIssueCommandParams<T>): Promise<IIssuedCertificate<T>> {
+    public async issueWithTxHash(params: IIssueCommandParams<T>): Promise<IssuanceActionResult<T>> {
         const command = {
             ...params,
             fromTime: Math.round(params.fromTime.getTime() / 1000),
@@ -59,12 +67,16 @@ export class OnChainCertificateService<T = null> {
             jobOptions
         );
 
-        const result = await this.waitForJobResult(job);
-
-        return this.mapCertificate(result);
+        return await OnChainCertificateService.waitForJobResult<IssuanceActionResult<T>>(job);
     }
 
-    public async claim(command: IClaimCommand): Promise<void> {
+    public async issue(params: IIssueCommandParams<T>): Promise<IIssuedCertificate<T>> {
+        const { certificate } = await this.issueWithTxHash(params);
+
+        return this.mapCertificate(certificate);
+    }
+
+    public async claimWithTxHash(command: IClaimCommand): Promise<ClaimActionResult> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -73,12 +85,14 @@ export class OnChainCertificateService<T = null> {
             jobOptions
         );
 
-        const result = await this.waitForJobResult(job);
-
-        return result;
+        return await OnChainCertificateService.waitForJobResult(job);
     }
 
-    public async transfer(command: ITransferCommand): Promise<void> {
+    public async claim(command: IClaimCommand): Promise<void> {
+        await this.claimWithTxHash(command);
+    }
+
+    public async transferWithTxHash(command: ITransferCommand): Promise<TransferActionResult> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -87,16 +101,16 @@ export class OnChainCertificateService<T = null> {
             jobOptions
         );
 
-        const result = await this.waitForJobResult(job);
-
-        return result;
+        return await OnChainCertificateService.waitForJobResult(job);
     }
 
-    public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
-        if (originalCertificates.length === 0) {
-            return [];
-        }
+    public async transfer(command: ITransferCommand): Promise<void> {
+        await this.transferWithTxHash(command);
+    }
 
+    public async batchIssueWithTxHash(
+        originalCertificates: IIssueCommandParams<T>[]
+    ): Promise<BatchIssuanceActionResult> {
         const certificates = originalCertificates.map(
             (certificate) =>
                 ({
@@ -116,16 +130,20 @@ export class OnChainCertificateService<T = null> {
             jobOptions
         );
 
-        const result: number[] = await this.waitForJobResult(job);
-
-        return result;
+        return await OnChainCertificateService.waitForJobResult(job);
     }
 
-    public async batchClaim(command: IClaimCommand[]): Promise<void> {
-        if (command.length === 0) {
-            return;
+    public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
+        if (originalCertificates.length === 0) {
+            return [];
         }
 
+        const { certificateIds } = await this.batchIssueWithTxHash(originalCertificates);
+
+        return certificateIds;
+    }
+
+    public async batchClaimWithTxHash(command: IClaimCommand[]): Promise<BatchClaimActionResult> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: {
@@ -136,16 +154,20 @@ export class OnChainCertificateService<T = null> {
             jobOptions
         );
 
-        const result = await this.waitForJobResult(job);
-
-        return result;
+        return await OnChainCertificateService.waitForJobResult(job);
     }
 
-    public async batchTransfer(command: ITransferCommand[]): Promise<void> {
+    public async batchClaim(command: IClaimCommand[]): Promise<void> {
         if (command.length === 0) {
             return;
         }
 
+        await this.batchClaimWithTxHash(command);
+    }
+
+    public async batchTransferWithTxHash(
+        command: ITransferCommand[]
+    ): Promise<BatchTransferActionResult> {
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: {
@@ -156,9 +178,15 @@ export class OnChainCertificateService<T = null> {
             jobOptions
         );
 
-        const result = await this.waitForJobResult(job);
+        return await OnChainCertificateService.waitForJobResult(job);
+    }
 
-        return result;
+    public async batchTransfer(command: ITransferCommand[]): Promise<void> {
+        if (command.length === 0) {
+            return;
+        }
+
+        await this.batchTransferWithTxHash(command);
     }
 
     private mapCertificate<P extends { metadata: any; claims: IClaim[] }>(
@@ -172,7 +200,9 @@ export class OnChainCertificateService<T = null> {
         };
     }
 
-    private async waitForJobResult(job: Job<BlockchainAction>): Promise<any> {
+    private static async waitForJobResult<ActionResult>(
+        job: Job<BlockchainAction>
+    ): Promise<ActionResult> {
         try {
             return await job.finished();
         } catch (e) {

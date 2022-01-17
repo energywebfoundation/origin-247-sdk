@@ -46,7 +46,8 @@ describe('CertificateReadModelRepository', () => {
                 '0x1': '100'
             },
             claimers: {},
-            isSynced: false
+            isSynced: false,
+            transactions: []
         };
         await certificateReadModelRepository.save(certificateReadModel);
         const saved = await certificateReadModelRepository.getByInternalCertificateId(1);
@@ -69,7 +70,8 @@ describe('CertificateReadModelRepository', () => {
                 '0x1': '100'
             },
             claimers: {},
-            isSynced: false
+            isSynced: false,
+            transactions: []
         };
         await certificateReadModelRepository.save(certificateReadModel);
         certificateReadModel.owners = { '0x1': '50' };
