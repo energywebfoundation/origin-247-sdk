@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.2.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.1.0...@energyweb/origin-247-certificate@3.2.0) (2022-01-17)
+
+
+### Features
+
+* add transactions logs to certificate model ([#70](https://github.com/energywebfoundation/origin-247-sdk/issues/70)) ([22f66ce](https://github.com/energywebfoundation/origin-247-sdk/commit/22f66ce827f71b809e7e92923ae1f8705dd2df6e))
+
+
+
+
+
 # [3.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.0.0...@energyweb/origin-247-certificate@3.1.0) (2022-01-14)
 
 
