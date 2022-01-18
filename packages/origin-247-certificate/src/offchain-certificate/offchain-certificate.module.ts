@@ -40,14 +40,8 @@ import { ENTITY_MANAGER, InMemoryEntityManager } from './utils/entity-manager';
 import { EntityManager } from 'typeorm';
 import { BlockchainSynchronizeQueuedService } from './synchronize/blockchain-synchronize-queued.service';
 import { BlockchainSynchronizeSyncService } from './synchronize/blockchain-synchronize-sync.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import configuration from './config/configuration';
-import { Configuration } from './config/config.interface';
-
-const serviceProvider = {
-    provide: OFFCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    useClass: OffchainCertificateService
-};
 
 @Module({
     providers: [
