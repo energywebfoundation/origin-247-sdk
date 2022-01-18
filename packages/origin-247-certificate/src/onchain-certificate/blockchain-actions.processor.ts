@@ -14,7 +14,7 @@ import {
 } from '@energyweb/issuer-api';
 import { TransactionPollService } from './transaction-poll.service';
 import { ConfigService } from '@nestjs/config';
-import { Configuration } from './offchain-certificate/config/config.interface';
+import { Configuration } from '../offchain-certificate/config/config.interface';
 import { IIssuedCertificate } from '../types';
 
 export const blockchainQueueName = 'blockchain-actions';
