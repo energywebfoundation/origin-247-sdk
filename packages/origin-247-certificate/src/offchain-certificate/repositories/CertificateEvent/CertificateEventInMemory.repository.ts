@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Optional } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateEventEntity } from './CertificateEvent.entity';
 import { CertificateEventRepository, SynchronizableEvent } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
