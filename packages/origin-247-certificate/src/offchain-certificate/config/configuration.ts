@@ -8,8 +8,9 @@ const configuration = (): Configuration => ({
     DB_PASSWORD: process.env.DB_PASSWORD ?? 'postgres',
     DB_DATABASE: process.env.DB_DATABASE ?? 'origin',
     CERTIFICATE_QUEUE_DELAY: Number(process.env.CERTIFICATE_QUEUE_DELAY) ?? 10000,
-    CERTIFICATE_QUEUE_LOCK_DURATION:
-        Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION) ?? 240 * 1000,
+    CERTIFICATE_QUEUE_LOCK_DURATION: Number(
+        process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000
+    ),
     REDIS_URL: process.env.REDIS_URL ?? { host: 'localhost', port: 6379 },
     MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT: process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT
         ? Number(process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT)

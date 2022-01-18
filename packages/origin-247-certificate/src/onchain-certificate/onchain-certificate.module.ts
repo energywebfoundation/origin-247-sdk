@@ -36,7 +36,7 @@ const realCertificateProvider = {
         BullModule.registerQueue({
             name: blockchainQueueName,
             settings: {
-                lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION) ?? 240 * 1000
+                lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
             }
         })
     ]

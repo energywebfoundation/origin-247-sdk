@@ -221,6 +221,23 @@ describe('CertificateEventRepository', () => {
             expect(certs).toHaveLength(1);
         });
 
+        it('should return no events if they exceed retry attempts limit', async () => {
+            const [event] = await prepareEvents(
+                new CertificateIssuedEvent(1, createIssueCommand())
+            );
+            await certificateEventRepository.updateAttempt({
+                eventId: event.id,
+                error: 'error'
+            });
+            await certificateEventRepository.updateAttempt({
+                eventId: event.id,
+                error: 'error'
+            });
+
+            const certs = await certificateEventRepository.getAllNotProcessed();
+            expect(certs).toHaveLength(0);
+        });
+
         it('should return no events when error occurred on them', async () => {
             const [event] = await prepareEvents(
                 new CertificateIssuedEvent(1, createIssueCommand())
