@@ -21,7 +21,6 @@ specifiers:
   '@material-ui/core': v5.0.0-beta.4
   '@nestjs/bull': 0.4.2
   '@nestjs/common': 8.1.1
-  '@nestjs/config': 1.0.2
   '@nestjs/core': 8.1.1
   '@nestjs/cqrs': 8.0.0
   '@nestjs/passport': 8.0.1
@@ -102,7 +101,6 @@ dependencies:
   '@material-ui/core': 5.0.0-beta.4_4b3229e895aa2d1f531244063c252253
   '@nestjs/bull': 0.4.2_8f8d273ac0a7b5eb0ebd21a8e6d9cacc
   '@nestjs/common': 8.1.1_dbe81b9c124a4a10925175ba43da462c
-  '@nestjs/config': 1.0.2_@nestjs+common@8.1.1+rxjs@7.4.0
   '@nestjs/core': 8.1.1_c61325c549df9179cfcf0b654c38155b
   '@nestjs/cqrs': 8.0.0_b457605c9b03e3cb14f0ae0de25590d0
   '@nestjs/passport': 8.0.1_ffae082f76a0d650160489d0fb86ad44
@@ -2161,6 +2159,21 @@ packages:
       lodash.get: 4.4.2
       lodash.has: 4.5.2
       lodash.set: 4.3.2
+      rxjs: 7.4.0
+      uuid: 8.3.2
+    dev: false
+
+  /@nestjs/config/1.1.6_@nestjs+common@8.1.1+rxjs@7.4.0:
+    resolution: {integrity: sha512-HYizKt6Dr6gcZl8FmZbTfQxP0MG8oXMh+gVFT0XCwYDAq26BOKyhPsIxrKsryicVeKViRgetCUhlJY9EqaekZA==}
+    peerDependencies:
+      '@nestjs/common': ^7.0.0 || ^8.0.0
+      reflect-metadata: ^0.1.13
+      rxjs: ^6.0.0 || ^7.2.0
+    dependencies:
+      '@nestjs/common': 8.1.1_dbe81b9c124a4a10925175ba43da462c
+      dotenv: 10.0.0
+      dotenv-expand: 5.1.0
+      lodash: 4.17.21
       rxjs: 7.4.0
       uuid: 8.3.2
     dev: false
@@ -13671,6 +13684,7 @@ packages:
       '@energyweb/utils-general': 11.0.5-alpha.1636552048.0
       '@nestjs/bull': 0.4.2_8f8d273ac0a7b5eb0ebd21a8e6d9cacc
       '@nestjs/common': 8.1.1_dbe81b9c124a4a10925175ba43da462c
+      '@nestjs/config': 1.1.6_@nestjs+common@8.1.1+rxjs@7.4.0
       '@nestjs/core': 8.1.1_c61325c549df9179cfcf0b654c38155b
       '@nestjs/cqrs': 8.0.0_b457605c9b03e3cb14f0ae0de25590d0
       '@nestjs/passport': 8.0.1_ffae082f76a0d650160489d0fb86ad44

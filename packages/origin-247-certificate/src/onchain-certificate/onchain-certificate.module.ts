@@ -8,6 +8,8 @@ import { OnChainCertificateService } from './onchain-certificate.service';
 import { BlockchainActionsProcessor, blockchainQueueName } from './blockchain-actions.processor';
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from './types';
 import { CertificateUpdatedHandler } from './certificate-updated.handler';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Configuration } from './offchain-certificate/config/config.interface';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -27,12 +29,16 @@ const realCertificateProvider = {
             enableCertificationRequest: false,
             enableTransactionLogging: true
         }),
+        ConfigModule.forRoot(),
         CqrsModule,
-        BullModule.registerQueue({
+        BullModule.registerQueueAsync({
             name: blockchainQueueName,
-            settings: {
-                lockDuration: Number(process.env.CERTIFICATE_QUEUE_LOCK_DURATION ?? 240 * 1000)
-            }
+            imports: [ConfigService],
+            useFactory: (configService: ConfigService<Configuration>) => ({
+                settings: {
+                    lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
+                }
+            })
         })
     ]
 })
