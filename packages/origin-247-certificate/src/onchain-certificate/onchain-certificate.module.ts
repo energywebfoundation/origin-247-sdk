@@ -24,8 +24,7 @@ const realCertificateProvider = {
     exports: [realCertificateProvider],
     imports: [
         IssuerModule.register({
-            enableCertificationRequest: false,
-            enableTransactionLogging: true
+            enableCertificationRequest: false
         }),
         CqrsModule,
         BullModule.registerQueue({
