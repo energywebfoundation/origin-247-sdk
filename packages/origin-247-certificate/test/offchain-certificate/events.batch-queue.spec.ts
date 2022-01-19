@@ -1,5 +1,7 @@
-import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
-import { SynchronizableEvent } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
+import {
+    CertificateEventType,
+    ICertificateEvent
+} from '../../src/offchain-certificate/events/Certificate.events';
 import { EventsBatchQueue } from '../../src/offchain-certificate/synchronize/strategies/batch/events.batch-queue';
 
 describe('EventsBatchQueue', () => {
@@ -17,8 +19,11 @@ describe('EventsBatchQueue', () => {
                 id: 0,
                 type: CertificateEventType.Issued,
                 commandId: 1,
-                payload: {}
-            } as SynchronizableEvent;
+                payload: {},
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 1
+            } as ICertificateEvent;
             const events = [eventStub];
 
             const eventsBatchQueue = new EventsBatchQueue(events);
@@ -28,20 +33,22 @@ describe('EventsBatchQueue', () => {
         it('should return false if there are two events on queue', async () => {
             const eventStub = {
                 id: 0,
-                internalCertificateId: 0,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date()
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 1
+            } as ICertificateEvent;
             const otherEventStub = {
-                id: 0,
-                internalCertificateId: 1,
+                id: 1,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date()
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 2
+            } as ICertificateEvent;
             const events = [eventStub, otherEventStub];
 
             const eventsBatchQueue = new EventsBatchQueue(events);
@@ -62,12 +69,13 @@ describe('EventsBatchQueue', () => {
         it('should return empty array if there are no events after processing everything', async () => {
             const eventStub = {
                 id: 0,
-                internalCertificateId: 0,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date(1)
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 1
+            } as ICertificateEvent;
             const events = [eventStub];
 
             const eventsBatchQueue = new EventsBatchQueue(events);
@@ -79,20 +87,22 @@ describe('EventsBatchQueue', () => {
         it('should return all events if they are for different certificates', async () => {
             const eventStub = {
                 id: 0,
-                internalCertificateId: 0,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date()
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 1
+            } as ICertificateEvent;
             const otherEventStup = {
-                id: 0,
-                internalCertificateId: 1,
+                id: 1,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date()
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 2
+            } as ICertificateEvent;
             const events = [eventStub, otherEventStup];
 
             const eventsBatchQueue = new EventsBatchQueue(events);
@@ -103,20 +113,22 @@ describe('EventsBatchQueue', () => {
         it('should return only first event if they are for the same certificate', async () => {
             const eventStub = {
                 id: 0,
-                internalCertificateId: 0,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date(1)
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:30:00.000Z'),
+                internalCertificateId: 1
+            } as ICertificateEvent;
             const earlierEvent = {
-                id: 0,
-                internalCertificateId: 0,
+                id: 1,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date(0)
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 1
+            } as ICertificateEvent;
             const events = [eventStub, earlierEvent];
 
             const eventsBatchQueue = new EventsBatchQueue(events);
@@ -134,16 +146,18 @@ describe('EventsBatchQueue', () => {
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date()
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z')
+            } as ICertificateEvent;
             const otherEventStup = {
-                id: 0,
+                id: 1,
                 internalCertificateId,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date()
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z')
+            } as ICertificateEvent;
             const events = [eventStub, otherEventStup];
             const eventsBatchQueue = new EventsBatchQueue(events);
 
@@ -155,24 +169,26 @@ describe('EventsBatchQueue', () => {
         it('should remove only the events for specific certificate', async () => {
             const eventStub = {
                 id: 0,
-                internalCertificateId: 0,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date(1)
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 1
+            } as ICertificateEvent;
             const eventForDifferentCertificate = {
-                id: 0,
-                internalCertificateId: 1,
+                id: 1,
                 type: CertificateEventType.Issued,
                 commandId: 1,
                 payload: {},
-                createdAt: new Date(0)
-            } as SynchronizableEvent;
+                version: 1,
+                createdAt: new Date('2020-01-01T01:00:00.000Z'),
+                internalCertificateId: 2
+            } as ICertificateEvent;
             const events = [eventStub, eventForDifferentCertificate];
             const eventsBatchQueue = new EventsBatchQueue(events);
 
-            eventsBatchQueue.removeEventsForCertificateIds([0]);
+            eventsBatchQueue.removeEventsForCertificateIds([1]);
 
             expect(eventsBatchQueue.popBatch()).toEqual([eventForDifferentCertificate]);
         });

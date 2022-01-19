@@ -5,7 +5,7 @@
     "types": "./dist/js/src/index.d.ts",
     "scripts": {
         "test:unit": "jest --testRegex '\\.spec.ts$'",
-        "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8545 && yarn drop && yarn migrate && jest --maxWorkers 1 --testRegex '.e2e-spec.ts$'\"",
+        "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8545 && yarn drop && yarn migrate && jest --maxWorkers 1 --testRegex '\\.e2e-spec.ts$'\"",
         "build": "tsc -b tsconfig.json",
         "migrate": "yarn typeorm:run && yarn typeorm:run:issuer",
         "typeorm": "ts-node -r tsconfig-paths/register node_modules/typeorm/cli.js --config ormconfig-dev.ts",

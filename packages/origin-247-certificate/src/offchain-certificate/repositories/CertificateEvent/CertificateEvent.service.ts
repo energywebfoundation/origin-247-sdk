@@ -1,12 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-
-import { CertificateEventEntity } from './CertificateEvent.entity';
-import {
-    CertificateEventRepository,
-    SynchronizableEvent,
-    SynchronizableEventType
-} from './CertificateEvent.repository';
+import { CertificateEventRepository } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../repository.keys';
 import { ENTITY_MANAGER } from '../../utils/entity-manager';
@@ -20,10 +14,7 @@ export class CertificateEventService {
         private entityManager: EntityManager
     ) {}
 
-    public async save(
-        event: ICertificateEvent,
-        commandId: number
-    ): Promise<CertificateEventEntity> {
+    public async save(event: ICertificateEvent, commandId: number): Promise<ICertificateEvent> {
         return await this.entityManager.transaction(async (txManager) => {
             const savedEvent = await this.certificateEventRepository.save(
                 {
@@ -48,13 +39,13 @@ export class CertificateEventService {
         });
     }
 
-    private shouldBeSynchronized(event: CertificateEventEntity): event is SynchronizableEvent {
+    private shouldBeSynchronized(event: ICertificateEvent): boolean {
         const synchronizableEventTypes = [
             CertificateEventType.Issued,
             CertificateEventType.Claimed,
             CertificateEventType.Transferred
-        ] as SynchronizableEventType[];
+        ];
 
-        return synchronizableEventTypes.includes(event.type as SynchronizableEventType);
+        return synchronizableEventTypes.includes(event.type);
     }
 }
