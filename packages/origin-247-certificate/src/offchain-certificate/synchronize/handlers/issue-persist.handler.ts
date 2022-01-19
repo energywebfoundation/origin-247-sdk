@@ -5,14 +5,13 @@ import { CertificateEventEntity } from '../../repositories/CertificateEvent/Cert
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { chunk } from 'lodash';
-import { SynchronizeHandler } from './synchronize.handler';
 import {
     BATCH_CONFIGURATION_TOKEN,
     BatchConfiguration
 } from '../strategies/batch/batch.configuration';
 
 @Injectable()
-export class IssuePersistHandler implements SynchronizeHandler {
+export class IssuePersistHandler {
     constructor(
         @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: OnChainCertificateService<unknown>,
@@ -21,12 +20,8 @@ export class IssuePersistHandler implements SynchronizeHandler {
         private batchConfiguration: BatchConfiguration
     ) {}
 
-    public canHandle(event: CertificateEventEntity) {
-        return event.type === CertificateEventType.Issued;
-    }
-
-    async synchronizeBatchBlock(
-        events: CertificateEventEntity[]
+    private async synchronizeBatchBlock(
+        events: CertificateIssuedEvent[]
     ): Promise<{ failedCertificateIds: number[] }> {
         try {
             const {
@@ -34,7 +29,7 @@ export class IssuePersistHandler implements SynchronizeHandler {
                 transactionHash
             } = await this.certificateService.batchIssueWithTxHash(
                 events
-                    .map((issuedEvent) => issuedEvent.payload as CertificateIssuedEvent['payload'])
+                    .map((issuedEvent) => issuedEvent.payload)
                     .map((payload) => ({
                         ...payload,
                         fromTime: new Date(payload.fromTime * 1000),
@@ -69,7 +64,7 @@ export class IssuePersistHandler implements SynchronizeHandler {
         }
     }
 
-    async handleBatch(events: CertificateEventEntity[]) {
+    async handleBatch(events: CertificateIssuedEvent[]) {
         const eventsBlocks = chunk(events, this.batchConfiguration.issueBatchSize);
         const failedCertificateIds: number[] = [];
 

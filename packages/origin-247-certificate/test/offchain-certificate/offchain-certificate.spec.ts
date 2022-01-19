@@ -13,6 +13,7 @@ import {
 import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
 import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../src/offchain-certificate/repositories/repository.keys';
+import { CertificateForUnitTestsService } from '../../src/onchain-certificate/onchain-certificateForUnitTests.service';
 
 describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
     let app: TestingModule;
@@ -129,6 +130,10 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
 
             await app.init();
         };
+
+        afterEach(async () => {
+            await app.close();
+        });
 
         it('should fail batch on issue persistance', async () => {
             await setup('issue');
@@ -278,6 +283,48 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
 
         afterEach(async () => {
             await app.close();
+        });
+    });
+
+    describe('Difference between internal and blockchain certificate id', () => {
+        beforeEach(async () => {
+            app = await Test.createTestingModule({
+                imports: [getNotAlignedIdsModuleForUnitTests()]
+            }).compile();
+
+            offChainCertificateService = await app.resolve(OffChainCertificateService);
+            synchronizeService = await app.resolve(BlockchainSynchronizeService);
+            onChainCertificateService = await app.resolve(ONCHAIN_CERTIFICATE_SERVICE_TOKEN);
+            certificateEventRepository = await app.resolve(CERTIFICATE_EVENT_REPOSITORY);
+
+            await app.init();
+        });
+
+        afterEach(async () => {
+            await app.close();
+        });
+
+        it('Correctly transfers and claim not aligned certificate id', async () => {
+            const id = await offChainCertificateService.issue(issueCommand);
+
+            await offChainCertificateService.transfer({
+                certificateId: id,
+                ...transferCommand
+            });
+
+            await offChainCertificateService.claim({
+                certificateId: id,
+                ...claimCommand
+            });
+
+            await synchronizeService.synchronize();
+
+            const certificate = await offChainCertificateService.getById(id);
+            const onChainCertificate = await onChainCertificateService.getById(
+                certificate!.blockchainCertificateId!
+            );
+
+            expect(onChainCertificate).toEqual(expectedCertificate);
         });
     });
 });
@@ -473,6 +520,26 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
             {
                 provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
                 useClass: CertificateForUnitTestsService
+            }
+        ],
+        exports: [ONCHAIN_CERTIFICATE_SERVICE_TOKEN]
+    })
+    class FailingOnChainModuleForUnitTests {}
+
+    return OffChainCertificateForUnitTestsModule.register(FailingOnChainModuleForUnitTests);
+};
+
+const getNotAlignedIdsModuleForUnitTests = () => {
+    @Injectable()
+    class CertificateNotAlignedTestsService<T> extends CertificateForUnitTestsService<T> {
+        protected serial = 100;
+    }
+
+    @Module({
+        providers: [
+            {
+                provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+                useClass: CertificateNotAlignedTestsService
             }
         ],
         exports: [ONCHAIN_CERTIFICATE_SERVICE_TOKEN]

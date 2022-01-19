@@ -13,14 +13,13 @@ import {
 import {
     CertificateClaimedEvent,
     CertificateClaimPersistedEvent,
-    CertificateEventType,
     CertificateIssuancePersistedEvent,
     CertificateIssuedEvent,
     CertificatePersistErrorEvent,
     CertificateTransferPersistedEvent,
     CertificateTransferredEvent,
     ICertificateEvent,
-    PersistedEvent
+    isPersistedEvent
 } from './events/Certificate.events';
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
@@ -75,7 +74,7 @@ export class OffChainCertificateService<T = null> {
         } as IIssueCommand<T>;
 
         const savedCommand = await this.certCommandRepo.save({ payload: command });
-        const event = new CertificateIssuedEvent(
+        const event = CertificateIssuedEvent.createNew(
             await this.generateInternalCertificateId(),
             command
         );
@@ -87,14 +86,14 @@ export class OffChainCertificateService<T = null> {
 
     public async claim(command: IClaimCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
-        const event = new CertificateClaimedEvent(command.certificateId, command);
+        const event = CertificateClaimedEvent.createNew(command.certificateId, command);
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
     }
 
     public async transfer(command: ITransferCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
-        const event = new CertificateTransferredEvent(command.certificateId, command);
+        const event = CertificateTransferredEvent.createNew(command.certificateId, command);
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
     }
@@ -105,7 +104,7 @@ export class OffChainCertificateService<T = null> {
     ): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
 
-        const event = new CertificateIssuancePersistedEvent(internalCertificateId, command);
+        const event = CertificateIssuancePersistedEvent.createNew(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
@@ -117,7 +116,7 @@ export class OffChainCertificateService<T = null> {
     ): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
 
-        const event = new CertificateClaimPersistedEvent(internalCertificateId, command);
+        const event = CertificateClaimPersistedEvent.createNew(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
@@ -129,7 +128,7 @@ export class OffChainCertificateService<T = null> {
     ): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
 
-        const event = new CertificateTransferPersistedEvent(internalCertificateId, command);
+        const event = CertificateTransferPersistedEvent.createNew(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate);
@@ -141,7 +140,7 @@ export class OffChainCertificateService<T = null> {
     ): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
 
-        const event = new CertificatePersistErrorEvent(internalCertificateId, command);
+        const event = CertificatePersistErrorEvent.createNew(internalCertificateId, command);
 
         const aggregate = await this.createAggregate([event]);
         await this.propagate(event, savedCommand, aggregate, command.errorMessage);
@@ -185,7 +184,7 @@ export class OffChainCertificateService<T = null> {
         try {
             commands.forEach(async (c) => {
                 CertificateAggregate.fromEvents([
-                    new CertificateIssuedEvent(await this.generateInternalCertificateId(), c)
+                    CertificateIssuedEvent.createNew(await this.generateInternalCertificateId(), c)
                 ]);
             });
         } catch (err) {
@@ -199,7 +198,7 @@ export class OffChainCertificateService<T = null> {
         try {
             for (const certificateId in grouped) {
                 const events = grouped[certificateId].map((c) => {
-                    return new CertificateClaimedEvent(parseInt(certificateId), c);
+                    return CertificateClaimedEvent.createNew(parseInt(certificateId), c);
                 });
                 await this.createAggregate(events);
             }
@@ -214,7 +213,7 @@ export class OffChainCertificateService<T = null> {
         try {
             for (const certificateId in grouped) {
                 const events = grouped[certificateId].map((c) => {
-                    return new CertificateTransferredEvent(parseInt(certificateId), c);
+                    return CertificateTransferredEvent.createNew(parseInt(certificateId), c);
                 });
                 await this.createAggregate(events);
             }
@@ -248,16 +247,9 @@ export class OffChainCertificateService<T = null> {
         await this.readModelRepo.save(aggregate.getCertificate()!);
         const savedEvent = await this.certificateEventService.save(event, command.id);
 
-        if (
-            [
-                CertificateEventType.ClaimPersisted,
-                CertificateEventType.IssuancePersisted,
-                CertificateEventType.TransferPersisted,
-                CertificateEventType.PersistError
-            ].includes(event.type)
-        ) {
+        if (isPersistedEvent(savedEvent)) {
             await this.certEventRepo.updateAttempt({
-                eventId: (savedEvent as PersistedEvent).payload.persistedEventId,
+                eventId: savedEvent.payload.persistedEventId,
                 error: errorMessage
             });
         }

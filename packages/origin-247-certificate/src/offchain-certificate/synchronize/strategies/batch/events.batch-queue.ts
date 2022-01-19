@@ -1,19 +1,19 @@
-import { SynchronizableEvent } from '../../../repositories/CertificateEvent/CertificateEvent.repository';
 import { flatten, groupBy } from 'lodash';
+import { ICertificateEvent } from '../../../events/Certificate.events';
 
 type CertificateId = number;
 
 export class EventsBatchQueue {
-    private eventsToProcess: Record<CertificateId, SynchronizableEvent[]> = {};
+    private eventsToProcess: Record<CertificateId, ICertificateEvent[]> = {};
 
-    constructor(events: SynchronizableEvent[]) {
+    constructor(events: ICertificateEvent[]) {
         const sortedEvents = events.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
         this.eventsToProcess = groupBy(sortedEvents, 'internalCertificateId');
     }
 
-    public popBatch(): SynchronizableEvent[] {
-        const eventsToProcess: SynchronizableEvent[] = [];
+    public popBatch(): ICertificateEvent[] {
+        const eventsToProcess: ICertificateEvent[] = [];
 
         Object.entries(this.eventsToProcess).forEach(([certificateId, eventsForCertificate]) => {
             const [firstEvent, ...otherEvents] = eventsForCertificate;

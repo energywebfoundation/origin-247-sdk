@@ -32,7 +32,6 @@ import {
     batchConfiguration
 } from './synchronize/strategies/batch/batch.configuration';
 import { IssuePersistHandler } from './synchronize/handlers/issue-persist.handler';
-import { SynchronizeManager } from './synchronize/handlers/synchronize.manager';
 import { CertificateCommandInMemoryRepository } from './repositories/CertificateCommand/CertificateCommandInMemory.repository';
 import { CertificateEventInMemoryRepository } from './repositories/CertificateEvent/CertificateEventInMemory.repository';
 import { CertificateReadModelInMemoryRepository } from './repositories/CertificateReadModel/CertificateReadModelInMemory.repository';
@@ -76,7 +75,6 @@ import { BlockchainSynchronizeSyncService } from './synchronize/blockchain-synch
         IssuePersistHandler,
         ClaimPersistHandler,
         TransferPersistHandler,
-        SynchronizeManager,
         CertificateEventService
     ],
     exports: [OffChainCertificateService, BlockchainSynchronizeService],
@@ -135,7 +133,6 @@ export class OffChainCertificateForUnitTestsModule {
                 IssuePersistHandler,
                 ClaimPersistHandler,
                 TransferPersistHandler,
-                SynchronizeManager,
                 CertificateEventService
             ],
             exports: [OffChainCertificateService, BlockchainSynchronizeService],
