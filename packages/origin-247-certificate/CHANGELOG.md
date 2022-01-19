@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.2.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.2.0...@energyweb/origin-247-certificate@3.2.1) (2022-01-19)
+
+
+### Bug Fixes
+
+* **origin-247-certificate:** properly map internal id to blockchain id ([626ef5f](https://github.com/energywebfoundation/origin-247-sdk/commit/626ef5f5c798143bf431404ab815b2c981a42fe0))
+
+
+
+
+
 # [3.2.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.1.0...@energyweb/origin-247-certificate@3.2.0) (2022-01-17)
 
 
