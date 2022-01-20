@@ -1,10 +1,10 @@
 import { Column, Entity, Index, PrimaryGeneratedColumn } from 'typeorm';
-import { CertificateEventType } from '../../events/Certificate.events';
+import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 
 export const tableName = 'certificate_event';
 
 @Entity(tableName)
-export class CertificateEventEntity {
+export class CertificateEventEntity implements ICertificateEvent {
     @PrimaryGeneratedColumn()
     id: number;
 

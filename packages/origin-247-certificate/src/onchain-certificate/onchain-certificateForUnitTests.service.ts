@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
 type PublicPart<T> = { [K in keyof T]: T[K] };
 @Injectable()
 export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCertificateService<T>> {
-    private serial = 0;
+    protected serial = 0;
     private db: ICertificate<T>[] = [];
 
     public async getAll(options: IGetAllCertificatesOptions = {}): Promise<ICertificate<T>[]> {

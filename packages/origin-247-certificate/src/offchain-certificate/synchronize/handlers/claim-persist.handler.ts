@@ -5,14 +5,13 @@ import { CertificateEventEntity } from '../../repositories/CertificateEvent/Cert
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { chunk } from 'lodash';
-import { SynchronizeHandler } from './synchronize.handler';
 import {
     BatchConfiguration,
     BATCH_CONFIGURATION_TOKEN
 } from '../strategies/batch/batch.configuration';
 
 @Injectable()
-export class ClaimPersistHandler implements SynchronizeHandler {
+export class ClaimPersistHandler {
     constructor(
         @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: OnChainCertificateService,
@@ -21,16 +20,15 @@ export class ClaimPersistHandler implements SynchronizeHandler {
         private batchConfiguration: BatchConfiguration
     ) {}
 
-    public canHandle(event: CertificateEventEntity) {
-        return event.type === CertificateEventType.Claimed;
-    }
-
-    public async handleBatch(events: CertificateEventEntity[]) {
+    public async handleBatch(
+        events: CertificateClaimedEvent[],
+        blockchainIdMap: Record<number, number>
+    ) {
         const eventsBlocks = chunk(events, this.batchConfiguration.claimBatchSize);
         const failedCertificateIds: number[] = [];
 
         for (const eventsBlock of eventsBlocks) {
-            const result = await this.synchronizeBatchBlock(eventsBlock);
+            const result = await this.synchronizeBatchBlock(eventsBlock, blockchainIdMap);
             failedCertificateIds.push(...result.failedCertificateIds);
         }
 
@@ -38,13 +36,15 @@ export class ClaimPersistHandler implements SynchronizeHandler {
     }
 
     private async synchronizeBatchBlock(
-        events: CertificateEventEntity[]
+        events: CertificateClaimedEvent[],
+        blockchainIdMap: Record<number, number>
     ): Promise<{ failedCertificateIds: number[] }> {
-        const claimedEvents = events as CertificateClaimedEvent[];
-
         try {
             const { transactionHash } = await this.certificateService.batchClaimWithTxHash(
-                claimedEvents.map((event) => event.payload)
+                events.map((event) => ({
+                    ...event.payload,
+                    certificateId: blockchainIdMap[event.internalCertificateId]
+                }))
             );
 
             const promises = events.map(async (event) => {

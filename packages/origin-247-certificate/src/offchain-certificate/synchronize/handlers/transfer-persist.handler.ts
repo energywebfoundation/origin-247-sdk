@@ -1,18 +1,16 @@
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../onchain-certificate/types';
 import { OnChainCertificateService } from '../../../onchain-certificate/onchain-certificate.service';
 import { CertificateEventType, CertificateTransferredEvent } from '../../events/Certificate.events';
-import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { chunk } from 'lodash';
-import { SynchronizeHandler } from './synchronize.handler';
 import {
     BATCH_CONFIGURATION_TOKEN,
     BatchConfiguration
 } from '../strategies/batch/batch.configuration';
 
 @Injectable()
-export class TransferPersistHandler implements SynchronizeHandler {
+export class TransferPersistHandler {
     constructor(
         @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: OnChainCertificateService,
@@ -21,16 +19,16 @@ export class TransferPersistHandler implements SynchronizeHandler {
         private batchConfiguration: BatchConfiguration
     ) {}
 
-    public canHandle(event: CertificateEventEntity) {
-        return event.type === CertificateEventType.Transferred;
-    }
-
-    public async handleBatch(events: CertificateEventEntity[]) {
-        const eventsBlocks = chunk(events, this.batchConfiguration.transferBatchSize);
+    public async handleBatch(
+        events: CertificateTransferredEvent[],
+        blockchainIdMap: Record<number, number>
+    ) {
         const failedCertificateIds: number[] = [];
 
-        for (const eventsBlock of eventsBlocks) {
-            const result = await this.synchronizeBatchBlock(eventsBlock);
+        const eventsBlocks = chunk(events, this.batchConfiguration.transferBatchSize);
+
+        for (const eventBlock of eventsBlocks) {
+            const result = await this.synchronizeBatchBlock(eventBlock, blockchainIdMap);
             failedCertificateIds.push(...result.failedCertificateIds);
         }
 
@@ -38,13 +36,15 @@ export class TransferPersistHandler implements SynchronizeHandler {
     }
 
     private async synchronizeBatchBlock(
-        events: CertificateEventEntity[]
+        events: CertificateTransferredEvent[],
+        blockchainIdMap: Record<number, number>
     ): Promise<{ failedCertificateIds: number[] }> {
-        const transferredEvents = events as CertificateTransferredEvent[];
-
         try {
             const { transactionHash } = await this.certificateService.batchTransferWithTxHash(
-                transferredEvents.map((event) => event.payload)
+                events.map((event) => ({
+                    ...event.payload,
+                    certificateId: blockchainIdMap[event.internalCertificateId]
+                }))
             );
 
             const promises = events.map(async (event) => {

@@ -27,8 +27,7 @@ const realCertificateProvider = {
     exports: [realCertificateProvider],
     imports: [
         IssuerModule.register({
-            enableCertificationRequest: false,
-            enableTransactionLogging: true
+            enableCertificationRequest: false
         }),
         ConfigModule.forRoot({
             isGlobal: true,

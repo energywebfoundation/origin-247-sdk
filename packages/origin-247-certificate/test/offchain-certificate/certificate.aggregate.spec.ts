@@ -8,7 +8,7 @@ import {
 } from '../../src/offchain-certificate/events/Certificate.events';
 import { CertificateErrors } from '../../src/offchain-certificate/errors';
 
-const issuedEvent = new CertificateIssuedEvent(1, {
+const issuedEvent = CertificateIssuedEvent.createNew(1, {
     toAddress: '0x1',
     userId: '1',
     energyValue: '100',
@@ -18,42 +18,42 @@ const issuedEvent = new CertificateIssuedEvent(1, {
     metadata: {}
 });
 
-const transferredEvent = new CertificateTransferredEvent(1, {
+const transferredEvent = CertificateTransferredEvent.createNew(1, {
     certificateId: 1,
     fromAddress: '0x1',
     toAddress: '0x2',
     energyValue: '100'
 });
 
-const smallTransferredEvent = new CertificateTransferredEvent(1, {
+const smallTransferredEvent = CertificateTransferredEvent.createNew(1, {
     certificateId: 1,
     fromAddress: '0x1',
     toAddress: '0x2',
     energyValue: '10'
 });
 
-const fromZeroTransferredEvent = new CertificateTransferredEvent(1, {
+const fromZeroTransferredEvent = CertificateTransferredEvent.createNew(1, {
     certificateId: 1,
     fromAddress: '0x0',
     toAddress: '0x2',
     energyValue: '100'
 });
 
-const toZeroTransferredEvent = new CertificateTransferredEvent(1, {
+const toZeroTransferredEvent = CertificateTransferredEvent.createNew(1, {
     certificateId: 1,
     fromAddress: '0x1',
     toAddress: '0x0',
     energyValue: '100'
 });
 
-const tooBigValueTransferredEvent = new CertificateTransferredEvent(1, {
+const tooBigValueTransferredEvent = CertificateTransferredEvent.createNew(1, {
     certificateId: 1,
     fromAddress: '0x1',
     toAddress: '0x2',
     energyValue: '200'
 });
 
-const claimedEvent = new CertificateClaimedEvent(1, {
+const claimedEvent = CertificateClaimedEvent.createNew(1, {
     certificateId: 1,
     claimData: {
         beneficiary: 'someBeneficiary',
@@ -67,7 +67,7 @@ const claimedEvent = new CertificateClaimedEvent(1, {
     energyValue: '100'
 });
 
-const smallClaimedEvent = new CertificateClaimedEvent(1, {
+const smallClaimedEvent = CertificateClaimedEvent.createNew(1, {
     certificateId: 1,
     claimData: {
         beneficiary: 'someBeneficiary',
@@ -81,7 +81,7 @@ const smallClaimedEvent = new CertificateClaimedEvent(1, {
     energyValue: '10'
 });
 
-const forZeroAddressClaimedEvent = new CertificateClaimedEvent(1, {
+const forZeroAddressClaimedEvent = CertificateClaimedEvent.createNew(1, {
     certificateId: 1,
     claimData: {
         beneficiary: 'someBeneficiary',
@@ -95,7 +95,7 @@ const forZeroAddressClaimedEvent = new CertificateClaimedEvent(1, {
     energyValue: '100'
 });
 
-const tooBigValueClaimedEvent = new CertificateClaimedEvent(1, {
+const tooBigValueClaimedEvent = CertificateClaimedEvent.createNew(1, {
     certificateId: 1,
     claimData: {
         beneficiary: 'someBeneficiary',
@@ -109,13 +109,13 @@ const tooBigValueClaimedEvent = new CertificateClaimedEvent(1, {
     energyValue: '200'
 });
 
-const issuancePersistedEvent = new CertificateIssuancePersistedEvent(1, {
+const issuancePersistedEvent = CertificateIssuancePersistedEvent.createNew(1, {
     blockchainCertificateId: 1,
     persistedEventId: -1,
     transactionHash: 'issuance-persisted-hash'
 });
 
-const transferPersistedEvent = new CertificateTransferPersistedEvent(1, {
+const transferPersistedEvent = CertificateTransferPersistedEvent.createNew(1, {
     persistedEventId: -1,
     transactionHash: 'transfer-persisted-hash'
 });
@@ -180,7 +180,7 @@ describe('CertificateAggregate', () => {
 
         it('should create aggregate from unordered events', () => {
             const aggregate = CertificateAggregate.fromEvents([
-                new CertificateTransferredEvent(1, {
+                CertificateTransferredEvent.createNew(1, {
                     certificateId: 1,
                     fromAddress: '0x1',
                     toAddress: '0x2',
@@ -292,7 +292,7 @@ describe('CertificateAggregate', () => {
         });
 
         it('should transfer all available balance when no energyValue is spiecified', () => {
-            const noValuetransferredEvent = new CertificateTransferredEvent(1, {
+            const noValuetransferredEvent = CertificateTransferredEvent.createNew(1, {
                 certificateId: 1,
                 fromAddress: '0x1',
                 toAddress: '0x2'
@@ -321,7 +321,7 @@ describe('CertificateAggregate', () => {
         });
 
         it('it should throw error when there is no energyValue and no owned volume', () => {
-            const noVolumestransferredEvent = new CertificateTransferredEvent(1, {
+            const noVolumestransferredEvent = CertificateTransferredEvent.createNew(1, {
                 certificateId: 1,
                 fromAddress: '0x2',
                 toAddress: '0x3'
@@ -386,7 +386,7 @@ describe('CertificateAggregate', () => {
         });
 
         it('should claim all available balance when no energyValue was specified', () => {
-            const claimedEvent = new CertificateClaimedEvent(1, {
+            const claimedEvent = CertificateClaimedEvent.createNew(1, {
                 certificateId: 1,
                 claimData: {
                     beneficiary: 'someBeneficiary',
@@ -435,7 +435,7 @@ describe('CertificateAggregate', () => {
         });
 
         it('it should throw error when there is no energyValue and no owned volume', () => {
-            const claimedEvent = new CertificateClaimedEvent(1, {
+            const claimedEvent = CertificateClaimedEvent.createNew(1, {
                 certificateId: 1,
                 claimData: {
                     beneficiary: 'someBeneficiary',

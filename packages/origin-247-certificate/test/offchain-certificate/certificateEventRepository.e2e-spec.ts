@@ -1,16 +1,16 @@
 import { bootstrapTestInstance } from '../setup';
 import { INestApplication } from '@nestjs/common';
-import { DatabaseService } from '@energyweb/origin-backend-utils';
 import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 import {
     CertificateClaimedEvent,
+    CertificateIssuancePersistedEvent,
     CertificateIssuedEvent,
     CertificateTransferredEvent,
     ICertificateEvent
 } from '../../src/offchain-certificate/events/Certificate.events';
+import { IIssuancePersistedCommand } from '../../src/offchain-certificate/types';
 import { IClaimCommand, IIssueCommand, ITransferCommand } from '../../src';
 import { CertificateEventService } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
-import { CertificateEventEntity } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.entity';
 
 jest.setTimeout(20 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
@@ -51,7 +51,7 @@ describe('CertificateEventRepository', () => {
     });
 
     it('should create a certificateEvent', async () => {
-        const event = new CertificateIssuedEvent(1, {
+        const event = CertificateIssuedEvent.createNew(1, {
             toAddress: '0x1',
             toTime: new Date().getTime(),
             fromTime: new Date().getTime(),
@@ -66,7 +66,7 @@ describe('CertificateEventRepository', () => {
     });
 
     it('should find by id', async () => {
-        const event = new CertificateIssuedEvent(1, {
+        const event = CertificateIssuedEvent.createNew(1, {
             toAddress: '0x1',
             toTime: new Date().getTime(),
             fromTime: new Date().getTime(),
@@ -75,13 +75,13 @@ describe('CertificateEventRepository', () => {
             deviceId: 'asdf',
             metadata: {}
         });
-        const otherEvent = new CertificateTransferredEvent(1, {
+        const otherEvent = CertificateTransferredEvent.createNew(1, {
             toAddress: '0x1',
             certificateId: 1,
             energyValue: '100',
             fromAddress: '0x2'
         });
-        const differentEvent = new CertificateIssuedEvent(2, {
+        const differentEvent = CertificateIssuedEvent.createNew(2, {
             toAddress: '0x1',
             toTime: new Date().getTime(),
             fromTime: new Date().getTime(),
@@ -103,7 +103,7 @@ describe('CertificateEventRepository', () => {
         let issuedCerts = await certificateEventRepository.getNumberOfCertificates();
         expect(issuedCerts).toBe(0);
 
-        const event = new CertificateIssuedEvent(issuedCerts + 1, {
+        const event = CertificateIssuedEvent.createNew(issuedCerts + 1, {
             toAddress: '0x1',
             toTime: new Date().getTime(),
             fromTime: new Date().getTime(),
@@ -116,7 +116,7 @@ describe('CertificateEventRepository', () => {
         issuedCerts = await certificateEventRepository.getNumberOfCertificates();
         expect(issuedCerts).toBe(1);
 
-        const otherEvent = new CertificateTransferredEvent(1, {
+        const otherEvent = CertificateTransferredEvent.createNew(1, {
             toAddress: '0x1',
             certificateId: 1,
             energyValue: '100',
@@ -127,7 +127,7 @@ describe('CertificateEventRepository', () => {
         issuedCerts = await certificateEventRepository.getNumberOfCertificates();
         expect(issuedCerts).toBe(1);
 
-        const anotherEvent = new CertificateIssuedEvent(issuedCerts + 1, {
+        const anotherEvent = CertificateIssuedEvent.createNew(issuedCerts + 1, {
             toAddress: '0x1',
             toTime: new Date().getTime(),
             fromTime: new Date().getTime(),
@@ -179,7 +179,7 @@ describe('CertificateEventRepository', () => {
         });
 
         const prepareEvents = async (...events: ICertificateEvent[]) => {
-            const savedEvents: CertificateEventEntity[] = [];
+            const savedEvents: ICertificateEvent[] = [];
 
             for (const event of events) {
                 const savedEvent = await certificateEventService.save(event, 0);
@@ -191,7 +191,7 @@ describe('CertificateEventRepository', () => {
 
         it('should return no events when all are persisted', async () => {
             const [event] = await prepareEvents(
-                new CertificateIssuedEvent(1, createIssueCommand())
+                CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
             await certificateEventRepository.updateAttempt({
                 eventId: event.id
@@ -203,7 +203,7 @@ describe('CertificateEventRepository', () => {
 
         it('should return events with error if they did not exceed retry attempts limit', async () => {
             const [event] = await prepareEvents(
-                new CertificateIssuedEvent(1, createIssueCommand())
+                CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
             await certificateEventRepository.updateAttempt({
                 eventId: event.id,
@@ -233,7 +233,7 @@ describe('CertificateEventRepository', () => {
 
         it('should return no events when error occurred on them', async () => {
             const [event] = await prepareEvents(
-                new CertificateIssuedEvent(1, createIssueCommand())
+                CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
 
             // Prepare 3 failed tries
@@ -258,7 +258,7 @@ describe('CertificateEventRepository', () => {
         });
 
         it('should return issue events when they are not processed', async () => {
-            await prepareEvents(new CertificateIssuedEvent(1, createIssueCommand()));
+            await prepareEvents(CertificateIssuedEvent.createNew(1, createIssueCommand()));
 
             const certs = await certificateEventRepository.getAllNotProcessed();
 
@@ -266,7 +266,7 @@ describe('CertificateEventRepository', () => {
         });
 
         it('should return claim events when they are not processed', async () => {
-            await prepareEvents(new CertificateClaimedEvent(1, createClaimCommand()));
+            await prepareEvents(CertificateClaimedEvent.createNew(1, createClaimCommand()));
 
             const certs = await certificateEventRepository.getAllNotProcessed();
 
@@ -274,11 +274,37 @@ describe('CertificateEventRepository', () => {
         });
 
         it('should return transfer events when they are not processed', async () => {
-            await prepareEvents(new CertificateTransferredEvent(1, createTransferCommand()));
+            await prepareEvents(CertificateTransferredEvent.createNew(1, createTransferCommand()));
 
             const certs = await certificateEventRepository.getAllNotProcessed();
 
             expect(certs).toHaveLength(1);
+        });
+    });
+
+    describe('#getBlockchainIdMap', () => {
+        it('should properly return id map', async () => {
+            const createIssuePersistedCommand = (id: number): IIssuancePersistedCommand => ({
+                blockchainCertificateId: id,
+                persistedEventId: 1,
+                transactionHash: ''
+            });
+
+            await certificateEventService.save(
+                CertificateIssuancePersistedEvent.createNew(1, createIssuePersistedCommand(10)),
+                0
+            );
+
+            await certificateEventService.save(
+                CertificateIssuancePersistedEvent.createNew(2, createIssuePersistedCommand(20)),
+                0
+            );
+
+            const idMap = await certificateEventRepository.getBlockchainIdMap([1, 2, 3]);
+
+            expect(Object.entries(idMap)).toHaveLength(2);
+            expect(idMap[1]).toBe(10);
+            expect(idMap[2]).toBe(20);
         });
     });
 });

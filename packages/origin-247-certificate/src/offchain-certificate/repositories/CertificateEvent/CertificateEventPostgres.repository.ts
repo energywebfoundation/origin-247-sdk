@@ -1,10 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, Repository } from 'typeorm';
-
+import { EntityManager, In, Repository } from 'typeorm';
+import { arrayToMap } from '../../utils/array';
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { CertificateEventRepository, SynchronizableEvent } from './CertificateEvent.repository';
-import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
+import { CertificateEventRepository } from './CertificateEvent.repository';
+import {
+    CertificateEventType,
+    CertificateIssuancePersistedEvent,
+    ICertificateEvent
+} from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
 import { ConfigService } from '@nestjs/config';
 import { Configuration } from '../../config/config.interface';
@@ -40,7 +44,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
     }
 
     public async save(
-        event: ICertificateEvent,
+        event: Omit<ICertificateEvent, 'id'>,
         commandId: number,
         txManager: EntityManager | null
     ): Promise<CertificateEventEntity> {
@@ -93,14 +97,13 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         return synchronizationAttempt;
     }
 
-    public async getAllNotProcessed(): Promise<SynchronizableEvent[]> {
+    public async getAllNotProcessed(): Promise<CertificateEventEntity[]> {
         const query = this.repository
             .createQueryBuilder('event')
             .select([
                 'event.id',
                 'event.internalCertificateId',
                 'event.createdAt',
-                'event.commandId',
                 'event.type',
                 'event.version',
                 'event.payload'
@@ -115,7 +118,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 `(attempt.error IS NOT NULL AND attempt.attempts_count < ${this.maxSynchronizationAttemptsForEvent})`
             );
 
-        return (await query.getMany()) as SynchronizableEvent[];
+        return await query.getMany();
     }
 
     public async getOne(eventId: number): Promise<CertificateEventEntity> {
@@ -126,6 +129,21 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         }
 
         return event;
+    }
+
+    public async getBlockchainIdMap(internalCertIds: number[]): Promise<Record<number, number>> {
+        const events = ((await this.repository.find({
+            where: {
+                type: CertificateEventType.IssuancePersisted,
+                internalCertificateId: In(internalCertIds)
+            }
+        })) as any) as CertificateIssuancePersistedEvent[]; // because of missing `_id` which is not relevant here
+
+        return arrayToMap(
+            events,
+            (e) => e.internalCertificateId,
+            (e) => e.payload.blockchainCertificateId
+        );
     }
 
     public async getNumberOfCertificates(): Promise<number> {

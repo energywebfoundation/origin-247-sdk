@@ -1,8 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { CertificateEventRepository, SynchronizableEvent } from './CertificateEvent.repository';
-import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
+import { CertificateEventRepository } from './CertificateEvent.repository';
+import {
+    CertificateEventType,
+    CertificateIssuancePersistedEvent,
+    ICertificateEvent,
+    isIssuePersistedEvent
+} from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
+import { arrayToMap } from '../../utils/array';
 
 @Injectable()
 export class CertificateEventInMemoryRepository implements CertificateEventRepository {
@@ -21,7 +27,7 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
     }
 
     public async save(
-        event: ICertificateEvent,
+        event: Omit<ICertificateEvent, 'id'>,
         commandId: number
     ): Promise<CertificateEventEntity> {
         const entity = {
@@ -69,7 +75,7 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         return synchronizationAttempt;
     }
 
-    public async getAllNotProcessed(): Promise<SynchronizableEvent[]> {
+    public async getAllNotProcessed(): Promise<CertificateEventEntity[]> {
         const attempts = Object.values(this.attemptDb).filter((a) => {
             return (
                 (!a.error && a.attemptsCount === 0) ||
@@ -81,7 +87,7 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
             return this.eventDb.find((e) => e.id === a.eventId)!;
         });
 
-        return events as SynchronizableEvent[];
+        return events;
     }
 
     public async getOne(eventId: number): Promise<CertificateEventEntity> {
@@ -92,6 +98,24 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         }
 
         return event;
+    }
+
+    public async getBlockchainIdMap(internalCertIds: number[]): Promise<Record<number, number>> {
+        // This guard in filter should work (properly map type), but whatever reason it keeps original type
+        const issuanceEvents = (this.eventDb.filter(
+            isIssuePersistedEvent
+        ) as any) as CertificateIssuancePersistedEvent[];
+        const events = issuanceEvents.filter((e) =>
+            internalCertIds.includes(e.internalCertificateId)
+        );
+
+        const idMap = arrayToMap(
+            events,
+            (e) => e.internalCertificateId,
+            (e) => e.payload.blockchainCertificateId
+        );
+
+        return idMap;
     }
 
     public async getNumberOfCertificates(): Promise<number> {
