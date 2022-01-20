@@ -41,7 +41,7 @@ import { EntityManager } from 'typeorm';
 import { BlockchainSynchronizeQueuedService } from './synchronize/blockchain-synchronize-queued.service';
 import { BlockchainSynchronizeSyncService } from './synchronize/blockchain-synchronize-sync.service';
 import { ConfigModule } from '@nestjs/config';
-import configuration from './config/configuration';
+import getConfiguration from './config/configuration';
 
 @Module({
     providers: [
@@ -96,7 +96,7 @@ import configuration from './config/configuration';
             name: SYNCHRONIZE_QUEUE_NAME
         }),
         ConfigModule.forRoot({
-            load: [configuration]
+            load: [getConfiguration]
         })
     ]
 })

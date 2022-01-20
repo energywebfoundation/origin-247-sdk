@@ -1,9 +1,9 @@
 import { Configuration } from './config.interface';
 
-const configuration = (): Configuration => ({
+const getConfiguration = (): Configuration => ({
     DATABASE_URL: process.env.DATABASE_URL,
     DB_HOST: process.env.DB_HOST ?? 'localhost',
-    DB_PORT: process.env.DB_PORT ?? 5432,
+    DB_PORT: Number(process.env.DB_PORT ?? 5432),
     DB_USERNAME: process.env.DB_USERNAME ?? 'postgres',
     DB_PASSWORD: process.env.DB_PASSWORD ?? 'postgres',
     DB_DATABASE: process.env.DB_DATABASE ?? 'origin',
@@ -17,4 +17,4 @@ const configuration = (): Configuration => ({
         : 3
 });
 
-export default configuration;
+export default getConfiguration;
