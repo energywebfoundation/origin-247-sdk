@@ -216,7 +216,7 @@ describe('CertificateEventRepository', () => {
 
         it('should return no events if they exceed retry attempts limit', async () => {
             const [event] = await prepareEvents(
-                new CertificateIssuedEvent(1, createIssueCommand())
+                CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
             await certificateEventRepository.updateAttempt({
                 eventId: event.id,
