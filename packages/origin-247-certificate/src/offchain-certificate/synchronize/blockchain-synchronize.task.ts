@@ -27,7 +27,7 @@ export class BlockchainSynchronizeTask {
         try {
             this.logger.debug(`Synchronization with blockchain started at ${new Date()}`);
 
-            const events = await this.certEventRepo.getAllNotProcessed();
+            const events = await this.certEventRepo.findAllToProcess();
             await this.synchronizeStrategy.synchronize(events);
 
             this.logger.debug(`Synchronization with blockchain finished at ${new Date()}`);

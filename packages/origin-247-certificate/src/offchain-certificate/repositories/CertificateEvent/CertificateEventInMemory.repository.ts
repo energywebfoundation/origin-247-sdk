@@ -75,7 +75,7 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         return synchronizationAttempt;
     }
 
-    public async getAllNotProcessed(): Promise<CertificateEventEntity[]> {
+    public async findAllToProcess(): Promise<CertificateEventEntity[]> {
         const attempts = Object.values(this.attemptDb).filter((a) => {
             return (
                 (!a.error && a.attemptsCount === 0) ||
