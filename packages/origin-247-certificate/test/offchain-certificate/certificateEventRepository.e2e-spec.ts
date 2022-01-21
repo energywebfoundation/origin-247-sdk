@@ -141,7 +141,7 @@ describe('CertificateEventRepository', () => {
         expect(issuedCerts).toBe(2);
     });
 
-    describe('#getAllNotProcessed', () => {
+    describe('#findAllToProcess', () => {
         it('should return empty list for no events to process', async () => {
             const certs = await certificateEventRepository.findAllToProcess();
             expect(certs).toHaveLength(0);
@@ -213,23 +213,6 @@ describe('CertificateEventRepository', () => {
 
             const certs = await certificateEventRepository.findAllToProcess();
             expect(certs).toHaveLength(1);
-        });
-
-        it('should return no events if they exceed retry attempts limit', async () => {
-            const [event] = await prepareEvents(
-                CertificateIssuedEvent.createNew(1, createIssueCommand())
-            );
-            await certificateEventRepository.updateAttempt({
-                eventId: event.id,
-                error: 'error'
-            });
-            await certificateEventRepository.updateAttempt({
-                eventId: event.id,
-                error: 'error'
-            });
-
-            const certs = await certificateEventRepository.getAllNotProcessed();
-            expect(certs).toHaveLength(0);
         });
 
         it('should return no events when error occurred on them', async () => {
