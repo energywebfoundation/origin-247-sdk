@@ -1,21 +1,24 @@
 import { ConnectionOptions } from 'typeorm';
+import getConfiguration from './src/offchain-certificate/config/configuration';
 
 const getDBConnectionOptions = (): ConnectionOptions => {
-    return process.env.DATABASE_URL
+    const configuration = getConfiguration();
+
+    return configuration.DATABASE_URL
         ? {
               type: 'postgres',
-              url: process.env.DATABASE_URL,
+              url: configuration.DATABASE_URL,
               ssl: {
                   rejectUnauthorized: false
               }
           }
         : {
               type: 'postgres',
-              host: process.env.DB_HOST ?? 'localhost',
-              port: Number(process.env.DB_PORT) ?? 5432,
-              username: process.env.DB_USERNAME ?? 'postgres',
-              password: process.env.DB_PASSWORD ?? 'postgres',
-              database: process.env.DB_DATABASE ?? 'origin'
+              host: configuration.DB_HOST,
+              port: configuration.DB_PORT,
+              username: configuration.DB_USERNAME,
+              password: configuration.DB_PASSWORD,
+              database: configuration.DB_DATABASE
           };
 };
 
