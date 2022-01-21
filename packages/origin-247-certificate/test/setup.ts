@@ -4,19 +4,19 @@ import {
     BlockchainPropertiesService,
     entities as IssuerEntities
 } from '@energyweb/issuer-api';
-import { TypeOrmModule, getConnectionToken } from '@nestjs/typeorm';
+import { getConnectionToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 import {
-    ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    BlockchainSynchronizeService,
     OffChainCertificateEntities,
-    OnChainCertificateService,
     OffChainCertificateModule,
     OffChainCertificateService,
-    BlockchainSynchronizeService
+    ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
+    OnChainCertificateService
 } from '../src';
 import { PassportModule } from '@nestjs/passport';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -29,6 +29,7 @@ import {
 } from '../src/offchain-certificate/repositories/repository.keys';
 import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
 import { Connection } from 'typeorm';
+import getConfiguration from '../src/offchain-certificate/config/configuration';
 
 const testLogger = new Logger('e2e');
 
@@ -61,10 +62,11 @@ const deployIssuer = async (registry: string) => {
 export const bootstrapTestInstance: any = async () => {
     const registry = await deployRegistry();
     const issuer = await deployIssuer(registry.address);
+    const configuration = getConfiguration();
 
     const QueueingModule = () => {
         return BullModule.forRoot({
-            redis: process.env.REDIS_URL ?? { host: 'localhost', port: 6379 }
+            redis: configuration.REDIS_URL
         });
     };
 
@@ -72,11 +74,11 @@ export const bootstrapTestInstance: any = async () => {
         imports: [
             TypeOrmModule.forRoot({
                 type: 'postgres',
-                host: process.env.DB_HOST ?? 'localhost',
-                port: Number(process.env.DB_PORT ?? 5432),
-                username: process.env.DB_USERNAME ?? 'postgres',
-                password: process.env.DB_PASSWORD ?? 'postgres',
-                database: process.env.DB_DATABASE ?? 'origin',
+                host: configuration.DB_HOST,
+                port: configuration.DB_PORT,
+                username: configuration.DB_USERNAME,
+                password: configuration.DB_PASSWORD,
+                database: configuration.DB_DATABASE,
                 logging: ['info'],
                 keepConnectionAlive: true,
                 entities: [...IssuerEntities, ...OffChainCertificateEntities]

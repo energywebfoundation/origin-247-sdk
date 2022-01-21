@@ -14,6 +14,7 @@ everything to blockchain. This implementation is described in [OffChain Module](
 Despite typical 24/7 SDK requirements and setup, you will need
 
 -   Redis (For enqueueing we use [bull](https://github.com/OptimalBits/bull) package)
+-   Peer runtime dependencies: `yarn add @energyweb/issuer @energyweb/issuer-api`
 
 ## Installation
 

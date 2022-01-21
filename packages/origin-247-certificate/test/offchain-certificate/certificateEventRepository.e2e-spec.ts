@@ -20,8 +20,11 @@ describe('CertificateEventRepository', () => {
     let cleanDB: () => Promise<void>;
     let certificateEventRepository: CertificateEventRepository;
     let certificateEventService: CertificateEventService;
+    let initialMaxTries: string | undefined;
 
     beforeAll(async () => {
+        initialMaxTries = process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT;
+        process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT = '2';
         ({
             app,
             cleanDB,
@@ -35,6 +38,7 @@ describe('CertificateEventRepository', () => {
     afterAll(async () => {
         await cleanDB();
         await app.close();
+        process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT = initialMaxTries;
     });
 
     afterEach(async () => {
@@ -211,6 +215,23 @@ describe('CertificateEventRepository', () => {
             expect(certs).toHaveLength(1);
         });
 
+        it('should return no events if they exceed retry attempts limit', async () => {
+            const [event] = await prepareEvents(
+                CertificateIssuedEvent.createNew(1, createIssueCommand())
+            );
+            await certificateEventRepository.updateAttempt({
+                eventId: event.id,
+                error: 'error'
+            });
+            await certificateEventRepository.updateAttempt({
+                eventId: event.id,
+                error: 'error'
+            });
+
+            const certs = await certificateEventRepository.getAllNotProcessed();
+            expect(certs).toHaveLength(0);
+        });
+
         it('should return no events when error occurred on them', async () => {
             const [event] = await prepareEvents(
                 CertificateIssuedEvent.createNew(1, createIssueCommand())
@@ -219,7 +240,6 @@ describe('CertificateEventRepository', () => {
             await updateAttempt(event, { error: 'some error', tries: 4 });
 
             const certs = await certificateEventRepository.findAllToProcess();
-
             expect(certs).toHaveLength(0);
         });
 

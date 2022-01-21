@@ -8,13 +8,13 @@ import {
     isIssuePersistedEvent
 } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
-import { MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT } from '../../synchronize/blockchain-synchronize.const';
 import { arrayToMap } from '../../utils/array';
 
 @Injectable()
 export class CertificateEventInMemoryRepository implements CertificateEventRepository {
     private eventDb: CertificateEventEntity[] = [];
     private attemptDb: Record<string, CertificateSynchronizationAttemptEntity> = {};
+    private maxSynchronizationAttemptsForEvent: number = Infinity;
 
     public async getAll(): Promise<CertificateEventEntity[]> {
         return this.eventDb;
@@ -79,7 +79,7 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         const attempts = Object.values(this.attemptDb).filter((a) => {
             return (
                 (!a.error && a.attemptsCount === 0) ||
-                (a.error && a.attemptsCount < MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT)
+                (a.error && a.attemptsCount < this.maxSynchronizationAttemptsForEvent)
             );
         });
 

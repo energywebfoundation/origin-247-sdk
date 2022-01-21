@@ -13,6 +13,8 @@ import {
     TransferCertificateCommand
 } from '@energyweb/issuer-api';
 import { TransactionPollService } from './transaction-poll.service';
+import { ConfigService } from '@nestjs/config';
+import { Configuration } from '../offchain-certificate/config/config.interface';
 import { IIssuedCertificate } from '../types';
 
 export const blockchainQueueName = 'blockchain-actions';
@@ -21,7 +23,11 @@ export const blockchainQueueName = 'blockchain-actions';
 export class BlockchainActionsProcessor {
     private readonly logger = new Logger(BlockchainActionsProcessor.name);
 
-    constructor(private commandBus: CommandBus, private transactionPoll: TransactionPollService) {}
+    constructor(
+        private commandBus: CommandBus,
+        private transactionPoll: TransactionPollService,
+        private readonly configService: ConfigService<Configuration>
+    ) {}
 
     @Process({ concurrency: 1 })
     async handle(payload: Job<BlockchainAction>): Promise<unknown> {
@@ -33,7 +39,7 @@ export class BlockchainActionsProcessor {
              * Therefore we need to give some time to process everything.
              */
             await new Promise((resolve) =>
-                setTimeout(resolve, Number(process.env.CERTIFICATE_QUEUE_DELAY ?? 10000))
+                setTimeout(resolve, this.configService.get('CERTIFICATE_QUEUE_DELAY'))
             );
 
             return result;
