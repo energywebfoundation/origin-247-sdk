@@ -329,19 +329,22 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
     });
 });
 
+const issueAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
+const transferAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232t';
+
 const issueCommand: IIssueCommandParams<null> = {
     deviceId: 'deviceId',
     energyValue: '1000',
     fromTime: new Date('2020-01-01T01:00:00.000Z'),
     toTime: new Date('2020-01-01T01:15:00.000Z'),
     metadata: null,
-    toAddress: 'issueAddress',
+    toAddress: issueAddress,
     userId: 'userId'
 };
 
 const transferCommand = {
-    fromAddress: 'issueAddress',
-    toAddress: 'transferAddress'
+    fromAddress: issueAddress,
+    toAddress: transferAddress
 };
 
 const claimCommand = {
