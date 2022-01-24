@@ -27,8 +27,21 @@ export class BlockchainSynchronizeTask {
         try {
             this.logger.debug(`Synchronization with blockchain started at ${new Date()}`);
 
-            const events = await this.certEventRepo.findAllToProcess();
-            await this.synchronizeStrategy.synchronize(events);
+            let i = 0;
+            while (i < 50) {
+                // This basically limits how many events we want to process in one task execution
+                const events = await this.certEventRepo.findAllToProcess({
+                    limit: 500
+                });
+
+                if (events.length === 0) {
+                    break;
+                }
+
+                await this.synchronizeStrategy.synchronize(events);
+
+                i += 1;
+            }
 
             this.logger.debug(`Synchronization with blockchain finished at ${new Date()}`);
         } catch (e) {
