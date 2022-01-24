@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, In, Repository } from 'typeorm';
 import { arrayToMap } from '../../utils/array';
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { CertificateEventRepository } from './CertificateEvent.repository';
+import { CertificateEventRepository, IGetToProcessOptions } from './CertificateEvent.repository';
 import {
     CertificateEventType,
     CertificateIssuancePersistedEvent,
@@ -22,7 +22,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         private repository: Repository<CertificateEventEntity>,
         @InjectRepository(CertificateSynchronizationAttemptEntity)
         private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>,
-        private configService: ConfigService<Configuration>
+        configService: ConfigService<Configuration>
     ) {
         this.maxSynchronizationAttemptsForEvent = configService.get(
             'MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT'
@@ -97,7 +97,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         return synchronizationAttempt;
     }
 
-    public async findAllToProcess(): Promise<CertificateEventEntity[]> {
+    public async findAllToProcess(params: IGetToProcessOptions): Promise<CertificateEventEntity[]> {
         const failedCertificatesIds = this.repository
             .createQueryBuilder('event')
             .select(['event.internalCertificateId'])
@@ -120,7 +120,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 'event.version',
                 'event.payload'
             ])
-            .leftJoinAndSelect(
+            .innerJoinAndSelect(
                 CertificateSynchronizationAttemptEntity,
                 'attempt',
                 'attempt.eventId = event.id'
@@ -134,9 +134,14 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 )`,
                 { attempts: this.maxSynchronizationAttemptsForEvent }
             )
-            .andWhere(`event.internalCertificateId NOT IN (${failedCertificatesIds.getQuery()})`);
+            .andWhere(`event.internalCertificateId NOT IN (${failedCertificatesIds.getQuery()})`)
+            .orderBy('event."createdAt"');
 
-        return await query.getMany();
+        if (params.limit) {
+            return await query.limit(params.limit).getMany();
+        } else {
+            return await query.getMany();
+        }
     }
 
     public async getOne(eventId: number): Promise<CertificateEventEntity> {

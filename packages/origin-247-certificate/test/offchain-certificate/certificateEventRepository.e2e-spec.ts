@@ -143,7 +143,7 @@ describe('CertificateEventRepository', () => {
 
     describe('#findAllToProcess', () => {
         it('should return empty list for no events to process', async () => {
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
             expect(certs).toHaveLength(0);
         });
 
@@ -198,7 +198,7 @@ describe('CertificateEventRepository', () => {
                 eventId: event.id
             });
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
             expect(certs).toHaveLength(0);
         });
 
@@ -211,7 +211,7 @@ describe('CertificateEventRepository', () => {
                 error: 'error'
             });
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
             expect(certs).toHaveLength(1);
         });
 
@@ -221,14 +221,14 @@ describe('CertificateEventRepository', () => {
             );
             await updateAttempt(event, { error: 'some error', tries: 3 });
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
             expect(certs).toHaveLength(0);
         });
 
         it('should return issue events when they are not processed', async () => {
             await prepareEvents(CertificateIssuedEvent.createNew(1, createIssueCommand()));
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
 
             expect(certs).toHaveLength(1);
         });
@@ -236,7 +236,7 @@ describe('CertificateEventRepository', () => {
         it('should return claim events when they are not processed', async () => {
             await prepareEvents(CertificateClaimedEvent.createNew(1, createClaimCommand()));
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
 
             expect(certs).toHaveLength(1);
         });
@@ -244,7 +244,7 @@ describe('CertificateEventRepository', () => {
         it('should return transfer events when they are not processed', async () => {
             await prepareEvents(CertificateTransferredEvent.createNew(1, createTransferCommand()));
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
 
             expect(certs).toHaveLength(1);
         });
@@ -257,7 +257,7 @@ describe('CertificateEventRepository', () => {
             );
             await updateAttempt(issue, { error: 'some error', tries: 3 });
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
 
             expect(certs).toHaveLength(0);
         });
@@ -270,7 +270,7 @@ describe('CertificateEventRepository', () => {
             );
             await updateAttempt(firstTransfer, { error: 'some error', tries: 3 });
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
 
             expect(certs).toHaveLength(0);
         });
@@ -283,7 +283,7 @@ describe('CertificateEventRepository', () => {
             );
             await updateAttempt(firstTransfer, { error: 'some error', tries: 3 });
 
-            const certs = await certificateEventRepository.findAllToProcess();
+            const certs = await certificateEventRepository.findAllToProcess({ limit: null });
 
             expect(certs).toHaveLength(0);
         });

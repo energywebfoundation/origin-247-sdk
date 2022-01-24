@@ -2,6 +2,10 @@ import { ICertificateEvent } from '../../events/Certificate.events';
 import { EntityManager } from 'typeorm';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
 
+export interface IGetToProcessOptions {
+    limit: number | null;
+}
+
 export interface CertificateEventRepository {
     save(
         event: Omit<ICertificateEvent, 'id'>,
@@ -30,5 +34,5 @@ export interface CertificateEventRepository {
 
     getNumberOfCertificates(): Promise<number>;
 
-    findAllToProcess(): Promise<ICertificateEvent[]>;
+    findAllToProcess(options: IGetToProcessOptions): Promise<ICertificateEvent[]>;
 }
