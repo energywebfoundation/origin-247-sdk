@@ -330,7 +330,7 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
 });
 
 const issueAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
-const transferAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232t';
+const transferAddress = '0x29D7d1dd5B6f9C864d9db560D72a247c178aE86B';
 
 const issueCommand: IIssueCommandParams<null> = {
     deviceId: 'deviceId',
