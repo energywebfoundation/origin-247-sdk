@@ -106,7 +106,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 'attempt',
                 'attempt.eventId = event.id'
             )
-            .where(`(attempt.attempts_count > :attempts)`, {
+            .where(`(attempt.attempts_count >= :attempts)`, {
                 attempts: this.maxSynchronizationAttemptsForEvent
             });
 
@@ -130,7 +130,7 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 (
                     (attempt.attempts_count = 0) 
                     OR 
-                    (attempt.error IS NOT NULL AND attempt.attempts_count <= :attempts)
+                    (attempt.error IS NOT NULL AND attempt.attempts_count < :attempts)
                 )`,
                 { attempts: this.maxSynchronizationAttemptsForEvent }
             )

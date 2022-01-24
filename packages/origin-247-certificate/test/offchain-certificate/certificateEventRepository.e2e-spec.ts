@@ -219,8 +219,7 @@ describe('CertificateEventRepository', () => {
             const [event] = await prepareEvents(
                 CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
-            // Prepare 4 failed tries
-            await updateAttempt(event, { error: 'some error', tries: 4 });
+            await updateAttempt(event, { error: 'some error', tries: 3 });
 
             const certs = await certificateEventRepository.findAllToProcess();
             expect(certs).toHaveLength(0);
@@ -256,7 +255,7 @@ describe('CertificateEventRepository', () => {
                 CertificateIssuedEvent.createNew(internalId, createIssueCommand()),
                 CertificateTransferredEvent.createNew(internalId, createTransferCommand())
             );
-            await updateAttempt(issue, { error: 'some error', tries: 4 });
+            await updateAttempt(issue, { error: 'some error', tries: 3 });
 
             const certs = await certificateEventRepository.findAllToProcess();
 
@@ -269,7 +268,7 @@ describe('CertificateEventRepository', () => {
                 CertificateTransferredEvent.createNew(internalId, createTransferCommand()),
                 CertificateTransferredEvent.createNew(internalId, createTransferCommand())
             );
-            await updateAttempt(firstTransfer, { error: 'some error', tries: 4 });
+            await updateAttempt(firstTransfer, { error: 'some error', tries: 3 });
 
             const certs = await certificateEventRepository.findAllToProcess();
 
@@ -282,7 +281,7 @@ describe('CertificateEventRepository', () => {
                 CertificateClaimedEvent.createNew(internalId, createClaimCommand()),
                 CertificateTransferredEvent.createNew(internalId, createTransferCommand())
             );
-            await updateAttempt(firstTransfer, { error: 'some error', tries: 4 });
+            await updateAttempt(firstTransfer, { error: 'some error', tries: 3 });
 
             const certs = await certificateEventRepository.findAllToProcess();
 
