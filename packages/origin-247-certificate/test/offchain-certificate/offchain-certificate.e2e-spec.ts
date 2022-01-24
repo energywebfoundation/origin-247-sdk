@@ -91,8 +91,8 @@ const claimCommand = {
         beneficiary: 'beneficiary',
         location: 'location',
         countryCode: 'countryCode',
-        periodStartDate: 'periodStartDate',
-        periodEndDate: 'periodEndDate',
+        periodStartDate: new Date().toISOString(),
+        periodEndDate: new Date().toISOString(),
         purpose: 'purpose'
     }
 };

@@ -59,6 +59,7 @@ specifiers:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2
   jest: 27.0.5
+  joi: 17.5.0
   lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
@@ -139,6 +140,7 @@ dependencies:
   hardhat: 2.6.4
   html-webpack-plugin: 5.3.2_webpack@5.51.1
   jest: 27.0.5_ts-node@9.1.1
+  joi: 17.5.0
   lodash: 4.17.21
   luxon: 2.0.2
   passport: 0.5.0
@@ -2483,6 +2485,12 @@ packages:
 
   /@sideway/address/4.1.2:
     resolution: {integrity: sha512-idTz8ibqWFrPU8kMirL0CoPH/A29XOzzAzpyN3zQ4kAWnzmNfFmRaoMNN6VI8ske5M73HZyhIaW4OuSFIdM4oA==}
+    dependencies:
+      '@hapi/hoek': 9.2.0
+    dev: false
+
+  /@sideway/address/4.1.3:
+    resolution: {integrity: sha512-8ncEUtmnTsMmL7z1YPB47kPUq7LpKWJNFPsRzHiIajGC5uXlWGn+AmkYPcHNl8S4tcEGx+cnORnNYaw2wvL+LQ==}
     dependencies:
       '@hapi/hoek': 9.2.0
     dev: false
@@ -8261,6 +8269,16 @@ packages:
       '@sideway/pinpoint': 2.0.0
     dev: false
 
+  /joi/17.5.0:
+    resolution: {integrity: sha512-R7hR50COp7StzLnDi4ywOXHrBrgNXuUUfJWIR5lPY5Bm/pOD3jZaTwpluUXVLRWcoWZxkrHBBJ5hLxgnlehbdw==}
+    dependencies:
+      '@hapi/hoek': 9.2.0
+      '@hapi/topo': 5.1.0
+      '@sideway/address': 4.1.3
+      '@sideway/formula': 3.0.0
+      '@sideway/pinpoint': 2.0.0
+    dev: false
+
   /js-sha3/0.5.7:
     resolution: {integrity: sha1-DU/9gALVMzqrr0oj7tL2N0yfKOc=}
     dev: false
@@ -13404,7 +13422,7 @@ packages:
     dev: false
 
   file:projects/origin-247-certificate.tgz_dbe81b9c124a4a10925175ba43da462c:
-    resolution: {integrity: sha512-dJX3RyRCwOL3M+mV4V4LKhRCYu5Ty4H1VaG6ScOTM4Ow2n75XBSi2fbYxFUiA5Y6a0M+PYcMLYxIOHwqdg73nA==, tarball: file:projects/origin-247-certificate.tgz}
+    resolution: {integrity: sha512-oE+ohBnoZqQ9Tb9HMpYOvNN6yaW+uTI/Z9LehQW2nhXBun7tt2hFFfoHgXpe6DyLR3rcWWp6Ua8VBIOtyagrfg==, tarball: file:projects/origin-247-certificate.tgz}
     id: file:projects/origin-247-certificate.tgz
     name: '@rush-temp/origin-247-certificate'
     version: 0.0.0
@@ -13432,6 +13450,7 @@ packages:
       ethers: 5.3.1
       ganache-cli: 6.12.2
       jest: 27.0.5_ts-node@9.1.1
+      joi: 17.5.0
       lodash: 4.17.21
       passport: 0.5.0
       pg: 8.7.1
@@ -13474,7 +13493,7 @@ packages:
     dev: false
 
   file:projects/origin-247-claim.tgz_e1b6b095d9b08b2fe53e813c4c2c16ed:
-    resolution: {integrity: sha512-cTWWAmGqv6Ugffa4NqHQzNRxNPV7Upj/ySxortw4k+9nu4Wvkxx3fOEUSxcxCoZoEHgs9Tu43lwumS9H3Jfv/Q==, tarball: file:projects/origin-247-claim.tgz}
+    resolution: {integrity: sha512-JmVvwAPZPKAggnPJ8fDkDGxQSncTRXLDTzfnlI8LeFw1aFaE7VcwjOvqvZLhBYFb3gMC3LvXMR6cQmWf/iln9A==, tarball: file:projects/origin-247-claim.tgz}
     id: file:projects/origin-247-claim.tgz
     name: '@rush-temp/origin-247-claim'
     version: 0.0.0
@@ -13622,7 +13641,7 @@ packages:
     dev: false
 
   file:projects/origin-247-transfer.tgz_passport@0.5.0:
-    resolution: {integrity: sha512-2MriLZa6HSWNAGXGZQUhCfNbSjY/YuVkYIUMdFo/00+8F5DWkLD5mvxa72Gox14GmjFL0kGP+fEwVgYj/g+lkw==, tarball: file:projects/origin-247-transfer.tgz}
+    resolution: {integrity: sha512-6vOROR74z9U++RpNCKz+dcDEsqw+WBrRZ9WmbiZTNtmOSeBL8Z1ncDIS5DpN4EGQ2gMfRCy25SFXKutTz/Vu/Q==, tarball: file:projects/origin-247-transfer.tgz}
     id: file:projects/origin-247-transfer.tgz
     name: '@rush-temp/origin-247-transfer'
     version: 0.0.0
