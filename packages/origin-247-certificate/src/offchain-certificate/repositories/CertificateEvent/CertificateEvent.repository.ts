@@ -30,5 +30,5 @@ export interface CertificateEventRepository {
 
     getNumberOfCertificates(): Promise<number>;
 
-    getAllNotProcessed(): Promise<ICertificateEvent[]>;
+    findAllToProcess(): Promise<ICertificateEvent[]>;
 }

@@ -9,6 +9,7 @@ import {
 } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
 import { arrayToMap } from '../../utils/array';
+import { chain } from 'lodash';
 
 @Injectable()
 export class CertificateEventInMemoryRepository implements CertificateEventRepository {
@@ -75,7 +76,17 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         return synchronizationAttempt;
     }
 
-    public async getAllNotProcessed(): Promise<CertificateEventEntity[]> {
+    public async findAllToProcess(): Promise<CertificateEventEntity[]> {
+        const failedEventIds = Object.values(this.attemptDb)
+            .filter((a) => a.error && a.attemptsCount > this.maxSynchronizationAttemptsForEvent)
+            .map((a) => a.eventId);
+        const failedCerts = chain(this.eventDb)
+            .filter((e) => failedEventIds.includes(e.id))
+            .map((e) => e.internalCertificateId)
+            .compact()
+            .uniq()
+            .value();
+
         const attempts = Object.values(this.attemptDb).filter((a) => {
             return (
                 (!a.error && a.attemptsCount === 0) ||
@@ -83,9 +94,11 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
             );
         });
 
-        const events = attempts.map((a) => {
-            return this.eventDb.find((e) => e.id === a.eventId)!;
-        });
+        const events = chain(attempts)
+            .map((a) => this.eventDb.find((e) => e.id === a.eventId))
+            .compact()
+            .filter((e) => !failedCerts.includes(e.internalCertificateId))
+            .value();
 
         return events;
     }

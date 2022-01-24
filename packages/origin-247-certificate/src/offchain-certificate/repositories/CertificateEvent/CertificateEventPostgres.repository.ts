@@ -97,7 +97,19 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         return synchronizationAttempt;
     }
 
-    public async getAllNotProcessed(): Promise<CertificateEventEntity[]> {
+    public async findAllToProcess(): Promise<CertificateEventEntity[]> {
+        const failedCertificatesIds = this.repository
+            .createQueryBuilder('event')
+            .select(['event.internalCertificateId'])
+            .innerJoin(
+                CertificateSynchronizationAttemptEntity,
+                'attempt',
+                'attempt.eventId = event.id'
+            )
+            .where(`(attempt.attempts_count >= :attempts)`, {
+                attempts: this.maxSynchronizationAttemptsForEvent
+            });
+
         const query = this.repository
             .createQueryBuilder('event')
             .select([
@@ -113,10 +125,16 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
                 'attempt',
                 'attempt.eventId = event.id'
             )
-            .where('(attempt.attempts_count = 0)')
-            .orWhere(
-                `(attempt.error IS NOT NULL AND attempt.attempts_count < ${this.maxSynchronizationAttemptsForEvent})`
-            );
+            .where(
+                `
+                (
+                    (attempt.attempts_count = 0) 
+                    OR 
+                    (attempt.error IS NOT NULL AND attempt.attempts_count < :attempts)
+                )`,
+                { attempts: this.maxSynchronizationAttemptsForEvent }
+            )
+            .andWhere(`event.internalCertificateId NOT IN (${failedCertificatesIds.getQuery()})`);
 
         return await query.getMany();
     }

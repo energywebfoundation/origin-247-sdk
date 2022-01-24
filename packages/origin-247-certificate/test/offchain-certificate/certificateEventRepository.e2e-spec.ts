@@ -141,9 +141,9 @@ describe('CertificateEventRepository', () => {
         expect(issuedCerts).toBe(2);
     });
 
-    describe('#getAllNotProcessed', () => {
+    describe('#findAllToProcess', () => {
         it('should return empty list for no events to process', async () => {
-            const certs = await certificateEventRepository.getAllNotProcessed();
+            const certs = await certificateEventRepository.findAllToProcess();
             expect(certs).toHaveLength(0);
         });
 
@@ -180,8 +180,9 @@ describe('CertificateEventRepository', () => {
 
         const prepareEvents = async (...events: ICertificateEvent[]) => {
             const savedEvents: ICertificateEvent[] = [];
-
+            let eventDate = 0;
             for (const event of events) {
+                event.createdAt = new Date(eventDate++);
                 const savedEvent = await certificateEventService.save(event, 0);
                 savedEvents.push(savedEvent);
             }
@@ -197,7 +198,7 @@ describe('CertificateEventRepository', () => {
                 eventId: event.id
             });
 
-            const certs = await certificateEventRepository.getAllNotProcessed();
+            const certs = await certificateEventRepository.findAllToProcess();
             expect(certs).toHaveLength(0);
         });
 
@@ -210,57 +211,24 @@ describe('CertificateEventRepository', () => {
                 error: 'error'
             });
 
-            const certs = await certificateEventRepository.getAllNotProcessed();
+            const certs = await certificateEventRepository.findAllToProcess();
             expect(certs).toHaveLength(1);
-        });
-
-        it('should return no events if they exceed retry attempts limit', async () => {
-            const [event] = await prepareEvents(
-                CertificateIssuedEvent.createNew(1, createIssueCommand())
-            );
-            await certificateEventRepository.updateAttempt({
-                eventId: event.id,
-                error: 'error'
-            });
-            await certificateEventRepository.updateAttempt({
-                eventId: event.id,
-                error: 'error'
-            });
-
-            const certs = await certificateEventRepository.getAllNotProcessed();
-            expect(certs).toHaveLength(0);
         });
 
         it('should return no events when error occurred on them', async () => {
             const [event] = await prepareEvents(
                 CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
+            await updateAttempt(event, { error: 'some error', tries: 3 });
 
-            // Prepare 3 failed tries
-
-            await certificateEventRepository.updateAttempt({
-                eventId: event.id,
-                error: 'some error'
-            });
-
-            await certificateEventRepository.updateAttempt({
-                eventId: event.id,
-                error: 'some error'
-            });
-
-            await certificateEventRepository.updateAttempt({
-                eventId: event.id,
-                error: 'some error'
-            });
-
-            const certs = await certificateEventRepository.getAllNotProcessed();
+            const certs = await certificateEventRepository.findAllToProcess();
             expect(certs).toHaveLength(0);
         });
 
         it('should return issue events when they are not processed', async () => {
             await prepareEvents(CertificateIssuedEvent.createNew(1, createIssueCommand()));
 
-            const certs = await certificateEventRepository.getAllNotProcessed();
+            const certs = await certificateEventRepository.findAllToProcess();
 
             expect(certs).toHaveLength(1);
         });
@@ -268,7 +236,7 @@ describe('CertificateEventRepository', () => {
         it('should return claim events when they are not processed', async () => {
             await prepareEvents(CertificateClaimedEvent.createNew(1, createClaimCommand()));
 
-            const certs = await certificateEventRepository.getAllNotProcessed();
+            const certs = await certificateEventRepository.findAllToProcess();
 
             expect(certs).toHaveLength(1);
         });
@@ -276,9 +244,48 @@ describe('CertificateEventRepository', () => {
         it('should return transfer events when they are not processed', async () => {
             await prepareEvents(CertificateTransferredEvent.createNew(1, createTransferCommand()));
 
-            const certs = await certificateEventRepository.getAllNotProcessed();
+            const certs = await certificateEventRepository.findAllToProcess();
 
             expect(certs).toHaveLength(1);
+        });
+
+        it('should not process other events for that certificate if issue failed', async () => {
+            const internalId = 1;
+            const [issue] = await prepareEvents(
+                CertificateIssuedEvent.createNew(internalId, createIssueCommand()),
+                CertificateTransferredEvent.createNew(internalId, createTransferCommand())
+            );
+            await updateAttempt(issue, { error: 'some error', tries: 3 });
+
+            const certs = await certificateEventRepository.findAllToProcess();
+
+            expect(certs).toHaveLength(0);
+        });
+
+        it('should not process other transfer event for that certificate if first transfer failed', async () => {
+            const internalId = 1;
+            const [firstTransfer] = await prepareEvents(
+                CertificateTransferredEvent.createNew(internalId, createTransferCommand()),
+                CertificateTransferredEvent.createNew(internalId, createTransferCommand())
+            );
+            await updateAttempt(firstTransfer, { error: 'some error', tries: 3 });
+
+            const certs = await certificateEventRepository.findAllToProcess();
+
+            expect(certs).toHaveLength(0);
+        });
+
+        it('should not process other transfer event for that certificate if claim failed', async () => {
+            const internalId = 1;
+            const [firstTransfer] = await prepareEvents(
+                CertificateClaimedEvent.createNew(internalId, createClaimCommand()),
+                CertificateTransferredEvent.createNew(internalId, createTransferCommand())
+            );
+            await updateAttempt(firstTransfer, { error: 'some error', tries: 3 });
+
+            const certs = await certificateEventRepository.findAllToProcess();
+
+            expect(certs).toHaveLength(0);
         });
     });
 
@@ -307,4 +314,16 @@ describe('CertificateEventRepository', () => {
             expect(idMap[2]).toBe(20);
         });
     });
+
+    const updateAttempt = async (
+        event: ICertificateEvent,
+        { error = undefined, tries = 1 }: { error?: string; tries: number }
+    ) => {
+        for (let i = 0; i < tries; i++) {
+            await certificateEventRepository.updateAttempt({
+                eventId: event.id,
+                error
+            });
+        }
+    };
 });

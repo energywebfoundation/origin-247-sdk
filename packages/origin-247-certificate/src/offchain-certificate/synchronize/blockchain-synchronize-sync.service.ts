@@ -14,7 +14,7 @@ export class BlockchainSynchronizeSyncService implements BlockchainSynchronizeSe
     ) {}
 
     public async synchronize() {
-        const events = await this.certEventRepo.getAllNotProcessed();
+        const events = await this.certEventRepo.findAllToProcess();
         await this.synchronizeStrategy.synchronize(events);
     }
 }
