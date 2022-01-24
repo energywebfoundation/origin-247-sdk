@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.3.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.2.1...@energyweb/origin-247-certificate@3.3.0) (2022-01-24)
+
+
+### Bug Fixes
+
+* After CR ([e767799](https://github.com/energywebfoundation/origin-247-sdk/commit/e767799e9ea6d77a6d48bc6ce0f754faeaafacc1))
+* After CR ([af4f5c4](https://github.com/energywebfoundation/origin-247-sdk/commit/af4f5c4bfb59dfa86e945059cc64375474b9e0c0))
+* After CR ([5fed89a](https://github.com/energywebfoundation/origin-247-sdk/commit/5fed89a136220129627195399fbaedf5308c246d))
+
+
+### Features
+
+* Do not try to synchronize certificates if synchronization failed before for them ([6b85c0e](https://github.com/energywebfoundation/origin-247-sdk/commit/6b85c0e71856637f11020b0b1a1ad535eb099801))
+* Make number of retries configurable ([#72](https://github.com/energywebfoundation/origin-247-sdk/issues/72)) ([a8952c6](https://github.com/energywebfoundation/origin-247-sdk/commit/a8952c67d78e31ece571347d8c170699cf5c458f))
+
+
+
+
+
 ## [3.2.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.2.0...@energyweb/origin-247-certificate@3.2.1) (2022-01-19)
 
 
