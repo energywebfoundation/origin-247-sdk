@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.5](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@2.0.4...@energyweb/origin-247-transfer@2.0.5) (2022-01-25)
+
+
+### Bug Fixes
+
+* use sequence for generating internal certificate id ([81807db](https://github.com/energywebfoundation/origin-247-sdk/commit/81807dbe938b294e819cb34b9fdf032acbc42a0b))
+
+
+
+
+
 ## [2.0.4](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@2.0.3...@energyweb/origin-247-transfer@2.0.4) (2022-01-24)
 
 **Note:** Version bump only for package @energyweb/origin-247-transfer
