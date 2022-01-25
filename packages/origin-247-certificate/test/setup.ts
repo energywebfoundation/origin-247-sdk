@@ -125,6 +125,13 @@ export const bootstrapTestInstance: any = async () => {
 
     const cleanDB = async () => {
         await connection.query(`TRUNCATE ${tables} RESTART IDENTITY CASCADE;`);
+        // Restart all sequences
+        await connection.query(`
+            SELECT  SETVAL(c.oid, 1)
+            from pg_class c JOIN pg_namespace n 
+            on n.oid = c.relnamespace 
+            where c.relkind = 'S' and n.nspname = 'public'  
+        `);
     };
 
     const blockchainProperties = await blockchainPropertiesService.create(

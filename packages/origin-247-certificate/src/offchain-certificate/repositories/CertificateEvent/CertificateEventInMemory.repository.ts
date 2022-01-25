@@ -13,6 +13,7 @@ import { chain } from 'lodash';
 
 @Injectable()
 export class CertificateEventInMemoryRepository implements CertificateEventRepository {
+    private internalCertificateIdSerial: number = 0;
     private eventDb: CertificateEventEntity[] = [];
     private attemptDb: Record<string, CertificateSynchronizationAttemptEntity> = {};
     private maxSynchronizationAttemptsForEvent: number = Infinity;
@@ -131,7 +132,9 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         return idMap;
     }
 
-    public async getNumberOfCertificates(): Promise<number> {
-        return this.eventDb.filter((e) => e.type === CertificateEventType.Issued).length;
+    public async getNextInternalCertificateId(): Promise<number> {
+        this.internalCertificateIdSerial += 1;
+
+        return this.internalCertificateIdSerial;
     }
 }

@@ -233,8 +233,7 @@ export class OffChainCertificateService<T = null> {
     }
 
     private async generateInternalCertificateId(): Promise<number> {
-        const numberOfCertificates = await this.certEventRepo.getNumberOfCertificates();
-        return numberOfCertificates + 1;
+        return await this.certEventRepo.getNextInternalCertificateId();
     }
 
     private async propagate(

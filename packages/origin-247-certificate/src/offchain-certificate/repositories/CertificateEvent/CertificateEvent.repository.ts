@@ -32,7 +32,7 @@ export interface CertificateEventRepository {
 
     getAll(): Promise<ICertificateEvent[]>;
 
-    getNumberOfCertificates(): Promise<number>;
+    getNextInternalCertificateId(): Promise<number>;
 
     findAllToProcess(options: IGetToProcessOptions): Promise<ICertificateEvent[]>;
 }

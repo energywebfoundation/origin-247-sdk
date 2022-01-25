@@ -169,13 +169,11 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         );
     }
 
-    public async getNumberOfCertificates(): Promise<number> {
-        const [certs, count] = await this.repository.findAndCount({
-            where: {
-                type: CertificateEventType.Issued
-            }
-        });
+    public async getNextInternalCertificateId(): Promise<number> {
+        const [{ nextval }] = await this.repository.query(
+            `SELECT nextval('certificate_internal_certificate_id_seq')`
+        );
 
-        return count;
+        return Number(nextval);
     }
 }
