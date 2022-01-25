@@ -99,46 +99,10 @@ describe('CertificateEventRepository', () => {
         expect(certs).toHaveLength(2);
     });
 
-    it('should return the number of issued certificates', async () => {
-        let issuedCerts = await certificateEventRepository.getNumberOfCertificates();
-        expect(issuedCerts).toBe(0);
-
-        const event = CertificateIssuedEvent.createNew(issuedCerts + 1, {
-            toAddress: '0x1',
-            toTime: new Date().getTime(),
-            fromTime: new Date().getTime(),
-            energyValue: '100',
-            userId: 'user1',
-            deviceId: 'asdf',
-            metadata: {}
-        });
-        await certificateEventService.save(event, 1);
-        issuedCerts = await certificateEventRepository.getNumberOfCertificates();
-        expect(issuedCerts).toBe(1);
-
-        const otherEvent = CertificateTransferredEvent.createNew(1, {
-            toAddress: '0x1',
-            certificateId: 1,
-            energyValue: '100',
-            fromAddress: '0x2'
-        });
-        await certificateEventService.save(otherEvent, 2);
-
-        issuedCerts = await certificateEventRepository.getNumberOfCertificates();
-        expect(issuedCerts).toBe(1);
-
-        const anotherEvent = CertificateIssuedEvent.createNew(issuedCerts + 1, {
-            toAddress: '0x1',
-            toTime: new Date().getTime(),
-            fromTime: new Date().getTime(),
-            energyValue: '100',
-            userId: 'user1',
-            deviceId: 'asdf',
-            metadata: {}
-        });
-        await certificateEventService.save(anotherEvent, 3);
-        issuedCerts = await certificateEventRepository.getNumberOfCertificates();
-        expect(issuedCerts).toBe(2);
+    it('should return corrent next internal certificate id', async () => {
+        expect(await certificateEventRepository.getNextInternalCertificateId()).toBe(2);
+        expect(await certificateEventRepository.getNextInternalCertificateId()).toBe(3);
+        expect(await certificateEventRepository.getNextInternalCertificateId()).toBe(4);
     });
 
     describe('#findAllToProcess', () => {
