@@ -10,6 +10,8 @@ import { CommandHandler } from '@nestjs/cqrs';
 jest.setTimeout(30 * 1000);
 
 const wait = (seconds) => new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+const sellerAddress = '0xc1912fee45d61c87cc5ea59dae31190fffff232d';
+const buyerAddress = '0x29D7d1dd5B6f9C864d9db560D72a247c178aE86B';
 
 describe('Transfer module', () => {
     it('creates ETR with given sites and data', async () => {
@@ -22,8 +24,8 @@ describe('Transfer module', () => {
                 expect(etr).toEqual(
                     expect.objectContaining({
                         volume: '60',
-                        sellerAddress: '0x111',
-                        buyerAddress: '0x222'
+                        sellerAddress,
+                        buyerAddress
                     })
                 );
             }
@@ -149,8 +151,8 @@ const doTest = async (data: DoTestData, cb: (etr: EnergyTransferRequestAttrs) =>
 
     const { app, eventBus, getEtr } = await setup({
         sites: {
-            sellerAddress: '0x111',
-            buyerAddress: '0x222'
+            sellerAddress,
+            buyerAddress
         },
         commands: data.commands.map((cmd) => commandMap[cmd]),
         providers: Object.keys(data.handlers).map((cmd) => handlerMap[cmd])
