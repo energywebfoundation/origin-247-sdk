@@ -2,7 +2,7 @@ import { OnChainCertificateService } from './onchain-certificate.service';
 import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { BigNumber } from 'ethers';
 import { ICertificate } from './types';
-import { IClaimCommand, IIssueCommandParams, IIssuedCertificate, ITransferCommand } from '../types';
+import { IClaimCommand, IIssueCommandParams, ITransferCommand } from '../types';
 import { Injectable } from '@nestjs/common';
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
@@ -40,13 +40,13 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
         return this.db.find((c) => c.id === id) ?? null;
     }
 
-    public async issue(params: IIssueCommandParams<T>): Promise<IIssuedCertificate<T>> {
+    public async issue(params: IIssueCommandParams<T>): Promise<ICertificate<T>> {
         this.serial += 1;
 
         const certificate: ICertificate<T> = {
             claims: [],
             claimers: {},
-            creationBlockHash: '',
+            creationTransactionHash: '',
             creationTime: Math.floor(Date.now() / 1000),
             deviceId: params.deviceId,
             generationStartTime: Math.floor(params.fromTime.getTime() / 1000),
@@ -56,22 +56,17 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             metadata: params.metadata,
             owners: {
                 [params.toAddress]: params.energyValue
-            }
+            },
+            latestCommitment: null,
+            createdAt: new Date(),
+            updatedAt: new Date()
         };
 
         this.db.push(certificate);
 
         return {
             ...certificate,
-            issuedPrivately: false,
-            isClaimed: false,
-            isOwned: true,
-            myClaims: [],
-            energy: {
-                claimedVolume: '0',
-                privateVolume: '0',
-                publicVolume: params.energyValue
-            }
+            issuedPrivately: false
         };
     }
 
@@ -168,9 +163,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
         await this.issue(command as any);
 
         return {
-            certificate: (this.db.find(
-                (c) => c.deviceId === command.deviceId
-            )! as unknown) as IIssuedCertificate<T>,
+            certificate: this.db.find((c) => c.deviceId === command.deviceId)!,
             transactionHash: 'txHash'
         };
     }

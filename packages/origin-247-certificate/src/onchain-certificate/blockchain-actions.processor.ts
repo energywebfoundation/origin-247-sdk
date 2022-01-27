@@ -15,7 +15,7 @@ import {
 import { TransactionPollService } from './transaction-poll.service';
 import { ConfigService } from '@nestjs/config';
 import { Configuration } from '../offchain-certificate/config/config.interface';
-import { IIssuedCertificate } from '../types';
+import { ICertificate } from './types';
 
 export const blockchainQueueName = 'blockchain-actions';
 
@@ -86,7 +86,7 @@ export class BlockchainActionsProcessor {
                 );
 
                 return {
-                    certificate: (issuanceCertificates[0] as unknown) as IIssuedCertificate,
+                    certificate: (issuanceCertificates[0] as unknown) as ICertificate,
                     transactionHash: issuanceTx.hash
                 };
 
@@ -212,7 +212,7 @@ export type BatchTransferActionResult = TransactionHashResult;
 export type BatchClaimActionResult = TransactionHashResult;
 
 export type IssuanceActionResult<MetadataType> = {
-    certificate: IIssuedCertificate<MetadataType>;
+    certificate: ICertificate<MetadataType>;
 } & TransactionHashResult;
 
 export type TransferActionResult = TransactionHashResult;
