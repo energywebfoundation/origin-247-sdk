@@ -33,12 +33,12 @@ import {
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
 import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import {
-    claimBatchCommandValidator,
-    claimCommandValidator,
-    issueBatchCommandValidator,
-    issueCommandValidator,
-    transferBatchCommandValidator,
-    transferCommandValidator
+    validateBatchClaimCommands,
+    validateBatchIssueCommands,
+    validateBatchTransferCommands,
+    validateClaimCommand,
+    validateIssueCommand,
+    validateTransferCommand
 } from './validators';
 
 @Injectable()
@@ -80,8 +80,8 @@ export class OffChainCertificateService<T = null> {
             fromTime: Math.round(params.fromTime.getTime() / 1000),
             toTime: Math.round(params.toTime.getTime() / 1000)
         } as IIssueCommand<T>;
+        await validateIssueCommand(command);
 
-        await issueCommandValidator(command);
         return await this.issueWithoutValidation(command);
     }
 
@@ -98,7 +98,7 @@ export class OffChainCertificateService<T = null> {
     }
 
     public async claim(command: IClaimCommand): Promise<void> {
-        await claimCommandValidator(command);
+        await validateClaimCommand(command);
         return await this.claimWithoutValidation(command);
     }
 
@@ -110,7 +110,7 @@ export class OffChainCertificateService<T = null> {
     }
 
     public async transfer(command: ITransferCommand): Promise<void> {
-        await transferCommandValidator(command);
+        await validateTransferCommand(command);
         return await this.transferWithoutValidation(command);
     }
     public async transferWithoutValidation(command: ITransferCommand): Promise<void> {
@@ -174,6 +174,7 @@ export class OffChainCertificateService<T = null> {
             fromTime: Math.round(c.fromTime.getTime() / 1000),
             toTime: Math.round(c.toTime.getTime() / 1000)
         }));
+        await validateBatchIssueCommands(commands);
         await this.validateBatchIssue(commands);
 
         const certs: number[] = [];
@@ -187,6 +188,7 @@ export class OffChainCertificateService<T = null> {
     }
 
     public async batchClaim(commands: IClaimCommand[]): Promise<void> {
+        await validateBatchClaimCommands(commands);
         await this.validateBatchClaim(commands);
 
         for (const command of commands) {
@@ -195,6 +197,7 @@ export class OffChainCertificateService<T = null> {
     }
 
     public async batchTransfer(commands: ITransferCommand[]): Promise<void> {
+        await validateBatchTransferCommands(commands);
         await this.validateBatchTransfer(commands);
 
         for (const command of commands) {
@@ -207,8 +210,6 @@ export class OffChainCertificateService<T = null> {
             commands.forEach((c) => {
                 CertificateAggregate.fromEvents([CertificateIssuedEvent.createNew(-1, c)]);
             });
-
-            await issueBatchCommandValidator(commands);
         } catch (err) {
             throw new CertificateErrors.BatchError(err);
         }
@@ -224,7 +225,6 @@ export class OffChainCertificateService<T = null> {
                 });
                 await this.createAggregate(events);
             }
-            await claimBatchCommandValidator(commands);
         } catch (err) {
             throw new CertificateErrors.BatchError(err);
         }
@@ -240,8 +240,6 @@ export class OffChainCertificateService<T = null> {
                 });
                 await this.createAggregate(events);
             }
-
-            await transferBatchCommandValidator(commands);
         } catch (err) {
             throw new CertificateErrors.BatchError(err);
         }
