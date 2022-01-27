@@ -6,16 +6,9 @@ import {
 import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
-import { IClaim } from '@energyweb/issuer';
 import { Job, Queue } from 'bull';
 import { BlockchainAction, BlockchainActionType, ICertificate } from './types';
-import {
-    IClaimCommand,
-    IIssueCommand,
-    IIssueCommandParams,
-    IIssuedCertificate,
-    ITransferCommand
-} from '../types';
+import { IClaimCommand, IIssueCommand, IIssueCommandParams, ITransferCommand } from '../types';
 import {
     BatchClaimActionResult,
     BatchIssuanceActionResult,
@@ -70,7 +63,7 @@ export class OnChainCertificateService<T = null> {
         return await OnChainCertificateService.waitForJobResult<IssuanceActionResult<T>>(job);
     }
 
-    public async issue(params: IIssueCommandParams<T>): Promise<IIssuedCertificate<T>> {
+    public async issue(params: IIssueCommandParams<T>): Promise<ICertificate<T>> {
         const { certificate } = await this.issueWithTxHash(params);
 
         return this.mapCertificate(certificate);
@@ -189,9 +182,7 @@ export class OnChainCertificateService<T = null> {
         await this.batchTransferWithTxHash(command);
     }
 
-    private mapCertificate<P extends { metadata: any; claims: IClaim[] }>(
-        certificate: P
-    ): P & { metadata: T; claims: IClaim[] } {
+    private mapCertificate(certificate: ICertificate<any>): ICertificate<T> {
         return {
             ...certificate,
             /** @NOTE this may be null, but this will be fixed at some point */

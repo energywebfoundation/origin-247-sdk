@@ -1,4 +1,4 @@
-import { IClaim, IClaimData } from '@energyweb/issuer';
+import { IClaimData } from '@energyweb/issuer';
 
 export type UnixTimestamp = number;
 
@@ -51,20 +51,4 @@ export interface IVolumeDistribution {
     publicVolume: string;
     privateVolume: string;
     claimedVolume: string;
-}
-
-export interface IIssuedCertificate<T = null> {
-    id: number;
-    deviceId: string;
-    generationStartTime: number;
-    generationEndTime: number;
-    creationTime: number;
-    metadata: T;
-    creationBlockHash: string;
-    energy: IVolumeDistribution;
-    isClaimed: boolean;
-    isOwned: boolean;
-    myClaims: IClaim[];
-    claims: IClaim[];
-    issuedPrivately: false;
 }

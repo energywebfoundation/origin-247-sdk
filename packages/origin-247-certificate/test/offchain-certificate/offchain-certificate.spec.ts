@@ -379,9 +379,12 @@ const expectedCertificate = {
             claimData: claimCommand.claimData
         }
     ],
-    creationBlockHash: expect.any(String),
+    creationTransactionHash: expect.any(String),
     issuedPrivately: expect.any(Boolean),
-    metadata: null
+    metadata: null,
+    createdAt: expect.any(Date),
+    updatedAt: expect.any(Date),
+    latestCommitment: null
 };
 
 type PublicPart<T> = { [K in keyof T]: T[K] };

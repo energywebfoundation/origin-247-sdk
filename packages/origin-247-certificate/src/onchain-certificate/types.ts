@@ -1,4 +1,4 @@
-import { IClaim } from '@energyweb/issuer';
+import { CertificateUtils, IClaim, IOwnershipCommitmentProof } from '@energyweb/issuer';
 import {
     IBatchClaimCommand,
     IBatchIssueCommand,
@@ -12,15 +12,18 @@ import {
 export interface ICertificate<T = null> {
     id: number;
     deviceId: string;
-    generationStartTime: UnixTimestamp;
-    generationEndTime: UnixTimestamp;
-    creationTime: UnixTimestamp;
-    owners: Record<string, string>;
-    claimers: Record<string, string> | null;
-    claims: IClaim[];
-    creationBlockHash: string;
-    issuedPrivately: boolean;
+    generationStartTime: number;
+    generationEndTime: number;
+    creationTime: number;
     metadata: T;
+    creationTransactionHash: string;
+    owners: CertificateUtils.IShareInCertificate;
+    claimers: CertificateUtils.IShareInCertificate;
+    claims: IClaim[];
+    issuedPrivately: boolean;
+    latestCommitment: IOwnershipCommitmentProof | null;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface ISuccessResponse {

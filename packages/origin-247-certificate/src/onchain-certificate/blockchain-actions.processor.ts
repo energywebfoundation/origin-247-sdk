@@ -15,7 +15,15 @@ import {
 import { TransactionPollService } from './transaction-poll.service';
 import { ConfigService } from '@nestjs/config';
 import { Configuration } from '../offchain-certificate/config/config.interface';
-import { IIssuedCertificate } from '../types';
+import { ICertificate } from './types';
+import {
+    IBatchClaimCommand,
+    IBatchIssueCommand,
+    IBatchTransferCommand,
+    IClaimCommand,
+    IIssueCommand,
+    ITransferCommand
+} from '../types';
 
 export const blockchainQueueName = 'blockchain-actions';
 
@@ -65,139 +73,150 @@ export class BlockchainActionsProcessor {
     > {
         switch (data.type) {
             case BlockchainActionType.Issuance:
-                const issuanceParams = data.payload;
-                this.logger.debug(`Triggering issuance for: ${JSON.stringify(issuanceParams)}`);
-
-                const issuanceTx = await this.commandBus.execute(
-                    new IssueCertificateCommand(
-                        issuanceParams.toAddress,
-                        issuanceParams.energyValue,
-                        issuanceParams.fromTime,
-                        issuanceParams.toTime,
-                        issuanceParams.deviceId,
-                        issuanceParams.userId,
-                        false,
-                        JSON.stringify(issuanceParams.metadata)
-                    )
-                );
-
-                const issuanceCertificates = await this.transactionPoll.waitForNewCertificates(
-                    issuanceTx.hash
-                );
-
-                return {
-                    certificate: (issuanceCertificates[0] as unknown) as IIssuedCertificate,
-                    transactionHash: issuanceTx.hash
-                };
-
+                return await this.handleIssue(data.payload);
             case BlockchainActionType.Transfer:
-                const transferParams = data.payload;
-                this.logger.debug(`Triggering transfer for: ${JSON.stringify(transferParams)}`);
-
-                const transferTx = await this.commandBus.execute(
-                    new TransferCertificateCommand(
-                        transferParams.certificateId,
-                        transferParams.fromAddress,
-                        transferParams.toAddress,
-                        transferParams.energyValue ? transferParams.energyValue : undefined
-                    )
-                );
-
-                await this.transactionPoll.waitForTransaction(transferTx.hash);
-
-                return { transactionHash: transferTx.hash };
-
+                return await this.handleTransfer(data.payload);
             case BlockchainActionType.Claim:
-                const claimParams = data.payload;
-                this.logger.debug(`Triggering claim for: ${JSON.stringify(claimParams)}`);
-
-                const claimTx = await this.commandBus.execute(
-                    new ClaimCertificateCommand(
-                        claimParams.certificateId,
-                        claimParams.claimData,
-                        claimParams.forAddress,
-                        claimParams.energyValue ? claimParams.energyValue.toString() : undefined
-                    )
-                );
-
-                await this.transactionPoll.waitForTransaction(claimTx.hash);
-
-                return { transactionHash: claimTx.hash };
-
+                return await this.handleClaim(data.payload);
             case BlockchainActionType.BatchIssuance:
-                const batchIssuanceParams = data.payload;
-                this.logger.debug(
-                    `Triggering batch issuance for: ${JSON.stringify(batchIssuanceParams)}`
-                );
-
-                const batchIssuanceTx = await this.commandBus.execute(
-                    new BatchIssueCertificatesCommand(
-                        batchIssuanceParams.certificates.map((certificate) => ({
-                            to: certificate.toAddress,
-                            deviceId: certificate.deviceId,
-                            energy: certificate.energyValue,
-                            fromTime: certificate.fromTime,
-                            toTime: certificate.toTime,
-                            metadata: JSON.stringify(certificate.metadata)
-                        }))
-                    )
-                );
-
-                const batchIssuanceCertificates = await this.transactionPoll.waitForNewCertificates(
-                    batchIssuanceTx.hash
-                );
-
-                return {
-                    certificateIds: batchIssuanceCertificates.map((c) => c.id),
-                    transactionHash: batchIssuanceTx.hash
-                };
-
+                return await this.handleBatchIssue(data.payload);
             case BlockchainActionType.BatchTransfer:
-                const batchTransferParams = data.payload;
-                this.logger.debug(
-                    `Triggering batch transfer for: ${JSON.stringify(batchTransferParams)}`
-                );
-
-                const batchTransferTx = await this.commandBus.execute(
-                    new BatchTransferCertificatesCommand(
-                        batchTransferParams.transfers.map((t) => ({
-                            id: t.certificateId,
-                            to: t.toAddress,
-                            from: t.fromAddress,
-                            amount: t.energyValue ? BigNumber.from(t.energyValue) : undefined
-                        }))
-                    )
-                );
-
-                await this.transactionPoll.waitForTransaction(batchTransferTx.hash);
-
-                return {
-                    transactionHash: batchTransferTx.hash
-                };
-
+                return await this.handleBatchTransfer(data.payload);
             case BlockchainActionType.BatchClaim:
-                const batchClaimParams = data.payload;
-                this.logger.debug(
-                    `Triggering batch claim for: ${JSON.stringify(batchClaimParams)}`
-                );
-
-                const batchClaimTx = await this.commandBus.execute(
-                    new BatchClaimCertificatesCommand(
-                        batchClaimParams.claims.map((c) => ({
-                            id: c.certificateId,
-                            from: c.forAddress,
-                            amount: c.energyValue ? BigNumber.from(c.energyValue) : undefined,
-                            claimData: c.claimData
-                        }))
-                    )
-                );
-
-                await this.transactionPoll.waitForTransaction(batchClaimTx.hash);
-
-                return {
-                    transactionHash: batchClaimTx.hash
-                };
+                return await this.handleBatchClaim(data.payload);
         }
+    }
+
+    private async handleIssue(params: IIssueCommand<any>): Promise<IssuanceActionResult<any>> {
+        this.logger.debug(`Triggering issuance for: ${JSON.stringify(params)}`);
+
+        const issuanceTx = await this.commandBus.execute(
+            new IssueCertificateCommand(
+                params.toAddress,
+                params.energyValue,
+                params.fromTime,
+                params.toTime,
+                params.deviceId,
+                params.userId,
+                false,
+                JSON.stringify(params.metadata)
+            )
+        );
+
+        const issuanceCertificates = await this.transactionPoll.waitForNewCertificates(
+            issuanceTx.hash
+        );
+
+        return {
+            certificate: (issuanceCertificates[0] as unknown) as ICertificate,
+            transactionHash: issuanceTx.hash
+        };
+    }
+
+    private async handleTransfer(params: ITransferCommand): Promise<TransferActionResult> {
+        this.logger.debug(`Triggering transfer for: ${JSON.stringify(params)}`);
+
+        const transferTx = await this.commandBus.execute(
+            new TransferCertificateCommand(
+                params.certificateId,
+                params.fromAddress,
+                params.toAddress,
+                params.energyValue ? params.energyValue : undefined
+            )
+        );
+
+        await this.transactionPoll.waitForTransaction(transferTx.hash);
+
+        return { transactionHash: transferTx.hash };
+    }
+
+    private async handleClaim(params: IClaimCommand): Promise<ClaimActionResult> {
+        this.logger.debug(`Triggering claim for: ${JSON.stringify(params)}`);
+
+        const claimTx = await this.commandBus.execute(
+            new ClaimCertificateCommand(
+                params.certificateId,
+                params.claimData,
+                params.forAddress,
+                params.energyValue ? params.energyValue.toString() : undefined
+            )
+        );
+
+        await this.transactionPoll.waitForTransaction(claimTx.hash);
+
+        return { transactionHash: claimTx.hash };
+    }
+
+    private async handleBatchIssue(
+        params: IBatchIssueCommand<any>
+    ): Promise<BatchIssuanceActionResult> {
+        this.logger.debug(`Triggering batch issuance for: ${JSON.stringify(params)}`);
+
+        const batchIssuanceTx = await this.commandBus.execute(
+            new BatchIssueCertificatesCommand(
+                params.certificates.map((certificate) => ({
+                    to: certificate.toAddress,
+                    deviceId: certificate.deviceId,
+                    energy: certificate.energyValue,
+                    fromTime: certificate.fromTime,
+                    toTime: certificate.toTime,
+                    metadata: JSON.stringify(certificate.metadata)
+                }))
+            )
+        );
+
+        const batchIssuanceCertificates = await this.transactionPoll.waitForNewCertificates(
+            batchIssuanceTx.hash
+        );
+
+        return {
+            certificateIds: batchIssuanceCertificates.map((c) => c.id),
+            transactionHash: batchIssuanceTx.hash
+        };
+    }
+
+    private async handleBatchTransfer(
+        params: IBatchTransferCommand
+    ): Promise<BatchTransferActionResult> {
+        this.logger.debug(`Triggering batch transfer for: ${JSON.stringify(params)}`);
+
+        const batchTransferTx = await this.commandBus.execute(
+            new BatchTransferCertificatesCommand(
+                params.transfers.map((t) => ({
+                    id: t.certificateId,
+                    to: t.toAddress,
+                    from: t.fromAddress,
+                    amount: t.energyValue ? BigNumber.from(t.energyValue) : undefined
+                }))
+            )
+        );
+
+        await this.transactionPoll.waitForTransaction(batchTransferTx.hash);
+
+        return {
+            transactionHash: batchTransferTx.hash
+        };
+    }
+
+    private async handleBatchClaim(params: IBatchClaimCommand): Promise<BatchClaimActionResult> {
+        this.logger.debug(`Triggering batch claim for: ${JSON.stringify(params)}`);
+
+        const batchClaimTx = await this.commandBus.execute(
+            new BatchClaimCertificatesCommand(
+                params.claims.map((c) => ({
+                    id: c.certificateId,
+                    from: c.forAddress,
+                    amount: c.energyValue ? BigNumber.from(c.energyValue) : undefined,
+                    claimData: c.claimData
+                }))
+            )
+        );
+
+        await this.transactionPoll.waitForTransaction(batchClaimTx.hash);
+
+        return {
+            transactionHash: batchClaimTx.hash
+        };
     }
 }
 
@@ -212,7 +231,7 @@ export type BatchTransferActionResult = TransactionHashResult;
 export type BatchClaimActionResult = TransactionHashResult;
 
 export type IssuanceActionResult<MetadataType> = {
-    certificate: IIssuedCertificate<MetadataType>;
+    certificate: ICertificate<MetadataType>;
 } & TransactionHashResult;
 
 export type TransferActionResult = TransactionHashResult;
