@@ -91,7 +91,7 @@ const invalidIssueCommand: IIssueCommand<any> = {
 
 const invalidClaimCommand: IClaimCommand = {
     certificateId: -1,
-    energyValue: '-1',
+    energyValue: 'asd',
     claimData: {
         beneficiary: '',
         countryCode: '',
@@ -199,7 +199,7 @@ const invalidClaimCommandErrors = expect.arrayContaining([
     expectValidationOf({
         constraint: 'isEnergyValue',
         property: 'energyValue',
-        value: '-1'
+        value: 'asd'
     }),
     expectValidationOf({
         value: 'some-address',

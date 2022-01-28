@@ -10,9 +10,13 @@ import { BigNumber } from 'ethers';
 @ValidatorConstraint({ name: 'isEnergyValue' })
 export class IsEnergyValueConstraint implements ValidatorConstraintInterface {
     public validate(value: string) {
-        const isNegative = BigNumber.from(value).isNegative();
+        try {
+            const isNegative = BigNumber.from(value).isNegative();
 
-        return !isNegative;
+            return !isNegative;
+        } catch (e) {
+            return false;
+        }
     }
 
     public defaultMessage(args: ValidationArguments) {
