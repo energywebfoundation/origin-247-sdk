@@ -1,6 +1,4 @@
-import { CreateDateColumn, Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
-import { IIssueCommand, ITransferCommand, IClaimCommand } from '../../../types';
-import { IClaimPersistedCommand } from '../../types';
+import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 export const tableName = 'certificate_command';
 
