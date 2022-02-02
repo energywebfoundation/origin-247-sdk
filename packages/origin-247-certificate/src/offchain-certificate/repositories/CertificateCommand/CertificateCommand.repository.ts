@@ -16,6 +16,8 @@ export type NewCertificateCommand = Omit<CertificateCommandEntity, 'id' | 'creat
 export interface CertificateCommandRepository {
     save(certificateCommand: NewCertificateCommand): Promise<CertificateCommandEntity>;
 
+    saveMany(certificateCommands: NewCertificateCommand[]): Promise<CertificateCommandEntity[]>;
+
     getById(commandId: number): Promise<CertificateCommandEntity | null>;
 
     getAll(): Promise<CertificateCommandEntity[]>;

@@ -15,8 +15,12 @@ export class CertificateCommandPostgresRepository implements CertificateCommandR
         private repository: Repository<CertificateCommandEntity>
     ) {}
 
-    public async save(generation: NewCertificateCommand): Promise<CertificateCommandEntity> {
-        return await this.repository.save(generation);
+    public async save(command: NewCertificateCommand): Promise<CertificateCommandEntity> {
+        return await this.repository.save(command);
+    }
+
+    public async saveMany(commands: NewCertificateCommand[]): Promise<CertificateCommandEntity[]> {
+        return await this.repository.save(commands);
     }
 
     public async getAll(): Promise<CertificateCommandEntity[]> {

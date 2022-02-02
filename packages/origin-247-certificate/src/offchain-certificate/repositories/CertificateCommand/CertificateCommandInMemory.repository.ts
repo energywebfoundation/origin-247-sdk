@@ -10,9 +10,9 @@ import {
 export class CertificateCommandInMemoryRepository implements CertificateCommandRepository {
     private db: CertificateCommandEntity[] = [];
 
-    public async save(generation: NewCertificateCommand): Promise<CertificateCommandEntity> {
+    public async save(command: NewCertificateCommand): Promise<CertificateCommandEntity> {
         const entity = {
-            ...generation,
+            ...command,
             createdAt: new Date(),
             id: this.db.length + 1
         };
@@ -20,6 +20,23 @@ export class CertificateCommandInMemoryRepository implements CertificateCommandR
         this.db.push(entity);
 
         return entity;
+    }
+
+    public async saveMany(commands: NewCertificateCommand[]): Promise<CertificateCommandEntity[]> {
+        const savedEntities: CertificateCommandEntity[] = [];
+
+        commands.forEach((command) => {
+            const entity = {
+                ...command,
+                createdAt: new Date(),
+                id: this.db.length + 1
+            };
+
+            this.db.push(entity);
+            savedEntities.push(entity);
+        });
+
+        return savedEntities;
     }
 
     public async getAll(): Promise<CertificateCommandEntity[]> {
