@@ -30,28 +30,20 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
         const failedCertificateIds: number[] = [];
         const hasCertificateFailed = (certificateId: number) =>
             failedCertificateIds.includes(certificateId);
-        console.time('synchronize');
         const eventsBatchQueue = new EventsBatchQueue(events);
-        console.timeLog('synchronize', 'EventsBatchQueue constructed');
 
         while (!eventsBatchQueue.isEmpty()) {
-            console.timeLog('synchronize', 'batch loop enter');
             const batch = eventsBatchQueue.popBatch();
-            console.timeLog('synchronize', 'popped batch to synchronize');
             const issueEvents = batch.filter(isIssueEvent);
             const transferEvents = batch.filter(isTransferEvent);
             const claimEvents = batch.filter(isClaimEvent);
-            console.timeLog('synchronize', 'filtered events by type');
 
             // Batch issue certificates
             const issueResult = await this.issuancePersistHandler.handleBatch(
                 issueEvents.filter((e) => !hasCertificateFailed(e.internalCertificateId))
             );
-            console.timeLog('synchronize', 'batch issue handled');
             failedCertificateIds.push(...issueResult.failedCertificateIds);
-            console.timeLog('synchronize', 'failed certificate saved');
             eventsBatchQueue.removeEventsForCertificateIds(issueResult.failedCertificateIds);
-            console.timeLog('synchronize', 'removed failed certificates from synchronization');
 
             // Batch transfer certificates
             const {
@@ -60,17 +52,13 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
             } = await this.getEventsWithBlockchainId(
                 transferEvents.filter((e) => !hasCertificateFailed(e.internalCertificateId))
             );
-            console.timeLog('synchronize', 'fetched transfer events with blockchain id');
 
             const transferResult = await this.transferPersistHandler.handleBatch(
                 transferEventsWithBlockchainId,
                 transferIdMap
             );
-            console.timeLog('synchronize', 'batch transfer handled');
             failedCertificateIds.push(...transferResult.failedCertificateIds);
-            console.timeLog('synchronize', 'failed certificate saved');
             eventsBatchQueue.removeEventsForCertificateIds(transferResult.failedCertificateIds);
-            console.timeLog('synchronize', 'removed failed certificates from synchronization');
 
             // Batch claim certificates
             const {
@@ -79,14 +67,11 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
             } = await this.getEventsWithBlockchainId(
                 claimEvents.filter((e) => !hasCertificateFailed(e.internalCertificateId))
             );
-            console.timeLog('synchronize', 'fetched claim events with blockchain id');
             const claimResult = await this.claimPersistHandler.handleBatch(
                 claimEventsWithBlockchainId,
                 claimIdMap
             );
-            console.timeLog('synchronize', 'batch claim handled');
             eventsBatchQueue.removeEventsForCertificateIds(claimResult.failedCertificateIds);
-            console.timeLog('synchronize', 'removed failed certificates from synchronization');
         }
     }
 

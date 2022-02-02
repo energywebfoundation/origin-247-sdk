@@ -18,15 +18,7 @@ const getDBConnectionOptions = (): ConnectionOptions => {
               port: configuration.DB_PORT,
               username: configuration.DB_USERNAME,
               password: configuration.DB_PASSWORD,
-              database: configuration.DB_DATABASE,
-              ssl: {
-                  rejectUnauthorized: false
-              },
-              extra: {
-                  ssl: {
-                      rejectUnauthorized: false
-                  }
-              }
+              database: configuration.DB_DATABASE
           };
 };
 

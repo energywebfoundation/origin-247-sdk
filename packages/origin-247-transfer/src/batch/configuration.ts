@@ -9,11 +9,14 @@ export interface BatchConfiguration {
 
 export const BATCH_CONFIGURATION_TOKEN = Symbol.for('BATCH_CONFIGURATION_TOKEN');
 
+const issueBatchSize = 500;
+
 export const defaultBatchConfiguration: BatchConfiguration = {
     issueAggregateSeconds: 10,
-    issueBatchSize: 500,
+    issueBatchSize: issueBatchSize,
     validateAggregateSeconds: 10,
     validateBatchSize: 500,
     transferAggregateSeconds: 10,
-    transferBatchSize: 200
+    // Transfer for the same batch size takes approximately 2.5x longer than issuance
+    transferBatchSize: issueBatchSize / 2.5
 };

@@ -181,7 +181,6 @@ export class OffChainCertificateService<T = null> {
         if (!originalCertificates.length) {
             return [];
         }
-        console.time('OffChainCertificateService.batchIssue');
 
         const commands: IIssueCommand<T>[] = originalCertificates.map((c) => ({
             ...c,
@@ -206,12 +205,8 @@ export class OffChainCertificateService<T = null> {
             (events) => this.createAggregate(events)
         );
 
-        await this.propagateMany(
-            events.map((event, index) => ({ ...event, commandId: savedCommands[index].id })),
-            aggregates
-        );
+        await this.propagateMany(zipEventsWithCommandId(events, savedCommands), aggregates);
 
-        console.timeEnd('OffChainCertificateService.batchIssue');
         return events.map((event) => event.internalCertificateId);
     }
 
@@ -219,11 +214,9 @@ export class OffChainCertificateService<T = null> {
         if (!commands.length) {
             return;
         }
-        console.time('OffChainCertificateService.batchClaim');
         await validateBatchClaimCommands(commands);
         await this.validateBatchClaim(commands);
         await this.handleBatch(commands);
-        console.timeEnd('OffChainCertificateService.batchClaim');
     }
 
     public async batchTransfer(commands: ITransferCommand[]): Promise<void> {
@@ -231,11 +224,9 @@ export class OffChainCertificateService<T = null> {
             return;
         }
 
-        console.time('OffChainCertificateService.batchTransfer');
         await validateBatchTransferCommands(commands);
         await this.validateBatchTransfer(commands);
         await this.handleBatch(commands);
-        console.timeEnd('OffChainCertificateService.batchTransfer');
     }
 
     private async handleBatch(commands: (IClaimCommand | ITransferCommand)[]) {

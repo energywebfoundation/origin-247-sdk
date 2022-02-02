@@ -30,18 +30,14 @@ export class BlockchainSynchronizeTask {
             let i = 0;
             while (i < 50) {
                 // This basically limits how many events we want to process in one task execution
-                console.time('certEventRepo.findAllToProcess');
                 const events = await this.certEventRepo.findAllToProcess({
                     limit: 500
                 });
-                console.timeEnd('certEventRepo.findAllToProcess');
                 if (events.length === 0) {
                     break;
                 }
 
-                console.time('synchronizeStrategy.synchronize');
                 await this.synchronizeStrategy.synchronize(events);
-                console.timeEnd('synchronizeStrategy.synchronize');
 
                 i += 1;
             }
