@@ -159,7 +159,7 @@ describe('CertificateEventRepository', () => {
                 CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
             await certificateEventRepository.updateAttempt({
-                eventId: event.id
+                eventIds: [event.id]
             });
 
             const certs = await certificateEventRepository.findAllToProcess({ limit: null });
@@ -171,7 +171,7 @@ describe('CertificateEventRepository', () => {
                 CertificateIssuedEvent.createNew(1, createIssueCommand())
             );
             await certificateEventRepository.updateAttempt({
-                eventId: event.id,
+                eventIds: [event.id],
                 error: 'error'
             });
 
@@ -285,7 +285,7 @@ describe('CertificateEventRepository', () => {
     ) => {
         for (let i = 0; i < tries; i++) {
             await certificateEventRepository.updateAttempt({
-                eventId: event.id,
+                eventIds: [event.id],
                 error
             });
         }

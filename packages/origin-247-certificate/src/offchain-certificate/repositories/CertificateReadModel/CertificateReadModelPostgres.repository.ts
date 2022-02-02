@@ -25,6 +25,14 @@ export class CertificateReadModelPostgresRepository<T>
         return certificateReadModel;
     }
 
+    async saveMany(
+        certificateReadModels: CertificateReadModelEntity<T>[]
+    ): Promise<CertificateReadModelEntity<T>[]> {
+        await this.repository.save(certificateReadModels as any[]);
+
+        return certificateReadModels;
+    }
+
     async getAll(
         options: IGetAllCertificatesOptions = {}
     ): Promise<CertificateReadModelEntity<T>[]> {

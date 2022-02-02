@@ -16,6 +16,19 @@ export class CertificateReadModelInMemoryRepository<T>
         return certificateReadModel;
     }
 
+    async saveMany(
+        certificateReadModels: CertificateReadModelEntity<T>[]
+    ): Promise<CertificateReadModelEntity<T>[]> {
+        const savedModels: CertificateReadModelEntity<T>[] = [];
+
+        certificateReadModels.forEach((certificateReadModel) => {
+            this.db[certificateReadModel.internalCertificateId] = certificateReadModel;
+            savedModels.push(certificateReadModel);
+        });
+
+        return savedModels;
+    }
+
     async getByInternalCertificateId(
         internalCertificateId: number
     ): Promise<CertificateReadModelEntity<T> | null> {

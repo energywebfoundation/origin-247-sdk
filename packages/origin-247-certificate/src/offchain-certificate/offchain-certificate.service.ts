@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CertificateCommandRepository } from './repositories/CertificateCommand/CertificateCommand.repository';
-import { CertificateEventRepository } from './repositories/CertificateEvent/CertificateEvent.repository';
+import {
+    CertificateEventRepository,
+    UnsavedEvent
+} from './repositories/CertificateEvent/CertificateEvent.repository';
 import { EventBus } from '@nestjs/cqrs';
 import { IClaimCommand, IIssueCommand, IIssueCommandParams, ITransferCommand } from '../types';
 import {
@@ -19,7 +22,8 @@ import {
     CertificateTransferPersistedEvent,
     CertificateTransferredEvent,
     ICertificateEvent,
-    isPersistedEvent
+    isPersistedEvent,
+    PersistedEvent
 } from './events/Certificate.events';
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
 import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
@@ -40,6 +44,13 @@ import {
     validateIssueCommand,
     validateTransferCommand
 } from './validators';
+import {
+    createAggregatesFromCertificateGroups,
+    createEventFromCommand,
+    createIssueEventsFromCommands,
+    groupByInternalCertificateId,
+    zipEventsWithCommandId
+} from './utils/batch.utils';
 
 @Injectable()
 export class OffChainCertificateService<T = null> {
@@ -57,21 +68,15 @@ export class OffChainCertificateService<T = null> {
     public async getAll(
         options: IGetAllCertificatesOptions = {}
     ): Promise<ICertificateReadModel<T>[]> {
-        const certificates = await this.readModelRepo.getAll(options);
-
-        return certificates;
+        return await this.readModelRepo.getAll(options);
     }
 
     public async getById(id: number): Promise<ICertificateReadModel<T> | null> {
-        const certificate = await this.readModelRepo.getByInternalCertificateId(id);
-
-        return certificate;
+        return await this.readModelRepo.getByInternalCertificateId(id);
     }
 
     public async getByIds(ids: number[]): Promise<ICertificateReadModel<T>[]> {
-        const certificates = await this.readModelRepo.getManyByInternalCertificateIds(ids);
-
-        return certificates;
+        return await this.readModelRepo.getManyByInternalCertificateIds(ids);
     }
 
     public async issue(params: IIssueCommandParams<T>): Promise<number> {
@@ -87,11 +92,14 @@ export class OffChainCertificateService<T = null> {
 
     public async issueWithoutValidation(command: IIssueCommand<T>): Promise<number> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
+
         const event = CertificateIssuedEvent.createNew(
             await this.generateInternalCertificateId(),
             command
         );
+
         const aggregate = await this.createAggregate([event]);
+
         await this.propagate(event, savedCommand, aggregate);
 
         return event.internalCertificateId;
@@ -113,6 +121,7 @@ export class OffChainCertificateService<T = null> {
         await validateTransferCommand(command);
         return await this.transferWithoutValidation(command);
     }
+
     public async transferWithoutValidation(command: ITransferCommand): Promise<void> {
         const savedCommand = await this.certCommandRepo.save({ payload: command });
         const event = CertificateTransferredEvent.createNew(command.certificateId, command);
@@ -169,40 +178,71 @@ export class OffChainCertificateService<T = null> {
     }
 
     public async batchIssue(originalCertificates: IIssueCommandParams<T>[]): Promise<number[]> {
+        if (!originalCertificates.length) {
+            return [];
+        }
+
         const commands: IIssueCommand<T>[] = originalCertificates.map((c) => ({
             ...c,
             fromTime: Math.round(c.fromTime.getTime() / 1000),
             toTime: Math.round(c.toTime.getTime() / 1000)
         }));
+
         await validateBatchIssueCommands(commands);
         await this.validateBatchIssue(commands);
 
-        const certs: number[] = [];
+        const savedCommands = await this.certCommandRepo.saveMany(
+            commands.map((command) => ({ payload: command }))
+        );
 
-        for (const command of commands) {
-            const certificateId = await this.issueWithoutValidation(command);
-            certs.push(certificateId);
-        }
+        const events = await createIssueEventsFromCommands(commands, () =>
+            this.generateInternalCertificateId()
+        );
+        const eventsByCertificateId = groupByInternalCertificateId(events);
 
-        return certs;
+        const aggregates = await createAggregatesFromCertificateGroups(
+            eventsByCertificateId,
+            (events) => this.createAggregate(events)
+        );
+
+        await this.propagateMany(zipEventsWithCommandId(events, savedCommands), aggregates);
+
+        return events.map((event) => event.internalCertificateId);
     }
 
     public async batchClaim(commands: IClaimCommand[]): Promise<void> {
+        if (!commands.length) {
+            return;
+        }
         await validateBatchClaimCommands(commands);
         await this.validateBatchClaim(commands);
-
-        for (const command of commands) {
-            await this.claimWithoutValidation(command);
-        }
+        await this.handleBatch(commands);
     }
 
     public async batchTransfer(commands: ITransferCommand[]): Promise<void> {
+        if (!commands.length) {
+            return;
+        }
+
         await validateBatchTransferCommands(commands);
         await this.validateBatchTransfer(commands);
+        await this.handleBatch(commands);
+    }
 
-        for (const command of commands) {
-            await this.transferWithoutValidation(command);
-        }
+    private async handleBatch(commands: (IClaimCommand | ITransferCommand)[]) {
+        const savedCommands = await this.certCommandRepo.saveMany(
+            commands.map((command) => ({ payload: command }))
+        );
+        const events = commands.map((command) => createEventFromCommand(command));
+
+        const eventsByCertificate = groupByInternalCertificateId(events);
+
+        const aggregates = await createAggregatesFromCertificateGroups(
+            eventsByCertificate,
+            (events) => this.createAggregate(events)
+        );
+
+        await this.propagateMany(zipEventsWithCommandId(events, savedCommands), aggregates);
     }
 
     private async validateBatchIssue(commands: IIssueCommand<T>[]): Promise<void> {
@@ -216,43 +256,39 @@ export class OffChainCertificateService<T = null> {
     }
 
     private async validateBatchClaim(commands: IClaimCommand[]): Promise<void> {
-        const grouped = this.groupCommandsByCertificate(commands);
+        const events = commands.map((command) => createEventFromCommand(command));
+        const eventsByCertificateId = groupByInternalCertificateId(events);
 
         try {
-            for (const certificateId in grouped) {
-                const events = grouped[certificateId].map((c) => {
-                    return CertificateClaimedEvent.createNew(parseInt(certificateId), c);
-                });
-                await this.createAggregate(events);
-            }
+            await createAggregatesFromCertificateGroups(eventsByCertificateId, (events) =>
+                this.createAggregate(events)
+            );
         } catch (err) {
             throw new CertificateErrors.BatchError(err);
         }
     }
 
     private async validateBatchTransfer(commands: ITransferCommand[]): Promise<void> {
-        const grouped = this.groupCommandsByCertificate(commands);
+        const events = commands.map((command) => createEventFromCommand(command));
+        const eventsByCertificateId = groupByInternalCertificateId(events);
 
         try {
-            for (const certificateId in grouped) {
-                const events = grouped[certificateId].map((c) => {
-                    return CertificateTransferredEvent.createNew(parseInt(certificateId), c);
-                });
-                await this.createAggregate(events);
-            }
+            await createAggregatesFromCertificateGroups(eventsByCertificateId, (events) =>
+                this.createAggregate(events)
+            );
         } catch (err) {
             throw new CertificateErrors.BatchError(err);
         }
     }
 
-    private async createAggregate(events: ICertificateEvent[]): Promise<CertificateAggregate<T>> {
-        const aggregate = CertificateAggregate.fromEvents<T>([
-            ...(await this.certEventRepo.getByInternalCertificateId(
-                events[0].internalCertificateId
-            )),
-            ...events
-        ]);
-        return aggregate;
+    private async createAggregate(
+        newEvents: ICertificateEvent[]
+    ): Promise<CertificateAggregate<T>> {
+        const certificateId = newEvents[0].internalCertificateId;
+
+        const previousEvents = await this.certEventRepo.getByInternalCertificateId(certificateId);
+
+        return CertificateAggregate.fromEvents<T>([...previousEvents, ...newEvents]);
     }
 
     private async generateInternalCertificateId(): Promise<number> {
@@ -271,22 +307,29 @@ export class OffChainCertificateService<T = null> {
 
         if (isPersistedEvent(savedEvent)) {
             await this.certEventRepo.updateAttempt({
-                eventId: savedEvent.payload.persistedEventId,
+                eventIds: [savedEvent.payload.persistedEventId],
                 error: errorMessage
             });
         }
     }
 
-    private groupCommandsByCertificate<T extends { certificateId: number }>(
-        commands: T[]
-    ): Record<number, T[]> {
-        const certificates: Record<number, T[]> = {};
-        commands.forEach((command) => {
-            const exists = certificates[command.certificateId];
-            exists
-                ? (certificates[command.certificateId] = [...exists, command])
-                : (certificates[command.certificateId] = [command]);
+    private async propagateMany(
+        events: (UnsavedEvent & { commandId: number })[],
+        aggregates: CertificateAggregate<T>[],
+        errorMessage?: string
+    ): Promise<void> {
+        await this.eventBus.publishAll(events);
+        await this.readModelRepo.saveMany(
+            aggregates.map((aggregate) => aggregate.getCertificate())
+        );
+        const savedEvents = await this.certificateEventService.saveMany(events);
+        const persistedEvents = savedEvents.filter((event) =>
+            isPersistedEvent(event)
+        ) as PersistedEvent[];
+
+        await this.certEventRepo.updateAttempt({
+            eventIds: persistedEvents.map((event) => event.payload.persistedEventId),
+            error: errorMessage
         });
-        return certificates;
     }
 }
