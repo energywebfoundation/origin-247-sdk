@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.4.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.3.1...@energyweb/origin-247-certificate@3.4.0) (2022-02-10)
+
+
+### Bug Fixes
+
+* inconsistent certificate type ([#48](https://github.com/energywebfoundation/origin-247-sdk/issues/48)) ([0812369](https://github.com/energywebfoundation/origin-247-sdk/commit/081236956e2de2f8c920f25bb837aacb3688c380))
+
+
+### Features
+
+* Add validation of user commands ([#76](https://github.com/energywebfoundation/origin-247-sdk/issues/76)) ([5b9fdac](https://github.com/energywebfoundation/origin-247-sdk/commit/5b9fdacb57de262c2f64cee8b2b18c33e63bfb1b))
+* Improve commands batching performance ([#80](https://github.com/energywebfoundation/origin-247-sdk/issues/80)) ([a3a8011](https://github.com/energywebfoundation/origin-247-sdk/commit/a3a80115ce14cb2ec00fcef266f8868966e765f9))
+
+
+
+
+
 ## [3.3.1](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.3.0...@energyweb/origin-247-certificate@3.3.1) (2022-01-25)
 
 

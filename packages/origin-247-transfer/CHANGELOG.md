@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@2.0.5...@energyweb/origin-247-transfer@2.1.0) (2022-02-10)
+
+
+### Features
+
+* Add validation of user commands ([#76](https://github.com/energywebfoundation/origin-247-sdk/issues/76)) ([5b9fdac](https://github.com/energywebfoundation/origin-247-sdk/commit/5b9fdacb57de262c2f64cee8b2b18c33e63bfb1b))
+* Improve commands batching performance ([#80](https://github.com/energywebfoundation/origin-247-sdk/issues/80)) ([a3a8011](https://github.com/energywebfoundation/origin-247-sdk/commit/a3a80115ce14cb2ec00fcef266f8868966e765f9))
+
+
+
+
+
 ## [2.0.5](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@2.0.4...@energyweb/origin-247-transfer@2.0.5) (2022-01-25)
 
 
