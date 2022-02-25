@@ -57,6 +57,7 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
                 transferEventsWithBlockchainId,
                 transferIdMap
             );
+            failedCertificateIds.push(...transferResult.failedCertificateIds);
             eventsBatchQueue.removeEventsForCertificateIds(transferResult.failedCertificateIds);
 
             // Batch claim certificates
@@ -70,7 +71,6 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
                 claimEventsWithBlockchainId,
                 claimIdMap
             );
-            failedCertificateIds.push(...claimResult.failedCertificateIds);
             eventsBatchQueue.removeEventsForCertificateIds(claimResult.failedCertificateIds);
         }
     }

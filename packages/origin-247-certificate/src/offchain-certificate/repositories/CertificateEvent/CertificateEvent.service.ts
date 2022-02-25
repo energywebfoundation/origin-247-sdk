@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { EntityManager } from 'typeorm';
-import { CertificateEventRepository } from './CertificateEvent.repository';
+import { CertificateEventRepository, UnsavedEvent } from './CertificateEvent.repository';
 import { CertificateEventType, ICertificateEvent } from '../../events/Certificate.events';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../repository.keys';
 import { ENTITY_MANAGER } from '../../utils/entity-manager';
@@ -36,6 +36,34 @@ export class CertificateEventService {
             }
 
             return savedEvent;
+        });
+    }
+
+    public async saveMany(
+        events: (UnsavedEvent & { commandId: number })[]
+    ): Promise<ICertificateEvent[]> {
+        return await this.entityManager.transaction(async (txManager) => {
+            const savedEvents = await this.certificateEventRepository.saveMany(
+                events.map((event) => ({
+                    internalCertificateId: event.internalCertificateId,
+                    type: event.type,
+                    version: event.version,
+                    payload: event.payload,
+                    commandId: event.commandId,
+                    createdAt: event.createdAt
+                })),
+                txManager
+            );
+
+            const eventsToSynchronize = savedEvents.filter((event) =>
+                this.shouldBeSynchronized(event)
+            );
+            await this.certificateEventRepository.createSynchronizationAttempts(
+                eventsToSynchronize.map((e) => e.id),
+                txManager
+            );
+
+            return savedEvents;
         });
     }
 

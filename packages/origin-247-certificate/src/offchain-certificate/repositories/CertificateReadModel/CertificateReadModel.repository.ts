@@ -14,6 +14,10 @@ export type NewCertificateReadModel<T> = Omit<
 export interface CertificateReadModelRepository<T> {
     save(certificateRM: NewCertificateReadModel<T>): Promise<CertificateReadModelEntity<T>>;
 
+    saveMany(
+        certificateRMs: NewCertificateReadModel<T>[]
+    ): Promise<CertificateReadModelEntity<T>[]>;
+
     getByInternalCertificateId(
         internalCertificateId: number
     ): Promise<ICertificateReadModel<T> | null>;

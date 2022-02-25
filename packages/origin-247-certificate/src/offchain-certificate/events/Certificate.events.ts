@@ -42,7 +42,7 @@ export interface ICertificateEvent {
     createdAt: Date;
 }
 
-type PersistedEvent =
+export type PersistedEvent =
     | CertificateIssuancePersistedEvent
     | CertificateClaimPersistedEvent
     | CertificateTransferPersistedEvent

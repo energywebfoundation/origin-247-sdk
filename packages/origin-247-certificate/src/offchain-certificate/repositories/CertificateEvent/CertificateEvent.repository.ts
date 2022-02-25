@@ -6,17 +6,29 @@ export interface IGetToProcessOptions {
     limit: number | null;
 }
 
+export type UnsavedEvent = Omit<ICertificateEvent, 'id'>;
+
 export interface CertificateEventRepository {
     save(
-        event: Omit<ICertificateEvent, 'id'>,
+        event: UnsavedEvent,
         commandId: number,
         txManager: EntityManager | null
     ): Promise<ICertificateEvent>;
+
+    saveMany(
+        events: (UnsavedEvent & { commandId: number })[],
+        txManager: EntityManager | null
+    ): Promise<ICertificateEvent[]>;
 
     createSynchronizationAttempt(
         eventId: number,
         txManager: EntityManager | null
     ): Promise<CertificateSynchronizationAttemptEntity>;
+
+    createSynchronizationAttempts(
+        eventId: number[],
+        txManager: EntityManager | null
+    ): Promise<CertificateSynchronizationAttemptEntity[]>;
 
     getByInternalCertificateId(internalCertId: number): Promise<ICertificateEvent[]>;
 
@@ -26,9 +38,9 @@ export interface CertificateEventRepository {
     getBlockchainIdMap(internalCertIds: number[]): Promise<Record<number, number>>;
 
     updateAttempt(updateData: {
-        eventId: number;
+        eventIds: number[];
         error?: string;
-    }): Promise<CertificateSynchronizationAttemptEntity>;
+    }): Promise<CertificateSynchronizationAttemptEntity[]>;
 
     getAll(): Promise<ICertificateEvent[]>;
 

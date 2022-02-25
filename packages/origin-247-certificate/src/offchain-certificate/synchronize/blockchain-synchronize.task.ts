@@ -33,7 +33,6 @@ export class BlockchainSynchronizeTask {
                 const events = await this.certEventRepo.findAllToProcess({
                     limit: 500
                 });
-
                 if (events.length === 0) {
                     break;
                 }

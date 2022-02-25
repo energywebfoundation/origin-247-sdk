@@ -1,10 +1,8 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CertificateEventEntity } from './CertificateEvent.entity';
-import { CertificateEventRepository } from './CertificateEvent.repository';
+import { CertificateEventRepository, UnsavedEvent } from './CertificateEvent.repository';
 import {
-    CertificateEventType,
     CertificateIssuancePersistedEvent,
-    ICertificateEvent,
     isIssuePersistedEvent
 } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
@@ -28,10 +26,7 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         return this.eventDb.filter((e) => e.internalCertificateId === internalCertId);
     }
 
-    public async save(
-        event: Omit<ICertificateEvent, 'id'>,
-        commandId: number
-    ): Promise<CertificateEventEntity> {
+    public async save(event: UnsavedEvent, commandId: number): Promise<CertificateEventEntity> {
         const entity = {
             internalCertificateId: event.internalCertificateId,
             type: event.type,
@@ -45,6 +40,28 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         this.eventDb.push(entity);
 
         return entity;
+    }
+
+    public async saveMany(
+        events: (UnsavedEvent & { commandId: number })[]
+    ): Promise<CertificateEventEntity[]> {
+        const saved: CertificateEventEntity[] = [];
+
+        events.forEach((event) => {
+            const entity = {
+                internalCertificateId: event.internalCertificateId,
+                type: event.type,
+                version: event.version,
+                payload: event.payload,
+                createdAt: event.createdAt,
+                commandId: event.commandId,
+                id: this.eventDb.length + 1
+            };
+            this.eventDb.push(entity);
+            saved.push(entity);
+        });
+
+        return saved;
     }
 
     public async createSynchronizationAttempt(
@@ -61,20 +78,44 @@ export class CertificateEventInMemoryRepository implements CertificateEventRepos
         return entity;
     }
 
+    public async createSynchronizationAttempts(
+        eventIds: number[]
+    ): Promise<CertificateSynchronizationAttemptEntity[]> {
+        const savedEntities: CertificateSynchronizationAttemptEntity[] = [];
+
+        eventIds.forEach((eventId) => {
+            const entity = {
+                eventId,
+                attemptsCount: 0,
+                createdAt: new Date()
+            };
+
+            this.attemptDb[eventId] = entity;
+            savedEntities.push(entity);
+        });
+
+        return savedEntities;
+    }
+
     public async updateAttempt({
-        eventId,
+        eventIds,
         error
-    }): Promise<CertificateSynchronizationAttemptEntity> {
-        const synchronizationAttempt = await this.attemptDb[eventId];
+    }): Promise<CertificateSynchronizationAttemptEntity[]> {
+        const savedAttempts: CertificateSynchronizationAttemptEntity[] = [];
 
-        if (!synchronizationAttempt) {
-            throw new Error('Synchronization attempt does not exist');
-        }
+        eventIds.forEach((eventId) => {
+            const synchronizationAttempt = this.attemptDb[eventId];
 
-        synchronizationAttempt.attemptsCount = synchronizationAttempt.attemptsCount + 1;
-        synchronizationAttempt.error = error ?? null;
+            if (!synchronizationAttempt) {
+                throw new Error('Synchronization attempt does not exist');
+            }
 
-        return synchronizationAttempt;
+            synchronizationAttempt.attemptsCount = synchronizationAttempt.attemptsCount + 1;
+            synchronizationAttempt.error = error ?? null;
+            savedAttempts.push(synchronizationAttempt);
+        });
+
+        return savedAttempts;
     }
 
     public async findAllToProcess(): Promise<CertificateEventEntity[]> {

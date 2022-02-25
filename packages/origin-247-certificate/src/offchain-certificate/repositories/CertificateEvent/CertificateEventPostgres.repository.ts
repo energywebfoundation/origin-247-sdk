@@ -62,6 +62,26 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         });
     }
 
+    public async saveMany(
+        events: (Omit<ICertificateEvent, 'id'> & { commandId: number })[],
+        txManager: EntityManager | null
+    ): Promise<CertificateEventEntity[]> {
+        const repository = txManager
+            ? txManager.getRepository(CertificateEventEntity)
+            : this.repository;
+
+        const eventsToSave = events.map((event) => ({
+            internalCertificateId: event.internalCertificateId,
+            type: event.type,
+            version: event.version,
+            payload: event.payload,
+            createdAt: event.createdAt,
+            commandId: event.commandId
+        }));
+
+        return await repository.save(eventsToSave);
+    }
+
     public async createSynchronizationAttempt(
         eventId: number,
         txManager: EntityManager | null
@@ -76,25 +96,37 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         });
     }
 
+    public async createSynchronizationAttempts(
+        eventIds: number[],
+        txManager: EntityManager | null
+    ): Promise<CertificateSynchronizationAttemptEntity[]> {
+        const repository = txManager
+            ? txManager.getRepository(CertificateSynchronizationAttemptEntity)
+            : this.synchronizationAttemptRepository;
+
+        return await repository.save(
+            eventIds.map((eventId) => ({
+                eventId,
+                attemptsCount: 0
+            }))
+        );
+    }
+
     public async updateAttempt({
-        eventId,
+        eventIds,
         error
-    }): Promise<CertificateSynchronizationAttemptEntity> {
-        const synchronizationAttempt = await this.synchronizationAttemptRepository.findOne(eventId);
-
-        if (!synchronizationAttempt) {
-            throw new Error('Synchronization attempt does not exist');
-        }
-
-        synchronizationAttempt.attemptsCount = synchronizationAttempt.attemptsCount + 1;
-        synchronizationAttempt.error = error ?? null;
-
-        await this.synchronizationAttemptRepository.update(
-            synchronizationAttempt.eventId,
-            synchronizationAttempt
+    }): Promise<CertificateSynchronizationAttemptEntity[]> {
+        const synchronizationAttempts = await this.synchronizationAttemptRepository.findByIds(
+            eventIds
         );
 
-        return synchronizationAttempt;
+        return await this.synchronizationAttemptRepository.save(
+            synchronizationAttempts.map((attempt) => ({
+                ...attempt,
+                attemptsCount: attempt.attemptsCount + 1,
+                error: error ?? null
+            }))
+        );
     }
 
     public async findAllToProcess(params: IGetToProcessOptions): Promise<CertificateEventEntity[]> {

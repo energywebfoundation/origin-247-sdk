@@ -62,7 +62,7 @@ import getConfiguration from './config/configuration';
         },
         {
             provide: BATCH_CONFIGURATION_TOKEN,
-            useValue: BatchConfigurationService
+            useClass: BatchConfigurationService
         },
         {
             provide: ENTITY_MANAGER,

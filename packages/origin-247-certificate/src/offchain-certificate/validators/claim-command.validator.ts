@@ -40,10 +40,10 @@ class ClaimDataDto implements IClaimData {
     @IsString()
     countryCode: string;
 
-    @IsDateString()
+    @IsString()
     periodStartDate: string;
 
-    @IsDateString()
+    @IsString()
     periodEndDate: string;
 
     @IsString()
