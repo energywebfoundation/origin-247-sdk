@@ -6,7 +6,7 @@ import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { chunk } from 'lodash';
 import {
-    BatchConfiguration,
+    BatchConfigurationService,
     BATCH_CONFIGURATION_TOKEN
 } from '../strategies/batch/batch.configuration';
 
@@ -17,14 +17,17 @@ export class ClaimPersistHandler {
         private readonly certificateService: OnChainCertificateService,
         private readonly offchainCertificateService: OffChainCertificateService,
         @Inject(BATCH_CONFIGURATION_TOKEN)
-        private batchConfiguration: BatchConfiguration
+        private batchConfigurationService: BatchConfigurationService
     ) {}
 
     public async handleBatch(
         events: CertificateClaimedEvent[],
         blockchainIdMap: Record<number, number>
     ) {
-        const eventsBlocks = chunk(events, this.batchConfiguration.claimBatchSize);
+        const eventsBlocks = chunk(
+            events,
+            this.batchConfigurationService.getBatchSizes().claimBatchSize
+        );
         const failedCertificateIds: number[] = [];
 
         for (const eventsBlock of eventsBlocks) {
