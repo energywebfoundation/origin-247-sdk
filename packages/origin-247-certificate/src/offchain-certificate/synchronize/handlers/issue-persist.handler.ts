@@ -7,7 +7,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { chunk } from 'lodash';
 import {
     BATCH_CONFIGURATION_TOKEN,
-    BatchConfiguration
+    BatchConfigurationService
 } from '../strategies/batch/batch.configuration';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class IssuePersistHandler {
         private readonly certificateService: OnChainCertificateService<unknown>,
         private readonly offchainCertificateService: OffChainCertificateService,
         @Inject(BATCH_CONFIGURATION_TOKEN)
-        private batchConfiguration: BatchConfiguration
+        private batchConfigurationService: BatchConfigurationService
     ) {}
 
     private async synchronizeBatchBlock(
@@ -65,7 +65,10 @@ export class IssuePersistHandler {
     }
 
     async handleBatch(events: CertificateIssuedEvent[]) {
-        const eventsBlocks = chunk(events, this.batchConfiguration.issueBatchSize);
+        const eventsBlocks = chunk(
+            events,
+            this.batchConfigurationService.getBatchSizes().issueBatchSize
+        );
         const failedCertificateIds: number[] = [];
 
         for (const eventsBlock of eventsBlocks) {

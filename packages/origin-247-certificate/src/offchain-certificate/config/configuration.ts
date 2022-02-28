@@ -14,7 +14,12 @@ const getConfiguration = (): Configuration => ({
     REDIS_URL: process.env.REDIS_URL ?? { host: 'localhost', port: 6379 },
     MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT: process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT
         ? Number(process.env.MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT)
-        : 3
+        : 3,
+    ISSUE_BATCH_SIZE: process.env.ISSUE_BATCH_SIZE ? parseInt(process.env.ISSUE_BATCH_SIZE) : 10,
+    CLAIM_BATCH_SIZE: process.env.CLAIM_BATCH_SIZE ? parseInt(process.env.CLAIM_BATCH_SIZE) : 25,
+    TRANSFER_BATCH_SIZE: process.env.TRANSFER_BATCH_SIZE
+        ? parseInt(process.env.TRANSFER_BATCH_SIZE)
+        : 100
 });
 
 export default getConfiguration;
