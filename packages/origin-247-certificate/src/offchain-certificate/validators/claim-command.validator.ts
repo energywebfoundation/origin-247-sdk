@@ -14,6 +14,7 @@ import { plainToClass, Type } from 'class-transformer';
 import { IsEnergyValue } from './decorators/is-energy-value';
 import { validatorOptions } from './validator.config';
 import { IClaimData } from '@energyweb/issuer';
+import { IsClaimData } from '@energyweb/issuer-api';
 
 export const validateClaimCommand = async (command: IClaimCommand) =>
     await validateOrReject(plainToClass(ClaimCommandDto, command), validatorOptions);
@@ -30,34 +31,13 @@ export const validateBatchClaimCommands = async (commands: IClaimCommand[]) => {
     throw validationErrors;
 };
 
-class ClaimDataDto implements IClaimData {
-    @IsString()
-    beneficiary: string;
-
-    @IsString()
-    location: string;
-
-    @IsString()
-    countryCode: string;
-
-    @IsString()
-    periodStartDate: string;
-
-    @IsString()
-    periodEndDate: string;
-
-    @IsString()
-    purpose: string;
-}
-
 class ClaimCommandDto implements IClaimCommand {
     @IsNumber()
     @Min(0)
     certificateId: number;
 
-    @ValidateNested()
-    @Type(() => ClaimDataDto)
-    claimData: ClaimDataDto;
+    @IsClaimData()
+    claimData: IClaimData;
 
     @IsEthereumAddress()
     forAddress: string;
