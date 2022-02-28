@@ -29,7 +29,8 @@ import { CertificateEventService } from './repositories/CertificateEvent/Certifi
 import { BatchSynchronizeStrategy } from './synchronize/strategies/batch/batch-synchronize.strategy';
 import {
     BATCH_CONFIGURATION_TOKEN,
-    BatchConfigurationService
+    BatchConfigurationService,
+    BatchConfigurationServiceForUnitTests
 } from './synchronize/strategies/batch/batch.configuration';
 import { IssuePersistHandler } from './synchronize/handlers/issue-persist.handler';
 import { CertificateCommandInMemoryRepository } from './repositories/CertificateCommand/CertificateCommandInMemory.repository';
@@ -95,6 +96,7 @@ import getConfiguration from './config/configuration';
         }),
         ConfigModule.forRoot({
             load: [getConfiguration]
+            // isGlobal: true
         })
     ]
 })
@@ -124,7 +126,7 @@ export class OffChainCertificateForUnitTestsModule {
                 },
                 {
                     provide: BATCH_CONFIGURATION_TOKEN,
-                    useValue: BatchConfigurationService
+                    useClass: BatchConfigurationServiceForUnitTests
                 },
                 {
                     provide: ENTITY_MANAGER,
