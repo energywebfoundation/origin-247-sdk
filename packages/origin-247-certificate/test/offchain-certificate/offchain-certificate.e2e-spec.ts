@@ -124,7 +124,8 @@ const expectedCertificate = {
         }
     ],
     issuedPrivately: expect.any(Boolean),
-    metadata: null
+    metadata: null,
+    schemaVersion: expect.any(Number)
 };
 
 const expectedReadModel: CertificateReadModelEntity<null> = {

@@ -6,7 +6,7 @@
     "scripts": {
         "test:unit": "jest --testRegex '\\.spec\\.ts$'",
         "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8547 && yarn drop && yarn migrate && yarn test:e2e:jest\"",
-        "test:e2e:jest": "WEB3=http://localhost:8547 jest --maxWorkers 1 --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
+        "test:e2e:jest": "WEB3=http://localhost:8547 OPERATOR_ENCRYPTION_KEY=pass jest --maxWorkers 1 --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
         "build": "tsc --project tsconfig.json",
         "migrate": "yarn typeorm:run && yarn typeorm:run:issuer && yarn typeorm:run:certificate",
         "drop": "yarn typeorm:drop && yarn typeorm:drop:issuer && yarn typeorm:drop:certificate",
@@ -26,7 +26,7 @@
         "lodash": "4.17.21",
         "luxon": "2.0.2",
         "pg": "8.7.1",
-        "typeorm": "0.2.39"
+        "typeorm": "0.2.41"
     },
     "peerDependencies": {
         "@energyweb/origin-247-certificate": "^1.0.0",
@@ -36,11 +36,11 @@
         "@nestjs/typeorm": "8.0.2"
     },
     "devDependencies": {
-        "@energyweb/issuer": "4.1.1-alpha.1636552048.0",
-        "@energyweb/issuer-api": "0.4.1-alpha.1636552048.0",
+        "@energyweb/issuer": "6.0.2-alpha.1646058469.0",
+        "@energyweb/issuer-api": "0.6.2-alpha.1646058469.0",
         "@energyweb/origin-247-certificate": "3.4.0",
-        "@energyweb/origin-backend-utils": "1.6.2-alpha.1636552048.0",
-        "@energyweb/utils-general": "11.0.5-alpha.1636552048.0",
+        "@energyweb/origin-backend-utils": "1.8.2-alpha.1646058469.0",
+        "@energyweb/utils-general": "11.2.2-alpha.1646058469.0",
         "@nestjs/bull": "0.4.2",
         "@nestjs/common": "8.1.1",
         "@nestjs/core": "8.1.1",

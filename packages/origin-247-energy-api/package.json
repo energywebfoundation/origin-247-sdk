@@ -8,7 +8,7 @@
         "build": "yarn compile && tsc",
         "compile": "hardhat compile",
         "test:e2e": "concurrently --success first --kill-others -n eth,test \"yarn run:ganache\" \"wait-on tcp:8548 && yarn drop && yarn migrate && yarn test:e2e:jest\"",
-        "test:e2e:jest": "NODE_ENV=e2e WEB3=http://localhost:8548 jest --maxWorkers 1 --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
+        "test:e2e:jest": "NODE_ENV=e2e WEB3=http://localhost:8548 OPERATOR_ENCRYPTION_KEY=pass jest --maxWorkers 1 --testRegex '.e2e-spec.ts$' --forceExit --passWithNoTests",
         "clean": "shx rm -rf cache artifacts dist *.log src/typechain",
         "migrate": "yarn typeorm:run",
         "drop": "yarn typeorm:drop",
@@ -23,8 +23,8 @@
     "keywords": [],
     "license": "GPL-3.0-or-later",
     "devDependencies": {
-        "@energyweb/origin-backend-utils": "1.6.2-alpha.1636552048.0",
-        "@energyweb/utils-general": "11.0.5-alpha.1636552048.0",
+        "@energyweb/origin-backend-utils": "1.8.2-alpha.1646058469.0",
+        "@energyweb/utils-general": "11.2.2-alpha.1646058469.0",
         "@ethersproject/abi": "5.3.1",
         "@ethersproject/providers": "5.3.1",
         "@nestjs/common": "8.1.1",
@@ -52,7 +52,7 @@
         "ts-jest": "27.0.3",
         "ts-node": "9.1.1",
         "typechain": "5.1.2",
-        "typeorm": "0.2.39",
+        "typeorm": "0.2.41",
         "typescript": "4.3.4",
         "wait-on": "6.0.0"
     },

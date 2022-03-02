@@ -119,7 +119,7 @@ export const bootstrapTestInstance: any = async () => {
 
     const connection = await app.resolve<Connection>(getConnectionToken());
     const tables = connection.entityMetadatas
-        .filter((e) => e.tableName !== 'issuer_blockchain_properties')
+        .filter((e) => e.tableName !== 'issuer_blockchain_properties' && e.tableName !== 'issuer_signer')
         .map((e) => `"${e.tableName}"`)
         .join(', ');
 
