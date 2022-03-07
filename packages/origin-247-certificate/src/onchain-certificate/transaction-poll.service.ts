@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { GetCertificateByTxHashQuery, Certificate } from '@energyweb/issuer-api';
 import { QueryBus } from '@nestjs/cqrs';
 
-const pollDelay = 3000;
-const maxRetries = 100;
+const pollDelay = 5000;
+const maxRetries = 200;
 
 @Injectable()
 export class TransactionPollService {
