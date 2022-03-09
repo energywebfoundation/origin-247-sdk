@@ -11,6 +11,8 @@ import { CertificateUpdatedHandler } from './certificate-updated.handler';
 import getConfiguration from '../offchain-certificate/config/configuration';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Configuration } from '../offchain-certificate/config/config.interface';
+import { BlockchainPropertiesService } from './blockchain-properties.service';
+import { OnChainCertificateFacade } from './onChainCertificateFacade';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -22,9 +24,11 @@ const realCertificateProvider = {
         realCertificateProvider,
         BlockchainActionsProcessor,
         TransactionPollService,
-        CertificateUpdatedHandler
+        CertificateUpdatedHandler,
+        BlockchainPropertiesService,
+        OnChainCertificateFacade
     ],
-    exports: [realCertificateProvider],
+    exports: [realCertificateProvider, OnChainCertificateFacade],
     imports: [
         IssuerModule.register({
             enableCertificationRequest: false
