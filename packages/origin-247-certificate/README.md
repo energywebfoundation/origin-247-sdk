@@ -92,7 +92,7 @@ export class SomeService {
 
 It is possible to deploy contracts using `OnChainCertificateFacade`. When using this method, it is unnecesary to do blockchain seeding migrations. How to use:
 
--   import certificate module into one of your applictaions modules
+-   import certificate module into one of your applications modules
 -   at application bootstrap, use OnChainCertificateFacade.deploy() method
 
 ```ts
@@ -102,6 +102,18 @@ const appModule = AppModule.register();
 const app = await NestFactory.create(appModule);
 const blockchainFacade = await app.resolve<OnChainCertificateFacade>(OnChainCertificateFacade);
 await blockchainFacade.deploy();
+```
+
+or
+
+```ts
+constructor(
+   private onChangeCertificateFacade: OnChainCertificateFacade
+) {}
+
+public async onApplicationBootstrap() {
+   await this.onChangeCertificateFacade.deploy();
+}
 ```
 
 ### Metadata
