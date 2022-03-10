@@ -20,7 +20,7 @@ export class AddDeploymentProperties1646865380689 implements MigrationInterface 
             const registry = await queryRunner.query(
                 `SELECT registry from issuer_blockchain_properties;`
             );
-            if (registry) {
+            if (registry.length) {
                 await this.addRegistry(queryRunner, registry[0].registry);
             }
         }
