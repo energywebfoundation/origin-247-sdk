@@ -13,6 +13,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Configuration } from '../offchain-certificate/config/config.interface';
 import { BlockchainPropertiesService } from './blockchain-properties.service';
 import { OnChainCertificateFacade } from './onChainCertificateFacade';
+import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
+import { DeploymentPropertiesPostgresRepository } from './repositories/deploymentProperties/deploymentPropertiesPostgres.repository';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -26,7 +28,11 @@ const realCertificateProvider = {
         TransactionPollService,
         CertificateUpdatedHandler,
         BlockchainPropertiesService,
-        OnChainCertificateFacade
+        OnChainCertificateFacade,
+        {
+            provide: DeploymentPropertiesRepository,
+            useClass: DeploymentPropertiesPostgresRepository
+        }
     ],
     exports: [realCertificateProvider, OnChainCertificateFacade],
     imports: [

@@ -1,10 +1,14 @@
+import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeploymentProperties } from '../../types';
 import { DeploymentPropertiesEntity } from './deploymentProperties.entity';
 import { DeploymentPropertiesRepository } from './deploymentProperties.repository';
 
 export class DeploymentPropertiesPostgresRepository implements DeploymentPropertiesRepository {
-    constructor(private repository: Repository<DeploymentPropertiesEntity>) {}
+    constructor(
+        @InjectRepository(DeploymentPropertiesEntity)
+        private repository: Repository<DeploymentPropertiesEntity>
+    ) {}
 
     public async get(): Promise<DeploymentProperties> {
         const [properties] = await this.repository.find();
