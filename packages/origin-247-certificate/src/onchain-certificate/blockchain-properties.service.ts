@@ -34,7 +34,7 @@ export class BlockchainPropertiesService {
 
         const web3 = getProviderWithFallback(...[this.primaryRPC].filter((url) => Boolean(url)));
 
-        let signer: Signer = new Wallet(this.assure0x(this.issuerPrivateKey), web3);
+        const signer: Signer = new Wallet(this.assure0x(this.issuerPrivateKey), web3);
 
         return {
             web3,
