@@ -16,7 +16,9 @@ import {
     OffChainCertificateModule,
     OffChainCertificateService,
     ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    OnChainCertificateService
+    OnChainCertificateService,
+    OnChainCertificateEntities,
+    OnChainCertificateModule
 } from '../src';
 import { PassportModule } from '@nestjs/passport';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -81,9 +83,14 @@ export const bootstrapTestInstance: any = async () => {
                 database: configuration.DB_DATABASE,
                 logging: ['info'],
                 keepConnectionAlive: true,
-                entities: [...IssuerEntities, ...OffChainCertificateEntities]
+                entities: [
+                    ...IssuerEntities,
+                    ...OffChainCertificateEntities,
+                    ...OnChainCertificateEntities
+                ]
             }),
             OffChainCertificateModule,
+            OnChainCertificateModule,
             QueueingModule(),
             BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' })
@@ -119,7 +126,9 @@ export const bootstrapTestInstance: any = async () => {
 
     const connection = await app.resolve<Connection>(getConnectionToken());
     const tables = connection.entityMetadatas
-        .filter((e) => e.tableName !== 'issuer_blockchain_properties' && e.tableName !== 'issuer_signer')
+        .filter(
+            (e) => e.tableName !== 'issuer_blockchain_properties' && e.tableName !== 'issuer_signer'
+        )
         .map((e) => `"${e.tableName}"`)
         .join(', ');
 
