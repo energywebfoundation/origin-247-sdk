@@ -31,7 +31,8 @@ import {
 import { ClaimModule } from '../src/claim.module';
 import {
     OffChainCertificateEntities,
-    OffChainCertificateService
+    OffChainCertificateService,
+    OnChainCertificateEntities
 } from '@energyweb/origin-247-certificate';
 import { ClaimFacade } from '../src';
 const testLogger = new Logger('e2e');
@@ -84,6 +85,7 @@ export const bootstrapTestInstance = async () => {
                 entities: [
                     ...IssuerEntities,
                     ...OffChainCertificateEntities,
+                    ...OnChainCertificateEntities,
                     MatchResultEntity,
                     LeftoverConsumptionEntity,
                     ExcessGenerationEntity
