@@ -1,9 +1,11 @@
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { DeploymentProperties } from '../../types';
 import { DeploymentPropertiesEntity } from './deploymentProperties.entity';
 import { DeploymentPropertiesRepository } from './deploymentProperties.repository';
 
+@Injectable()
 export class DeploymentPropertiesPostgresRepository implements DeploymentPropertiesRepository {
     constructor(
         @InjectRepository(DeploymentPropertiesEntity)

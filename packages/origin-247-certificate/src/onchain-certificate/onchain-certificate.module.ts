@@ -15,6 +15,8 @@ import { BlockchainPropertiesService } from './blockchain-properties.service';
 import { OnChainCertificateFacade } from './onChainCertificateFacade';
 import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
 import { DeploymentPropertiesPostgresRepository } from './repositories/deploymentProperties/deploymentPropertiesPostgres.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DeploymentPropertiesEntity } from './repositories/deploymentProperties/deploymentProperties.entity';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -52,7 +54,8 @@ const realCertificateProvider = {
                     lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
                 }
             })
-        })
+        }),
+        TypeOrmModule.forFeature([DeploymentPropertiesEntity])
     ]
 })
 export class OnChainCertificateModule {}
