@@ -9,7 +9,6 @@ import { getProviderWithFallback } from '@energyweb/utils-general';
 export class BlockchainPropertiesService {
     private primaryRPC: string;
     private issuerPrivateKey: string;
-    private mnemonic: string;
 
     constructor(
         private configService: ConfigService,
@@ -17,7 +16,6 @@ export class BlockchainPropertiesService {
     ) {
         const primaryRPC = this.configService.get<string>('WEB3');
         const issuerPrivateKey = this.configService.get<string>('ISSUER_PRIVATE_KEY');
-        const mnemonic = this.configService.get<string>('MNEMONIC');
 
         if (!primaryRPC) {
             throw new Error('No WEB3 environment variable set');
@@ -27,13 +25,8 @@ export class BlockchainPropertiesService {
             throw new Error('No ISSUER_PRIVATE_KEY environment variable set');
         }
 
-        if (!mnemonic) {
-            throw new Error('No MNEMONIC environment variable set');
-        }
-
         this.primaryRPC = primaryRPC;
         this.issuerPrivateKey = issuerPrivateKey;
-        this.mnemonic = mnemonic;
     }
 
     async getProperties(): Promise<IBlockchainProperties> {
