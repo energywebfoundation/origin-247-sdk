@@ -1,6 +1,6 @@
 import { PrimaryColumn, Entity } from 'typeorm';
 
-export const tableName = 'deployment_properties';
+export const tableName = 'certificate_deployment_properties';
 @Entity(tableName)
 export class DeploymentPropertiesEntity {
     @PrimaryColumn()
