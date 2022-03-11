@@ -55,3 +55,7 @@ export type BlockchainAction =
     | IAction<BlockchainActionType.BatchClaim, IBatchClaimCommand>;
 
 export const ONCHAIN_CERTIFICATE_SERVICE_TOKEN = Symbol.for('ONCHAIN_CERTIFICATE_SERVICE_TOKEN');
+
+export interface DeploymentProperties {
+    registry: string;
+}

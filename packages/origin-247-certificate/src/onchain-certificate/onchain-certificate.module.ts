@@ -11,6 +11,12 @@ import { CertificateUpdatedHandler } from './certificate-updated.handler';
 import getConfiguration from '../offchain-certificate/config/configuration';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Configuration } from '../offchain-certificate/config/config.interface';
+import { BlockchainPropertiesService } from './blockchain-properties.service';
+import { OnChainCertificateFacade } from './onChainCertificateFacade';
+import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
+import { DeploymentPropertiesPostgresRepository } from './repositories/deploymentProperties/deploymentPropertiesPostgres.repository';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { DeploymentPropertiesEntity } from './repositories/deploymentProperties/deploymentProperties.entity';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -22,9 +28,15 @@ const realCertificateProvider = {
         realCertificateProvider,
         BlockchainActionsProcessor,
         TransactionPollService,
-        CertificateUpdatedHandler
+        CertificateUpdatedHandler,
+        BlockchainPropertiesService,
+        OnChainCertificateFacade,
+        {
+            provide: DeploymentPropertiesRepository,
+            useClass: DeploymentPropertiesPostgresRepository
+        }
     ],
-    exports: [realCertificateProvider],
+    exports: [realCertificateProvider, OnChainCertificateFacade],
     imports: [
         IssuerModule.register({
             enableCertificationRequest: false
@@ -42,7 +54,8 @@ const realCertificateProvider = {
                     lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
                 }
             })
-        })
+        }),
+        TypeOrmModule.forFeature([DeploymentPropertiesEntity])
     ]
 })
 export class OnChainCertificateModule {}

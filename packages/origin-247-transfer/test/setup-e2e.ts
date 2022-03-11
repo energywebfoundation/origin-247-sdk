@@ -16,7 +16,8 @@ import {
 } from '../src';
 import {
     OffChainCertificateService,
-    OffChainCertificateEntities
+    OffChainCertificateEntities,
+    OnChainCertificateEntities
 } from '@energyweb/origin-247-certificate';
 import { entities as IssuerEntities } from '@energyweb/issuer-api';
 import { PassportModule } from '@nestjs/passport';
@@ -80,6 +81,7 @@ export const bootstrapTestInstance = async () => {
                 entities: [
                     ...IssuerEntities,
                     ...OffChainCertificateEntities,
+                    ...OnChainCertificateEntities,
                     EnergyTransferRequestEntity
                 ],
                 logging: ['info'],

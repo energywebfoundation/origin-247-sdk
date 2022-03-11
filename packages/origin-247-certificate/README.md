@@ -1,6 +1,6 @@
 # Origin 24/7 SDK - Certificate module
 
-Certificate module (and its `OnChainCertificateService`) allow to issue, transfer and claim certificates.
+Certificate module (and its `OnChainCertificateService`) allow to deploy contracts; issue, transfer and claim certificates.
 
 It enqueues and batches transactions, which is required for optimal blockchain work.
 
@@ -85,6 +85,34 @@ export class SomeService {
       ...
     });
   }
+}
+```
+
+## Deploying and migrating contracts
+
+It is possible to deploy contracts using `OnChainCertificateFacade`. When using this method, it is unnecesary to do blockchain seeding migrations. How to use:
+
+-   import certificate module into one of your applications modules
+-   at application bootstrap, use OnChainCertificateFacade.deploy() method
+
+```ts
+import { OnChainCertificateFacade } from '@energyweb/origin-247-certificate';
+// ...
+const appModule = AppModule.register();
+const app = await NestFactory.create(appModule);
+const blockchainFacade = await app.resolve<OnChainCertificateFacade>(OnChainCertificateFacade);
+await blockchainFacade.deploy();
+```
+
+or
+
+```ts
+constructor(
+   private onChangeCertificateFacade: OnChainCertificateFacade
+) {}
+
+public async onApplicationBootstrap() {
+   await this.onChangeCertificateFacade.deploy();
 }
 ```
 
