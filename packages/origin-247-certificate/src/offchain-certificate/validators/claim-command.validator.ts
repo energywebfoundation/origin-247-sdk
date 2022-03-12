@@ -1,20 +1,18 @@
 import { IClaimCommand } from '../../types';
 import {
-    IsDateString,
     IsEthereumAddress,
     IsNumber,
     IsOptional,
-    IsString,
     Min,
+    registerDecorator,
     validate,
-    ValidateNested,
-    validateOrReject
+    validateOrReject,
+    ValidationOptions
 } from 'class-validator';
-import { plainToClass, Type } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { IsEnergyValue } from './decorators/is-energy-value';
 import { validatorOptions } from './validator.config';
 import { IClaimData } from '@energyweb/issuer';
-import { IsClaimData } from '@energyweb/issuer-api';
 
 export const validateClaimCommand = async (command: IClaimCommand) =>
     await validateOrReject(plainToClass(ClaimCommandDto, command), validatorOptions);
@@ -30,6 +28,42 @@ export const validateBatchClaimCommands = async (commands: IClaimCommand[]) => {
 
     throw validationErrors;
 };
+
+export function IsClaimData(validationOptions?: ValidationOptions) {
+    return function (object: Object, propertyName: string) {
+        registerDecorator({
+            name: 'isClaimData',
+            target: object.constructor,
+            propertyName: propertyName,
+            options: validationOptions,
+            validator: {
+                validate(value: any) {
+                    const isPlainObject = (value: any) =>
+                        typeof value === 'object' && value !== null;
+                    const validate = (value: any): boolean => {
+                        if (Array.isArray(value)) {
+                            return value.every(validate);
+                        }
+
+                        if (isPlainObject(value)) {
+                            return Object.values(value).every(validate);
+                        }
+
+                        return (
+                            typeof value === 'string' || typeof value === 'number' || value === null
+                        );
+                    };
+
+                    if (isPlainObject(value)) {
+                        return validate(value);
+                    } else {
+                        return false;
+                    }
+                }
+            }
+        });
+    };
+}
 
 class ClaimCommandDto implements IClaimCommand {
     @IsNumber()

@@ -25,14 +25,14 @@ export interface IClaimCommand {
     certificateId: number;
     claimData: IClaimData;
     forAddress: string;
-    energyValue?: string;
+    energyValue: string;
 }
 
 export interface ITransferCommand {
     certificateId: number;
     fromAddress: string;
     toAddress: string;
-    energyValue?: string;
+    energyValue: string;
 }
 
 export interface IBatchIssueCommand<T> {

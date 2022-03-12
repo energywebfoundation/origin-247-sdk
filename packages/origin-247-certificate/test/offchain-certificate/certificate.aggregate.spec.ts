@@ -291,16 +291,17 @@ describe('CertificateAggregate', () => {
             expect(getAggregate).toThrow(CertificateErrors.Transfer.NotEnoughBalance);
         });
 
-        it('should transfer all available balance when no energyValue is spiecified', () => {
-            const noValuetransferredEvent = CertificateTransferredEvent.createNew(1, {
+        it('should transfer all available balance', () => {
+            const fullValuetransferredEvent = CertificateTransferredEvent.createNew(1, {
                 certificateId: 1,
                 fromAddress: '0x1',
-                toAddress: '0x2'
+                toAddress: '0x2',
+                energyValue: '100'
             });
 
             const aggregate = CertificateAggregate.fromEvents([
                 issuedEvent,
-                noValuetransferredEvent
+                fullValuetransferredEvent
             ]);
 
             expect(aggregate.getCertificate()).toMatchObject({
@@ -320,15 +321,16 @@ describe('CertificateAggregate', () => {
             });
         });
 
-        it('it should throw error when there is no energyValue and no owned volume', () => {
-            const noVolumestransferredEvent = CertificateTransferredEvent.createNew(1, {
+        it('it should throw error when there is no owned volume', () => {
+            const fullVolumestransferredEvent = CertificateTransferredEvent.createNew(1, {
                 certificateId: 1,
                 fromAddress: '0x2',
-                toAddress: '0x3'
+                toAddress: '0x3',
+                energyValue: '100000'
             });
 
             const getAggregate = () =>
-                CertificateAggregate.fromEvents([issuedEvent, noVolumestransferredEvent]);
+                CertificateAggregate.fromEvents([issuedEvent, fullVolumestransferredEvent]);
 
             expect(getAggregate).toThrow(CertificateErrors.Transfer.NotEnoughBalance);
         });
@@ -385,7 +387,7 @@ describe('CertificateAggregate', () => {
             expect(getAggregate).toThrow(CertificateErrors.Claim.NotEnoughBalance);
         });
 
-        it('should claim all available balance when no energyValue was specified', () => {
+        it('should claim all available balance', () => {
             const claimedEvent = CertificateClaimedEvent.createNew(1, {
                 certificateId: 1,
                 claimData: {
@@ -396,7 +398,8 @@ describe('CertificateAggregate', () => {
                     periodEndDate: '2021-11-18T08:30:00.000Z',
                     purpose: 'higher'
                 },
-                forAddress: '0x1'
+                forAddress: '0x1',
+                energyValue: '100'
             });
 
             const aggregate = CertificateAggregate.fromEvents([issuedEvent, claimedEvent]);
@@ -434,7 +437,7 @@ describe('CertificateAggregate', () => {
             });
         });
 
-        it('it should throw error when there is no energyValue and no owned volume', () => {
+        it('it should throw error when there is no owned volume', () => {
             const claimedEvent = CertificateClaimedEvent.createNew(1, {
                 certificateId: 1,
                 claimData: {
@@ -445,7 +448,8 @@ describe('CertificateAggregate', () => {
                     periodEndDate: '2021-11-18T08:30:00.000Z',
                     purpose: 'higher'
                 },
-                forAddress: '0x2'
+                forAddress: '0x2',
+                energyValue: '100000'
             });
 
             const geAggregate = () => CertificateAggregate.fromEvents([issuedEvent, claimedEvent]);

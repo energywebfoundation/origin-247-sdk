@@ -1,23 +1,18 @@
-import {
-    GetAllCertificatesQuery,
-    GetCertificateQuery,
-    IGetAllCertificatesOptions
-} from '@energyweb/issuer-api';
 import { Injectable } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
 import { Job, Queue } from 'bull';
 import { BlockchainAction, BlockchainActionType, ICertificate } from './types';
 import { IClaimCommand, IIssueCommand, IIssueCommandParams, ITransferCommand } from '../types';
+import { blockchainQueueName } from './blockchain-actions.processor';
 import {
     BatchClaimActionResult,
     BatchIssuanceActionResult,
     BatchTransferActionResult,
-    blockchainQueueName,
     ClaimActionResult,
     IssuanceActionResult,
     TransferActionResult
-} from './blockchain-actions.processor';
+} from './certificate-operations/certificate-operations.service';
 
 const jobOptions = {
     // redis cleanup
@@ -32,18 +27,6 @@ export class OnChainCertificateService<T = null> {
         @InjectQueue(blockchainQueueName)
         private readonly blockchainActionsQueue: Queue<BlockchainAction>
     ) {}
-
-    public async getAll(options: IGetAllCertificatesOptions = {}): Promise<ICertificate<T>[]> {
-        const certificates = await this.queryBus.execute(new GetAllCertificatesQuery(options));
-
-        return certificates.map((c) => this.mapCertificate(c));
-    }
-
-    public async getById(id: number): Promise<ICertificate<T> | null> {
-        const certificate = await this.queryBus.execute(new GetCertificateQuery(id));
-
-        return certificate ? this.mapCertificate(certificate) : null;
-    }
 
     public async issueWithTxHash(params: IIssueCommandParams<T>): Promise<IssuanceActionResult<T>> {
         const command = {
@@ -63,10 +46,10 @@ export class OnChainCertificateService<T = null> {
         return await OnChainCertificateService.waitForJobResult<IssuanceActionResult<T>>(job);
     }
 
-    public async issue(params: IIssueCommandParams<T>): Promise<ICertificate<T>> {
-        const { certificate } = await this.issueWithTxHash(params);
+    public async issue(params: IIssueCommandParams<T>): Promise<number> {
+        const { certificateId } = await this.issueWithTxHash(params);
 
-        return this.mapCertificate(certificate);
+        return certificateId;
     }
 
     public async claimWithTxHash(command: IClaimCommand): Promise<ClaimActionResult> {

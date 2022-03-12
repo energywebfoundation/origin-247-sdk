@@ -10,6 +10,7 @@ export * from './onchain-certificate/onchain-certificate.module';
 export * from './onchain-certificate/onchain-certificate.service';
 export * from './onchain-certificate/onChainCertificateFacade';
 export * from './onchain-certificate/types';
+export * from './onchain-certificate/blockchain-properties.service';
 
 export * from './offchain-certificate/offchain-certificate.module';
 export * from './offchain-certificate/offchain-certificate.service';

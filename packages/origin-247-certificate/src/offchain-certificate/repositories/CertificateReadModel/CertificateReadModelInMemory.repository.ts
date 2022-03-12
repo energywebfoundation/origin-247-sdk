@@ -1,7 +1,9 @@
-import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { Injectable } from '@nestjs/common';
 import { CertificateReadModelEntity } from './CertificateReadModel.entity';
-import { CertificateReadModelRepository } from './CertificateReadModel.repository';
+import {
+    CertificateReadModelRepository,
+    IGetAllCertificatesOptions
+} from './CertificateReadModel.repository';
 
 @Injectable()
 export class CertificateReadModelInMemoryRepository<T>
@@ -45,6 +47,14 @@ export class CertificateReadModelInMemoryRepository<T>
         return Object.values(this.db).filter((e) =>
             internalCertificateIds.includes(e.internalCertificateId)
         );
+    }
+
+    async getManyByBlockchainCertificateIds(
+        blockchainCertificateIds: number[]
+    ): Promise<CertificateReadModelEntity<T>[]> {
+        return Object.values(this.db)
+            .filter((e) => e.blockchainCertificateId)
+            .filter((e) => blockchainCertificateIds.includes(e.blockchainCertificateId!));
     }
 
     async getAll(

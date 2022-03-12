@@ -1,13 +1,12 @@
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../onchain-certificate/types';
 import { OnChainCertificateService } from '../../../onchain-certificate/onchain-certificate.service';
 import { CertificateClaimedEvent, CertificateEventType } from '../../events/Certificate.events';
-import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { OffChainCertificateService } from '../../offchain-certificate.service';
 import { Inject, Injectable } from '@nestjs/common';
 import { chunk } from 'lodash';
 import {
-    BatchConfigurationService,
-    BATCH_CONFIGURATION_TOKEN
+    BATCH_CONFIGURATION_TOKEN,
+    BatchConfigurationService
 } from '../strategies/batch/batch.configuration';
 
 @Injectable()
