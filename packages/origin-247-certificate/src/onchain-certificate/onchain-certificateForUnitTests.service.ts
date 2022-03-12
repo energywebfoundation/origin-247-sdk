@@ -1,5 +1,4 @@
 import { OnChainCertificateService } from './onchain-certificate.service';
-import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { BigNumber } from 'ethers';
 import { ICertificate } from './types';
 import { IClaimCommand, IIssueCommandParams, ITransferCommand } from '../types';
@@ -11,36 +10,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
     protected serial = 0;
     private db: ICertificate<T>[] = [];
 
-    public async getAll(options: IGetAllCertificatesOptions = {}): Promise<ICertificate<T>[]> {
-        const lastDate = new Date('2030-01-01T00:00:00.000Z');
-        const generationEndFrom = options.generationEndFrom ?? new Date(0);
-        const generationEndTo = options.generationEndTo ?? lastDate;
-        const generationStartFrom = options.generationStartFrom ?? new Date(0);
-        const generationStartTo = options.generationStartTo ?? lastDate;
-        const creationTimeFrom = options.creationTimeFrom ?? new Date(0);
-        const creationTimeTo = options.creationTimeTo ?? lastDate;
-        const deviceId = options.deviceId;
-
-        return this.db.filter((entry) => {
-            const isDateOk =
-                new Date(entry.generationStartTime * 1000) >= generationStartFrom &&
-                new Date(entry.generationStartTime * 1000) <= generationStartTo &&
-                new Date(entry.generationEndTime * 1000) >= generationEndFrom &&
-                new Date(entry.generationEndTime * 1000) <= generationEndTo &&
-                new Date(entry.creationTime * 1000) >= creationTimeFrom &&
-                new Date(entry.creationTime * 1000) <= creationTimeTo;
-
-            const isDeviceOk = deviceId ? deviceId === entry.deviceId : true;
-
-            return isDateOk && isDeviceOk;
-        });
-    }
-
-    public async getById(id: number): Promise<ICertificate<T> | null> {
-        return this.db.find((c) => c.id === id) ?? null;
-    }
-
-    public async issue(params: IIssueCommandParams<T>): Promise<ICertificate<T>> {
+    public async issue(params: IIssueCommandParams<T>): Promise<number> {
         this.serial += 1;
 
         const certificate: ICertificate<T> = {
@@ -64,10 +34,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
 
         this.db.push(certificate);
 
-        return {
-            ...certificate,
-            issuedPrivately: false
-        };
+        return certificate.id;
     }
 
     public async claim(command: IClaimCommand): Promise<void> {
@@ -77,15 +44,11 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             return;
         }
 
-        const value =
-            command.energyValue ??
-            Object.values(certificate.owners)
-                .reduce((sum, v) => sum.add(v), BigNumber.from(0))
-                .toString();
+        const value = command.energyValue;
 
         certificate.claims.push({
             claimData: command.claimData,
-            value,
+            value: value,
             topic: '0',
             from: command.forAddress,
             id: 0,
@@ -107,7 +70,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             return;
         }
 
-        const value = Number(command.energyValue ?? certificate.owners[command.fromAddress]);
+        const value = Number(command.energyValue);
 
         certificate.owners[command.fromAddress] = (
             Number(certificate.owners[command.fromAddress]) - value
@@ -126,7 +89,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             originalCertificates.map((certificate) => this.issue(certificate))
         );
 
-        return result.map((r) => r.id);
+        return result;
     }
 
     public async batchClaim(command: IClaimCommand[]): Promise<void> {
@@ -163,7 +126,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
         await this.issue(command as any);
 
         return {
-            certificate: this.db.find((c) => c.deviceId === command.deviceId)!,
+            certificateId: this.db.find((c) => c.deviceId === command.deviceId)?.id!,
             transactionHash: 'txHash'
         };
     }

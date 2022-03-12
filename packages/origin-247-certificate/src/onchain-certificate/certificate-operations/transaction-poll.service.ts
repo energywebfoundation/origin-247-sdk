@@ -1,38 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { GetCertificateByTxHashQuery, Certificate } from '@energyweb/issuer-api';
-import { QueryBus } from '@nestjs/cqrs';
 
 const pollDelay = 3000;
 const maxRetries = 100;
 
+type TxHash = string;
+type BlockchainCertificateId = number;
+
 @Injectable()
-export class TransactionPollService {
+export class TransactionPollService<T = null> {
     /**
      * @NOTE
      *
      * If:
      * 1. replaced by a persistent storage (redis)
-     * 2. issuer-api allows to call to check if transaction was processed
      * then on application startup we could see if we still await some transactions.
      *
      * This may not be possible at this point, since if application fails (so the startup happens),
      * then the job will not be awaited on the client side, so the result would not matter anyway.
      */
-    private processedTransactions: Record<string, true> = {};
+    private processedTransactions: Record<TxHash, true> = {};
 
-    constructor(private queryBus: QueryBus) {}
+    private newCertificates: Record<TxHash, BlockchainCertificateId[]> = {};
 
-    public async waitForNewCertificates(txHash: string): Promise<Certificate[]> {
+    public async waitForNewCertificates(txHash: string): Promise<number[]> {
         return await this.poll(txHash, async (hash) => {
-            const result: Certificate[] = await this.queryBus.execute(
-                new GetCertificateByTxHashQuery(hash)
-            );
+            const certificateIds = this.newCertificates[hash];
 
-            if (result.length === 0) {
+            if (!certificateIds) {
+                return new Error('Transaction not on blockchain');
+            }
+
+            if (certificateIds.length === 0) {
                 return new Error('Could not find certificate');
             }
 
-            return result;
+            return certificateIds;
         });
     }
 
@@ -48,8 +50,12 @@ export class TransactionPollService {
         });
     }
 
-    public async saveTransactionAsProcessed(txHash: string): Promise<void> {
+    public saveTransactionAsProcessed(txHash: string): void {
         this.processedTransactions[txHash] = true;
+    }
+
+    public saveNewCertificate(txHash: string, blockchainCertificateIds: number[]): void {
+        this.newCertificates[txHash] = blockchainCertificateIds;
     }
 
     private async poll<T>(

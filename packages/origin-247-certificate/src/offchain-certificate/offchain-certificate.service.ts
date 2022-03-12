@@ -26,7 +26,10 @@ import {
     PersistedEvent
 } from './events/Certificate.events';
 import { CertificateCommandEntity } from './repositories/CertificateCommand/CertificateCommand.entity';
-import { CertificateReadModelRepository } from './repositories/CertificateReadModel/CertificateReadModel.repository';
+import {
+    CertificateReadModelRepository,
+    IGetAllCertificatesOptions
+} from './repositories/CertificateReadModel/CertificateReadModel.repository';
 import { CertificateAggregate } from './certificate.aggregate';
 import { CertificateErrors } from './errors';
 import {
@@ -35,7 +38,6 @@ import {
     CERTIFICATE_READ_MODEL_REPOSITORY
 } from './repositories/repository.keys';
 import { CertificateEventService } from './repositories/CertificateEvent/CertificateEvent.service';
-import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import {
     validateBatchClaimCommands,
     validateBatchIssueCommands,

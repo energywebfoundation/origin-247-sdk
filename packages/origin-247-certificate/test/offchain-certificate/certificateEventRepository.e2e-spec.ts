@@ -12,7 +12,7 @@ import { IIssuancePersistedCommand } from '../../src/offchain-certificate/types'
 import { IClaimCommand, IIssueCommand, ITransferCommand } from '../../src';
 import { CertificateEventService } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
 
-jest.setTimeout(20 * 1000);
+jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
 describe('CertificateEventRepository', () => {

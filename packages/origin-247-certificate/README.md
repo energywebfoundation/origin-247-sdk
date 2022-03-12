@@ -14,37 +14,15 @@ everything to blockchain. This implementation is described in [OffChain Module](
 Despite typical 24/7 SDK requirements and setup, you will need
 
 -   Redis (For enqueueing we use [bull](https://github.com/OptimalBits/bull) package)
--   Peer runtime dependencies: `yarn add @energyweb/issuer @energyweb/issuer-api`
+-   Peer runtime dependencies: `yarn add @energyweb/issuer`
 
 ## Installation
 
 **If you were redirected here from `origin-247-claim` or `origin-247-transfer` modules,
 please apply [OffChain Module](#offchain-module) section installation (**and usage\*\* (manual blockchain synchronization in particular)) as well.
 
-0. Add peer runtime dependencies: `yarn add @energyweb/issuer @energyweb/issuer-api`
+0. Add peer runtime dependencies: `yarn add @energyweb/issuer`
 1. For NestJS Bull please consult: https://docs.nestjs.com/techniques/queues and setup `BullModule.forRoot`.
-2. For migrations, please add entry to your `package.json` scripts section:
-
-`"typeorm:run:issuer": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/issuer-api/dist/js/ormconfig.js",`
-
-Which allows to run migration required by the module.
-
-3. Add TypeORM entities:
-
-```ts
-import { entities as IssuerEntities } from '@energyweb/issuer-api';
-
-[...]
-
-TypeOrmModule.forRoot({
-  ...
-  entities: [
-    ...,
-    ...IssuerEntities,
-  ],
-  ...
-});
-```
 
 ## Usage
 
@@ -139,7 +117,7 @@ Any value accepted by `JSON.stringify` can be used as metadata (including null -
 
 ### Testing
 
-Use `OnChainCertificateForUnitTestsModule` (instead of regular module) which abstracts away whole `issuer-api`, blockchain, database and Redis dependencies. This implementation stores certificates in memory. It is not bullet-proof (because it's really simple), but should handle most happy-paths.
+Use `OnChainCertificateForUnitTestsModule` (instead of regular module) which abstracts away whole `issuer`, blockchain, database and Redis dependencies. This implementation stores certificates in memory. It is not bullet-proof (because it's really simple), but should handle most happy-paths.
 
 ## OffChain Module
 
@@ -149,7 +127,7 @@ and then on-request to synchronize it with a blockchain (internally it uses `OnC
 ### Installation
 
 0. Apply regular installation instructions described above.
-1. Besides `issuer-api` entities you need to import `OffChainCertificateEntities` entities, and add them to `TypeORM.forRoot`
+1. You need to import `OffChainCertificateEntities` entities, and add them to `TypeORM.forRoot`
 2. You need to run migrations from `origin-247-certificate`, e.g.
 
 ```

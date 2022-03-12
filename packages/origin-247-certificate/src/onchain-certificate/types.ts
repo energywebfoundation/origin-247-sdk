@@ -58,4 +58,5 @@ export const ONCHAIN_CERTIFICATE_SERVICE_TOKEN = Symbol.for('ONCHAIN_CERTIFICATE
 
 export interface DeploymentProperties {
     registry: string;
+    issuer: string;
 }

@@ -1,25 +1,23 @@
-import { Contracts, CertificateUtils } from '@energyweb/issuer';
-import { BlockchainPropertiesService, BlockchainPropertiesModule } from '@energyweb/issuer-api';
+import { CertificateUtils } from '@energyweb/issuer';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
-import { EventBus, CqrsModule } from '@nestjs/cqrs';
-import { getProviderWithFallback } from '@energyweb/utils-general';
+import { CqrsModule, EventBus } from '@nestjs/cqrs';
 import { Test } from '@nestjs/testing';
 import { DatabaseService } from '@energyweb/origin-backend-utils';
 import {
+    ENERGY_TRANSFER_REQUEST_REPOSITORY,
     EnergyTransferRequestEntity,
     EnergyTransferRequestRepository,
-    ENERGY_TRANSFER_REQUEST_REPOSITORY,
     GenerationReadingStoredEvent,
     TransferModule
 } from '../src';
 import {
-    OffChainCertificateService,
+    BlockchainPropertiesService,
     OffChainCertificateEntities,
+    OffChainCertificateService,
     OnChainCertificateEntities
 } from '@energyweb/origin-247-certificate';
-import { entities as IssuerEntities } from '@energyweb/issuer-api';
 import { PassportModule } from '@nestjs/passport';
 import {
     AsymmetricInstantValidationCommand,
@@ -32,9 +30,6 @@ import {
 } from './setup-e2e-dependencies';
 
 const testLogger = new Logger('e2e');
-
-const web3 = process.env.WEB3 ?? 'http://localhost:8545';
-const provider = getProviderWithFallback(web3);
 
 export const registryDeployer = {
     address: '0xBBad6d3d893e9E75fE8e73cb5Ac6E2C82C9A91d0',
@@ -51,18 +46,7 @@ export const user2Wallet = {
     privateKey: '0x9d4b1fbf6a730b6399ada447b0cf19a25ed91f819d7c860d0aa0de779badc8c2'
 };
 
-const deployRegistry = async () => {
-    return Contracts.migrateRegistry(provider, registryDeployer.privateKey);
-};
-
-const deployIssuer = async (registry: string) => {
-    return Contracts.migrateIssuer(provider, registryDeployer.privateKey, registry);
-};
-
 export const bootstrapTestInstance = async () => {
-    const registry = await deployRegistry();
-    const issuer = await deployIssuer(registry.address);
-
     const QueueingModule = () => {
         return BullModule.forRoot({
             redis: process.env.REDIS_URL ?? { host: 'localhost', port: 6379 }
@@ -79,7 +63,6 @@ export const bootstrapTestInstance = async () => {
                 password: process.env.DB_PASSWORD ?? 'postgres',
                 database: process.env.DB_DATABASE ?? 'origin',
                 entities: [
-                    ...IssuerEntities,
                     ...OffChainCertificateEntities,
                     ...OnChainCertificateEntities,
                     EnergyTransferRequestEntity
@@ -96,7 +79,6 @@ export const bootstrapTestInstance = async () => {
             }),
             CqrsModule,
             QueueingModule(),
-            BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' })
         ],
         providers: [
@@ -118,22 +100,16 @@ export const bootstrapTestInstance = async () => {
         BlockchainPropertiesService
     );
 
-    const blockchainProperties = await blockchainPropertiesService.create(
-        provider.network.chainId,
-        registry.address,
-        issuer.address,
-        web3,
-        registryDeployer.privateKey
+    await blockchainPropertiesService.deploy();
+
+    await CertificateUtils.approveOperator(
+        registryDeployer.address,
+        await blockchainPropertiesService.wrap(userWallet.privateKey)
     );
 
     await CertificateUtils.approveOperator(
         registryDeployer.address,
-        blockchainProperties.wrap(userWallet.privateKey)
-    );
-
-    await CertificateUtils.approveOperator(
-        registryDeployer.address,
-        blockchainProperties.wrap(user2Wallet.privateKey)
+        await blockchainPropertiesService.wrap(user2Wallet.privateKey)
     );
 
     app.useLogger(testLogger);
@@ -145,7 +121,6 @@ export const bootstrapTestInstance = async () => {
     );
 
     await databaseService.query('TRUNCATE energy_transfer_request_v2 RESTART IDENTITY CASCADE;');
-    await databaseService.query('TRUNCATE issuer_certificate RESTART IDENTITY CASCADE;');
 
     return {
         databaseService,

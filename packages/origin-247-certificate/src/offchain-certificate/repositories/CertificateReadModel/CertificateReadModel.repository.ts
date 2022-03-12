@@ -1,4 +1,3 @@
-import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { ICertificateReadModel } from '../../types';
 import { CertificateReadModelEntity } from './CertificateReadModel.entity';
 
@@ -27,4 +26,14 @@ export interface CertificateReadModelRepository<T> {
     ): Promise<ICertificateReadModel<T>[]>;
 
     getAll(options?: IGetAllCertificatesOptions): Promise<ICertificateReadModel<T>[]>;
+}
+
+export interface IGetAllCertificatesOptions {
+    generationEndFrom?: Date;
+    generationEndTo?: Date;
+    generationStartFrom?: Date;
+    generationStartTo?: Date;
+    creationTimeFrom?: Date;
+    creationTimeTo?: Date;
+    deviceId?: string;
 }

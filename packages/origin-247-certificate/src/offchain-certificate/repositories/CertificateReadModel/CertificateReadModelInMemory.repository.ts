@@ -1,7 +1,9 @@
-import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { Injectable } from '@nestjs/common';
 import { CertificateReadModelEntity } from './CertificateReadModel.entity';
-import { CertificateReadModelRepository } from './CertificateReadModel.repository';
+import {
+    CertificateReadModelRepository,
+    IGetAllCertificatesOptions
+} from './CertificateReadModel.repository';
 
 @Injectable()
 export class CertificateReadModelInMemoryRepository<T>

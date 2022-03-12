@@ -1,9 +1,4 @@
 import { CertificateUtils, Contracts } from '@energyweb/issuer';
-import {
-    BlockchainPropertiesModule,
-    BlockchainPropertiesService,
-    entities as IssuerEntities
-} from '@energyweb/issuer-api';
 import { getConnectionToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
@@ -16,9 +11,9 @@ import {
     OffChainCertificateModule,
     OffChainCertificateService,
     ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
-    OnChainCertificateService,
     OnChainCertificateEntities,
-    OnChainCertificateModule
+    OnChainCertificateModule,
+    OnChainCertificateService
 } from '../src';
 import { PassportModule } from '@nestjs/passport';
 import { CertificateEventRepository } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
@@ -32,6 +27,9 @@ import {
 import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
 import { Connection } from 'typeorm';
 import getConfiguration from '../src/offchain-certificate/config/configuration';
+import { BlockchainPropertiesService } from '../src/onchain-certificate/blockchain-properties.service';
+import { ConfigService } from '@nestjs/config';
+import { DeploymentPropertiesRepository } from '../src/onchain-certificate/repositories/deploymentProperties/deploymentProperties.repository';
 
 const testLogger = new Logger('e2e');
 
@@ -53,17 +51,7 @@ export const user2Wallet = {
     privateKey: '0x9d4b1fbf6a730b6399ada447b0cf19a25ed91f819d7c860d0aa0de779badc8c2'
 };
 
-const deployRegistry = async () => {
-    return Contracts.migrateRegistry(provider, registryDeployer.privateKey);
-};
-
-const deployIssuer = async (registry: string) => {
-    return Contracts.migrateIssuer(provider, registryDeployer.privateKey, registry);
-};
-
 export const bootstrapTestInstance: any = async () => {
-    const registry = await deployRegistry();
-    const issuer = await deployIssuer(registry.address);
     const configuration = getConfiguration();
 
     const QueueingModule = () => {
@@ -83,16 +71,11 @@ export const bootstrapTestInstance: any = async () => {
                 database: configuration.DB_DATABASE,
                 logging: ['info'],
                 keepConnectionAlive: true,
-                entities: [
-                    ...IssuerEntities,
-                    ...OffChainCertificateEntities,
-                    ...OnChainCertificateEntities
-                ]
+                entities: [...OffChainCertificateEntities, ...OnChainCertificateEntities]
             }),
             OffChainCertificateModule,
             OnChainCertificateModule,
             QueueingModule(),
-            BlockchainPropertiesModule,
             PassportModule.register({ defaultStrategy: 'jwt' })
         ],
         providers: [DatabaseService]
@@ -104,9 +87,6 @@ export const bootstrapTestInstance: any = async () => {
         ONCHAIN_CERTIFICATE_SERVICE_TOKEN
     );
     const databaseService = await app.resolve<DatabaseService>(DatabaseService);
-    const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(
-        BlockchainPropertiesService
-    );
     const certificateEventRepository = await app.resolve<CertificateEventRepository>(
         CERTIFICATE_EVENT_REPOSITORY
     );
@@ -123,12 +103,13 @@ export const bootstrapTestInstance: any = async () => {
     const certificateCommandRepository = await app.resolve<CertificateCommandRepository>(
         CERTIFICATE_COMMAND_REPOSITORY
     );
+    const blockchainPropertiesService = await app.resolve<BlockchainPropertiesService>(
+        BlockchainPropertiesService
+    );
 
     const connection = await app.resolve<Connection>(getConnectionToken());
     const tables = connection.entityMetadatas
-        .filter(
-            (e) => e.tableName !== 'issuer_blockchain_properties' && e.tableName !== 'issuer_signer'
-        )
+        .filter((e) => !['certificate_deployment_properties'].includes(e.tableName))
         .map((e) => `"${e.tableName}"`)
         .join(', ');
 
@@ -136,29 +117,24 @@ export const bootstrapTestInstance: any = async () => {
         await connection.query(`TRUNCATE ${tables} RESTART IDENTITY CASCADE;`);
         // Restart all sequences
         await connection.query(`
-            SELECT  SETVAL(c.oid, 1)
-            from pg_class c JOIN pg_namespace n 
-            on n.oid = c.relnamespace 
-            where c.relkind = 'S' and n.nspname = 'public'  
+            SELECT SETVAL(c.oid, 1)
+            from pg_class c
+                     JOIN pg_namespace n
+                          on n.oid = c.relnamespace
+            where c.relkind = 'S'
+              and n.nspname = 'public'
         `);
     };
 
-    const blockchainProperties = await blockchainPropertiesService.create(
-        provider.network.chainId,
-        registry.address,
-        issuer.address,
-        web3,
-        registryDeployer.privateKey
+    await blockchainPropertiesService.deploy();
+    await CertificateUtils.approveOperator(
+        registryDeployer.address,
+        await blockchainPropertiesService.wrap(userWallet.privateKey)
     );
 
     await CertificateUtils.approveOperator(
         registryDeployer.address,
-        blockchainProperties.wrap(userWallet.privateKey)
-    );
-
-    await CertificateUtils.approveOperator(
-        registryDeployer.address,
-        blockchainProperties.wrap(user2Wallet.privateKey)
+        await blockchainPropertiesService.wrap(user2Wallet.privateKey)
     );
 
     app.useLogger(testLogger);

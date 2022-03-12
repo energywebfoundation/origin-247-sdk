@@ -138,9 +138,8 @@ export class CertificateAggregate<T> {
         const fromBalance = BigNumber.from(certificate.owners[fromAddress] ?? '0');
         const toBalance = BigNumber.from(certificate.owners[toAddress] ?? '0');
 
-        const transferVolume = BigNumber.from(energyValue ?? fromBalance);
-        const newFromBalance = fromBalance.sub(transferVolume);
-        const newToBalance = toBalance.add(transferVolume);
+        const newFromBalance = fromBalance.sub(energyValue);
+        const newToBalance = toBalance.add(energyValue);
 
         return {
             ...certificate,
@@ -179,10 +178,9 @@ export class CertificateAggregate<T> {
         const claimedBalance = BigNumber.from(
             certificate.claimers![forAddress] ? certificate.claimers![forAddress] : '0'
         );
-        const transferVolume = BigNumber.from(energyValue ?? unclaimedBalance);
 
-        const newUnclaimedBalance = unclaimedBalance.sub(transferVolume);
-        const newClaimedBalance = claimedBalance.add(transferVolume);
+        const newUnclaimedBalance = unclaimedBalance.sub(energyValue);
+        const newClaimedBalance = claimedBalance.add(energyValue);
 
         return {
             ...certificate,
@@ -201,7 +199,7 @@ export class CertificateAggregate<T> {
                     from: forAddress,
                     to: forAddress,
                     topic: '',
-                    value: transferVolume.toString(),
+                    value: energyValue,
                     claimData: claimData
                 }
             ]
@@ -236,13 +234,7 @@ export class CertificateAggregate<T> {
             throw new CertificateErrors.Transfer.ToZeroAddress(internalCertificateId);
         }
 
-        if (
-            !this.hasEnoughBalance(
-                certificate,
-                fromAddress,
-                energyValue ?? certificate.owners[fromAddress]
-            )
-        ) {
+        if (!this.hasEnoughBalance(certificate, fromAddress, energyValue)) {
             throw new CertificateErrors.Transfer.NotEnoughBalance(
                 internalCertificateId,
                 fromAddress
@@ -260,13 +252,7 @@ export class CertificateAggregate<T> {
             throw new CertificateErrors.Claim.ForZeroAddress(internalCertificateId);
         }
 
-        if (
-            !this.hasEnoughBalance(
-                certificate,
-                forAddress,
-                energyValue ?? certificate.owners[forAddress]
-            )
-        ) {
+        if (!this.hasEnoughBalance(certificate, forAddress, energyValue)) {
             throw new CertificateErrors.Claim.NotEnoughBalance(internalCertificateId, forAddress);
         }
     }

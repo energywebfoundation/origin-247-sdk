@@ -60,12 +60,6 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
             expect(readModel).not.toBeNull();
             expect(readModel!.blockchainCertificateId).not.toBeNull();
 
-            const certificate = await onChainCertificateService.getById(
-                readModel!.blockchainCertificateId!
-            );
-
-            expect(certificate).toEqual(expectedCertificate);
-
             const events = await certificateEventRepository.getAll();
 
             expect(events).toHaveLength(6);
@@ -96,16 +90,6 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
 
             expect(readModel2).not.toBeNull();
             expect(readModel2!.blockchainCertificateId).not.toBeNull();
-
-            const certificate1 = await onChainCertificateService.getById(
-                readModel1!.blockchainCertificateId!
-            );
-            const certificate2 = await onChainCertificateService.getById(
-                readModel2!.blockchainCertificateId!
-            );
-
-            expect(certificate1).toEqual(expectedCertificate);
-            expect(certificate2).toEqual(expectedCertificate);
 
             const events = await certificateEventRepository.getAll();
 
@@ -320,11 +304,7 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
             await synchronizeService.synchronize();
 
             const certificate = await offChainCertificateService.getById(id);
-            const onChainCertificate = await onChainCertificateService.getById(
-                certificate!.blockchainCertificateId!
-            );
-
-            expect(onChainCertificate).toEqual(expectedCertificate);
+            expect(certificate?.transactions).toHaveLength(3);
         });
     });
 });
@@ -344,7 +324,8 @@ const issueCommand: IIssueCommandParams<null> = {
 
 const transferCommand = {
     fromAddress: issueAddress,
-    toAddress: transferAddress
+    toAddress: transferAddress,
+    energyValue: '1000'
 };
 
 const claimCommand = {
@@ -356,38 +337,8 @@ const claimCommand = {
         periodStartDate: new Date().toISOString(),
         periodEndDate: new Date().toISOString(),
         purpose: 'purpose'
-    }
-};
-
-const expectedCertificate = {
-    id: expect.any(Number),
-    deviceId: issueCommand.deviceId,
-    generationStartTime: Math.floor(issueCommand.fromTime.getTime() / 1000),
-    generationEndTime: Math.floor(issueCommand.toTime.getTime() / 1000),
-    creationTime: expect.any(Number),
-    owners: {
-        [issueCommand.toAddress]: '0',
-        [transferCommand.toAddress]: '0'
     },
-    claimers: {
-        [claimCommand.forAddress]: issueCommand.energyValue
-    },
-    claims: [
-        {
-            id: expect.any(Number),
-            from: claimCommand.forAddress,
-            to: claimCommand.forAddress,
-            topic: expect.any(String),
-            value: issueCommand.energyValue,
-            claimData: claimCommand.claimData
-        }
-    ],
-    creationTransactionHash: expect.any(String),
-    issuedPrivately: expect.any(Boolean),
-    metadata: null,
-    createdAt: expect.any(Date),
-    updatedAt: expect.any(Date),
-    latestCommitment: null
+    energyValue: '1000'
 };
 
 type PublicPart<T> = { [K in keyof T]: T[K] };
@@ -503,7 +454,7 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
             const certificate = await this.issue(command);
 
             return {
-                certificate,
+                certificateId: certificate.id,
                 transactionHash: 'txHash'
             };
         }

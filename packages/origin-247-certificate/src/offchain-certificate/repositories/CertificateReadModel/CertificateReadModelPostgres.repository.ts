@@ -1,10 +1,12 @@
-import { IGetAllCertificatesOptions } from '@energyweb/issuer-api';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, In, Between } from 'typeorm';
+import { Between, In, Repository } from 'typeorm';
 
 import { CertificateReadModelEntity } from './CertificateReadModel.entity';
-import { CertificateReadModelRepository } from './CertificateReadModel.repository';
+import {
+    CertificateReadModelRepository,
+    IGetAllCertificatesOptions
+} from './CertificateReadModel.repository';
 
 const dateToSeconds = (d: Date) => Math.floor(d.getTime() / 1000);
 const futureDate = new Date('2038-01-01T00:00:00.000Z'); // used for more elegant query, this is almost max date, that can be converted to postgres int4

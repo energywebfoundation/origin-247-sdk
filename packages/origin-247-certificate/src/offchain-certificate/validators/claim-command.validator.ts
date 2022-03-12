@@ -1,20 +1,19 @@
 import { IClaimCommand } from '../../types';
 import {
-    IsDateString,
     IsEthereumAddress,
     IsNumber,
+    IsObject,
     IsOptional,
-    IsString,
     Min,
+    registerDecorator,
     validate,
-    ValidateNested,
-    validateOrReject
+    validateOrReject,
+    ValidationOptions
 } from 'class-validator';
-import { plainToClass, Type } from 'class-transformer';
+import { plainToClass } from 'class-transformer';
 import { IsEnergyValue } from './decorators/is-energy-value';
 import { validatorOptions } from './validator.config';
 import { IClaimData } from '@energyweb/issuer';
-import { IsClaimData } from '@energyweb/issuer-api';
 
 export const validateClaimCommand = async (command: IClaimCommand) =>
     await validateOrReject(plainToClass(ClaimCommandDto, command), validatorOptions);
@@ -36,7 +35,6 @@ class ClaimCommandDto implements IClaimCommand {
     @Min(0)
     certificateId: number;
 
-    @IsClaimData()
     claimData: IClaimData;
 
     @IsEthereumAddress()

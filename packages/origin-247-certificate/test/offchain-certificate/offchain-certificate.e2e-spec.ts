@@ -56,16 +56,12 @@ describe('OffchainCertificate', () => {
 
         await blockchainSynchronizeService.synchronize();
 
-        await new Promise((r) => setTimeout(r, 30000));
+        await new Promise((r) => setTimeout(r, 40000));
 
         const readModel = await offchainCertificateService.getById(certificateId);
 
         expect(readModel).not.toBeNull();
         expect(readModel!.blockchainCertificateId).not.toBeNull();
-
-        const certificate = await certificateService.getById(readModel!.blockchainCertificateId!);
-
-        expect(certificate).toEqual(expectedCertificate);
         expect(readModel).toEqual(expectedReadModel);
     });
 });
@@ -82,7 +78,8 @@ const issueCommand: IIssueCommandParams<null> = {
 
 const transferCommand = {
     fromAddress: userWallet.address,
-    toAddress: user2Wallet.address
+    toAddress: user2Wallet.address,
+    energyValue: '1000'
 };
 
 const claimCommand = {
@@ -94,38 +91,8 @@ const claimCommand = {
         periodStartDate: new Date().toISOString(),
         periodEndDate: new Date().toISOString(),
         purpose: 'purpose'
-    }
-};
-
-const expectedCertificate = {
-    id: expect.any(Number),
-    deviceId: issueCommand.deviceId,
-    generationStartTime: Math.floor(issueCommand.fromTime.getTime() / 1000),
-    generationEndTime: Math.floor(issueCommand.toTime.getTime() / 1000),
-    creationTime: expect.any(Number),
-    createdAt: expect.any(Date),
-    updatedAt: expect.any(Date),
-    creationTransactionHash: expect.any(String),
-    latestCommitment: null,
-    owners: {
-        [issueCommand.toAddress]: '0',
-        [transferCommand.toAddress]: '0'
     },
-    claimers: {
-        [claimCommand.forAddress]: issueCommand.energyValue
-    },
-    claims: [
-        {
-            id: expect.any(Number),
-            from: claimCommand.forAddress,
-            to: claimCommand.forAddress,
-            value: issueCommand.energyValue,
-            claimData: claimCommand.claimData
-        }
-    ],
-    issuedPrivately: expect.any(Boolean),
-    metadata: null,
-    schemaVersion: expect.any(Number)
+    energyValue: '1000'
 };
 
 const expectedReadModel: CertificateReadModelEntity<null> = {
