@@ -78,14 +78,4 @@ export class CertificateReadModelPostgresRepository<T>
             }
         });
     }
-
-    async getManyByBlockchainCertificateIds(
-        blockchainCertificateIds: number[]
-    ): Promise<CertificateReadModelEntity<T>[]> {
-        return await this.repository.find({
-            where: {
-                blockchainCertificateId: In(blockchainCertificateIds)
-            }
-        });
-    }
 }

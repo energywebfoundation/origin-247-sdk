@@ -2,7 +2,7 @@ import { bootstrapTestInstance } from '../setup';
 import { INestApplication } from '@nestjs/common';
 import { CertificateReadModelRepository } from '../../src/offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
 
-jest.setTimeout(20 * 1000);
+jest.setTimeout(60 * 1000);
 process.env.CERTIFICATE_QUEUE_DELAY = '1000';
 
 describe('CertificateReadModelRepository', () => {

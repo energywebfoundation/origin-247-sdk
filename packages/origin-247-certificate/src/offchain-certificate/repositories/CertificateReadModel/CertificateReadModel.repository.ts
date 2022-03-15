@@ -25,10 +25,6 @@ export interface CertificateReadModelRepository<T> {
         internalCertificateIds: number[]
     ): Promise<ICertificateReadModel<T>[]>;
 
-    getManyByBlockchainCertificateIds(
-        blockchainCertificateIds: number[]
-    ): Promise<ICertificateReadModel<T>[]>;
-
     getAll(options?: IGetAllCertificatesOptions): Promise<ICertificateReadModel<T>[]>;
 }
 

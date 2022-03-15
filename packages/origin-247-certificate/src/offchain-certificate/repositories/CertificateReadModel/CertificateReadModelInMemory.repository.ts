@@ -49,14 +49,6 @@ export class CertificateReadModelInMemoryRepository<T>
         );
     }
 
-    async getManyByBlockchainCertificateIds(
-        blockchainCertificateIds: number[]
-    ): Promise<CertificateReadModelEntity<T>[]> {
-        return Object.values(this.db)
-            .filter((e) => e.blockchainCertificateId)
-            .filter((e) => blockchainCertificateIds.includes(e.blockchainCertificateId!));
-    }
-
     async getAll(
         options: IGetAllCertificatesOptions = {}
     ): Promise<CertificateReadModelEntity<T>[]> {

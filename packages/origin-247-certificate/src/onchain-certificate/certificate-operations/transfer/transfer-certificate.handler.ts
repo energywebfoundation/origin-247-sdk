@@ -22,10 +22,6 @@ export class TransferCertificateHandler<T = null> {
             CertificateSchemaVersion.Latest
         );
 
-        return await onChainCert.transfer(
-            toAddress,
-            BigNumber.from(energyValue ?? onChainCert.owners[fromAddress]),
-            fromAddress
-        );
+        return await onChainCert.transfer(toAddress, BigNumber.from(energyValue), fromAddress);
     }
 }

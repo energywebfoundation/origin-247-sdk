@@ -1,12 +1,5 @@
 import { ITransferCommand } from '../../types';
-import {
-    IsEthereumAddress,
-    IsNumber,
-    IsOptional,
-    Min,
-    validate,
-    validateOrReject
-} from 'class-validator';
+import { IsEthereumAddress, IsNumber, Min, validate, validateOrReject } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 import { validatorOptions } from './validator.config';
 import { IsEnergyValue } from './decorators/is-energy-value';
@@ -38,7 +31,6 @@ class TransferCommandDto implements ITransferCommand {
     @IsEthereumAddress()
     toAddress: string;
 
-    @IsOptional()
     @IsEnergyValue()
     energyValue: string;
 }

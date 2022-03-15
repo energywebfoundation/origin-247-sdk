@@ -44,15 +44,11 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             return;
         }
 
-        const value =
-            command.energyValue ??
-            Object.values(certificate.owners)
-                .reduce((sum, v) => sum.add(v), BigNumber.from(0))
-                .toString();
+        const value = command.energyValue;
 
         certificate.claims.push({
             claimData: command.claimData,
-            value,
+            value: value,
             topic: '0',
             from: command.forAddress,
             id: 0,
@@ -74,7 +70,7 @@ export class CertificateForUnitTestsService<T> implements PublicPart<OnChainCert
             return;
         }
 
-        const value = Number(command.energyValue ?? certificate.owners[command.fromAddress]);
+        const value = Number(command.energyValue);
 
         certificate.owners[command.fromAddress] = (
             Number(certificate.owners[command.fromAddress]) - value
