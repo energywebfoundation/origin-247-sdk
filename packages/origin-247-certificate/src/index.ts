@@ -3,6 +3,7 @@ import { CertificateCommandEntity } from './offchain-certificate/repositories/Ce
 import { CertificateReadModelEntity } from './offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
 import { CertificateSynchronizationAttemptEntity } from './offchain-certificate/repositories/CertificateEvent/CertificateSynchronizationAttempt.entity';
 import { DeploymentPropertiesEntity } from './onchain-certificate/repositories/deploymentProperties/deploymentProperties.entity';
+export { IGetAllCertificatesOptions } from './offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.repository';
 
 export * from './types';
 
