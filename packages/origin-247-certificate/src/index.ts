@@ -12,13 +12,13 @@ export * from './onchain-certificate/onchain-certificate.service';
 export * from './onchain-certificate/onChainCertificateFacade';
 export * from './onchain-certificate/types';
 export * from './onchain-certificate/blockchain-properties.service';
+export * from './onchain-certificate/deployContracts';
 
 export * from './offchain-certificate/offchain-certificate.module';
 export * from './offchain-certificate/offchain-certificate.service';
 export * from './offchain-certificate/certificate.aggregate';
 export * from './offchain-certificate/synchronize/blockchain-synchronize.service';
 export * from './offchain-certificate/types';
-
 export const OffChainCertificateEntities = [
     CertificateSynchronizationAttemptEntity,
     CertificateEventEntity,
