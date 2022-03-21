@@ -1,6 +1,6 @@
 import { IBlockchainProperties } from '@energyweb/issuer';
 import { Injectable } from '@nestjs/common';
-import { BlockchainPropertiesService } from './blockchain-properties.service';
+import { BlockchainProperties, BlockchainPropertiesService } from './blockchain-properties.service';
 
 @Injectable()
 export class OnChainCertificateFacade {
@@ -10,7 +10,11 @@ export class OnChainCertificateFacade {
         await this.blockchainPropertiesService.deploy();
     }
 
-    public async getBlockchainProperties(): Promise<IBlockchainProperties> {
-        return await this.blockchainPropertiesService.getProperties();
+    public async getBlockchainProperties(): Promise<BlockchainProperties> {
+        return await this.blockchainPropertiesService.get();
+    }
+
+    public async getWrappedBlockchainProperties(): Promise<IBlockchainProperties> {
+        return await this.blockchainPropertiesService.getWrapped();
     }
 }

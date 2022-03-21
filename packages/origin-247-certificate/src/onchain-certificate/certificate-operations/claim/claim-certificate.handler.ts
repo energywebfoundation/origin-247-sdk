@@ -14,7 +14,7 @@ export class ClaimCertificateHandler<T = null> {
         forAddress,
         energyValue
     }: IClaimCommand): Promise<ContractTransaction> {
-        const blockchainProperties = await this.blockchainPropertiesService.getProperties();
+        const blockchainProperties = await this.blockchainPropertiesService.getWrapped();
 
         const cert = await new CertificateFacade(
             certificateId,

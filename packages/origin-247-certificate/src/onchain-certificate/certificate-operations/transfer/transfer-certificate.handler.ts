@@ -14,7 +14,7 @@ export class TransferCertificateHandler<T = null> {
         toAddress,
         energyValue
     }: ITransferCommand): Promise<ContractTransaction> {
-        const blockchainProperties = await this.blockchainPropertiesService.getProperties();
+        const blockchainProperties = await this.blockchainPropertiesService.getWrapped();
 
         const onChainCert = await new CertificateFacade(
             certificateId,
