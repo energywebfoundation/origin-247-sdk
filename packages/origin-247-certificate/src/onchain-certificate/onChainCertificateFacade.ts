@@ -11,6 +11,6 @@ export class OnChainCertificateFacade {
     }
 
     public async getBlockchainProperties(): Promise<IBlockchainProperties> {
-        return await this.blockchainPropertiesService.getProperties();
+        return await this.blockchainPropertiesService.getWrapped();
     }
 }

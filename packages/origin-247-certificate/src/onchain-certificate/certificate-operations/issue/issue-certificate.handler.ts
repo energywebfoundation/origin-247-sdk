@@ -16,7 +16,7 @@ export class IssueCertificateHandler {
         deviceId,
         metadata
     }: IIssueCommand<any>): Promise<ContractTransaction> {
-        const blockchainProperties = await this.blockchainPropertiesService.getProperties();
+        const blockchainProperties = await this.blockchainPropertiesService.getWrapped();
 
         return await CertificateFacade.create(
             toAddress,

@@ -6,8 +6,16 @@ import { providers, Signer, Wallet } from 'ethers';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { waitForState } from '../utils/wait.utils';
 
+export interface BlockchainProperties {
+    rpcNode: string;
+    fallbackRpcNode: string | null;
+    registry: string;
+    issuer: string;
+}
+
 @Injectable()
 export class BlockchainPropertiesService {
+    private readonly fallbackRPC: string | null;
     private readonly primaryRPC: string;
     private readonly issuerPrivateKey: string;
 
@@ -15,7 +23,7 @@ export class BlockchainPropertiesService {
         private configService: ConfigService<{ WEB3: string; ISSUER_PRIVATE_KEY: string }>,
         private deploymentPropsRepo: DeploymentPropertiesRepository
     ) {
-        const primaryRPC = this.configService.get('WEB3');
+        const [primaryRPC, fallbackRPC] = this.configService.get('WEB3').split(';');
         const issuerPrivateKey = this.configService.get('ISSUER_PRIVATE_KEY');
 
         if (!primaryRPC) {
@@ -28,9 +36,10 @@ export class BlockchainPropertiesService {
 
         this.primaryRPC = primaryRPC;
         this.issuerPrivateKey = issuerPrivateKey;
+        this.fallbackRPC = fallbackRPC ? fallbackRPC : null;
     }
 
-    async getProperties(): Promise<IBlockchainProperties> {
+    async get(): Promise<BlockchainProperties> {
         await waitForState(
             async () => await this.isDeployed(),
             'Blockchain properties were not deployed',
@@ -39,7 +48,26 @@ export class BlockchainPropertiesService {
 
         const { registry, issuer } = await this.deploymentPropsRepo.get();
 
-        const web3 = getProviderWithFallback(...[this.primaryRPC].filter((url) => Boolean(url)));
+        return {
+            rpcNode: this.primaryRPC,
+            fallbackRpcNode: this.fallbackRPC,
+            issuer,
+            registry
+        };
+    }
+
+    async getWrapped(): Promise<IBlockchainProperties> {
+        await waitForState(
+            async () => await this.isDeployed(),
+            'Blockchain properties were not deployed',
+            { interval: 5_000, maxTries: 24 }
+        );
+
+        const { registry, issuer } = await this.deploymentPropsRepo.get();
+
+        const web3 = getProviderWithFallback(
+            ...[this.primaryRPC, this.fallbackRPC ?? ''].filter((url) => Boolean(url))
+        );
 
         const signer: Signer = new Wallet(this.assure0x(this.issuerPrivateKey), web3);
 
@@ -77,7 +105,7 @@ export class BlockchainPropertiesService {
     async wrap(privateKey: string) {
         const { registry, issuer } = await this.deploymentPropsRepo.get();
 
-        const { web3 } = await this.getProperties();
+        const { web3 } = await this.getWrapped();
 
         const signer: Signer = new Wallet(this.assure0x(privateKey), web3);
         return {

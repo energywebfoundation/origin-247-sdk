@@ -9,7 +9,7 @@ export class BatchTransferCertificatesHandler<T = null> {
     constructor(private readonly blockchainPropertiesService: BlockchainPropertiesService) {}
 
     async execute({ transfers }: IBatchTransferCommand): Promise<ContractTransaction> {
-        const blockchainProperties = await this.blockchainPropertiesService.getProperties();
+        const blockchainProperties = await this.blockchainPropertiesService.getWrapped();
 
         try {
             return await CertificateBatchOperations.transferCertificates(

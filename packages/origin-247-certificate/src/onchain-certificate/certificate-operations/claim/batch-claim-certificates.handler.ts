@@ -9,7 +9,7 @@ export class BatchClaimCertificatesHandler<T = null> {
     constructor(private readonly blockchainPropertiesService: BlockchainPropertiesService) {}
 
     async execute({ claims }: IBatchClaimCommand): Promise<ContractTransaction> {
-        const blockchainProperties = await this.blockchainPropertiesService.getProperties();
+        const blockchainProperties = await this.blockchainPropertiesService.getWrapped();
 
         if (claims.length === 0) {
             throw new BadRequestException('Cannot process empty claims request');
