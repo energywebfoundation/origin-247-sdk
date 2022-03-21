@@ -20,8 +20,8 @@ export class BatchConfigurationService {
 
         return {
             issueBatchSize: issueSize ? parseInt(issueSize) : 10,
-            claimBatchSize: claimSize ? parseInt(claimSize) : 25,
-            transferBatchSize: transferSize ? parseInt(transferSize) : 100
+            claimBatchSize: claimSize ? parseInt(claimSize) : 20,
+            transferBatchSize: transferSize ? parseInt(transferSize) : 20
         };
     }
 }
@@ -31,8 +31,8 @@ export class BatchConfigurationServiceForUnitTests {
     getBatchSizes(): BatchConfiguration {
         return {
             issueBatchSize: 10,
-            claimBatchSize: 25,
-            transferBatchSize: 100
+            claimBatchSize: 20,
+            transferBatchSize: 20
         };
     }
 }
