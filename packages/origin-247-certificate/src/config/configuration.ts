@@ -1,6 +1,6 @@
 import { Configuration } from './config.interface';
 import { memoize } from 'lodash';
-import { validate, validateOrReject } from 'class-validator';
+import { validateOrReject } from 'class-validator';
 import { plainToClass } from 'class-transformer';
 
 export const getConfiguration = memoize(
@@ -12,7 +12,9 @@ export const getConfiguration = memoize(
         DB_PASSWORD: process.env.DB_PASSWORD ?? 'postgres',
         DB_DATABASE: process.env.DB_DATABASE ?? 'origin',
         REDIS_URL: process.env.REDIS_URL ?? { host: 'localhost', port: 6379 },
-        CERTIFICATE_QUEUE_DELAY: Number(process.env.CERTIFICATE_QUEUE_DELAY) ?? 10000,
+        CERTIFICATE_QUEUE_DELAY: process.env.CERTIFICATE_QUEUE_DELAY
+            ? parseInt(process.env.CERTIFICATE_QUEUE_DELAY, 10)
+            : 10000,
         ISSUER_PRIVATE_KEY: process.env.ISSUER_PRIVATE_KEY!,
         WEB3: {
             primaryRPC: process.env.WEB3?.split(';')?.[0]!,
@@ -41,7 +43,5 @@ export const getConfiguration = memoize(
 
 export const validateConfiguration = async () => {
     const configValues = getConfiguration();
-    await validateOrReject(plainToClass(Configuration, configValues), {
-        validationError: { target: false }
-    });
+    await validateOrReject(plainToClass(Configuration, configValues));
 };
