@@ -1,10 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { providers } from 'ethers';
 import { CertificateUtils, IBlockchainProperties } from '@energyweb/issuer';
-import { ConfigService } from '@nestjs/config';
 
 import { BlockchainPropertiesService } from '../blockchain-properties.service';
 import { TransactionPollService } from '../certificate-operations/transaction-poll.service';
+import { getConfiguration } from '../../config/configuration';
 
 @Injectable()
 export class OnChainWatcher implements OnModuleInit {
@@ -15,7 +15,6 @@ export class OnChainWatcher implements OnModuleInit {
     public registry: IBlockchainProperties['registry'];
 
     constructor(
-        private readonly configService: ConfigService,
         private readonly blockchainPropertiesService: BlockchainPropertiesService,
         private readonly transactionPollService: TransactionPollService
     ) {}
@@ -27,8 +26,7 @@ export class OnChainWatcher implements OnModuleInit {
         this.registry = registry;
 
         this.provider.pollingInterval =
-            Number(this.configService.get<string>('BLOCKCHAIN_POLLING_INTERVAL')) ||
-            this.provider.pollingInterval;
+            getConfiguration().BLOCKCHAIN_POLLING_INTERVAL || this.provider.pollingInterval;
 
         this.provider.on(
             this.registry.filters.IssuanceSingle(null, null, null),

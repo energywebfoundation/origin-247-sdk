@@ -10,7 +10,7 @@ import {
     ICertificateEvent
 } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
-import { CertificateConfigService } from '../../../config/certificate-config.service';
+import { getConfiguration } from '../../../config/configuration';
 
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {
@@ -20,12 +20,9 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         @InjectRepository(CertificateEventEntity)
         private repository: Repository<CertificateEventEntity>,
         @InjectRepository(CertificateSynchronizationAttemptEntity)
-        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>,
-        private certificateConfigService: CertificateConfigService
+        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>
     ) {
-        this.maxSynchronizationAttemptsForEvent = certificateConfigService.get(
-            'MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT'
-        )!;
+        this.maxSynchronizationAttemptsForEvent = getConfiguration().MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT;
     }
 
     public async getAll(): Promise<CertificateEventEntity[]> {

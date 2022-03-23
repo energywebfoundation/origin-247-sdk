@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bull';
 import { TransactionPollService } from './certificate-operations/transaction-poll.service';
@@ -24,8 +24,7 @@ import { CertificateReadModelInMemoryRepository } from '../offchain-certificate/
 import { CertificateReadModelPostgresRepository } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
 import { CertificateReadModelEntity } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
 import { OnChainWatcher } from './listeners/on-chain-certificates.listener';
-import { CertificateConfigModule } from '../config/certificate-config.module';
-import { CertificateConfigService } from '../config/certificate-config.service';
+import { getConfiguration, validateConfiguration } from '../config/configuration';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -60,21 +59,23 @@ const realCertificateProvider = {
     ],
     exports: [realCertificateProvider, OnChainCertificateFacade],
     imports: [
-        CertificateConfigModule,
         CqrsModule,
         BullModule.registerQueueAsync({
             name: blockchainQueueName,
-            inject: [CertificateConfigService],
-            useFactory: (configService: CertificateConfigService) => ({
+            useFactory: () => ({
                 settings: {
-                    lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
+                    lockDuration: getConfiguration().CERTIFICATE_QUEUE_LOCK_DURATION
                 }
             })
         }),
         TypeOrmModule.forFeature([DeploymentPropertiesEntity, CertificateReadModelEntity])
     ]
 })
-export class OnChainCertificateModule {}
+export class OnChainCertificateModule implements OnModuleInit {
+    async onModuleInit(): Promise<any> {
+        await validateConfiguration();
+    }
+}
 
 const inMemoryServiceProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -92,4 +93,8 @@ const inMemoryServiceProvider = {
     exports: [inMemoryServiceProvider],
     imports: [CqrsModule]
 })
-export class OnChainCertificateForUnitTestsModule {}
+export class OnChainCertificateForUnitTestsModule implements OnModuleInit {
+    async onModuleInit(): Promise<any> {
+        await validateConfiguration();
+    }
+}

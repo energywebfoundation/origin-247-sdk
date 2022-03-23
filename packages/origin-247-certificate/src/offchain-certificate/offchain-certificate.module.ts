@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { CertificateCommandPostgresRepository } from './repositories/CertificateCommand/CertificateCommandPostgres.repository';
 import { CertificateEventPostgresRepository } from './repositories/CertificateEvent/CertificateEventPostgres.repository';
@@ -40,7 +40,7 @@ import { ENTITY_MANAGER, InMemoryEntityManager } from './utils/entity-manager';
 import { EntityManager } from 'typeorm';
 import { BlockchainSynchronizeQueuedService } from './synchronize/blockchain-synchronize-queued.service';
 import { BlockchainSynchronizeSyncService } from './synchronize/blockchain-synchronize-sync.service';
-import { CertificateConfigModule } from '../config/certificate-config.module';
+import { validateConfiguration } from '../config/configuration';
 
 @Module({
     providers: [
@@ -92,14 +92,21 @@ import { CertificateConfigModule } from '../config/certificate-config.module';
 
         BullModule.registerQueue({
             name: SYNCHRONIZE_QUEUE_NAME
-        }),
-        CertificateConfigModule
+        })
     ]
 })
-export class OffChainCertificateModule {}
+export class OffChainCertificateModule implements OnModuleInit {
+    async onModuleInit(): Promise<any> {
+        await validateConfiguration();
+    }
+}
 
 @Module({})
-export class OffChainCertificateForUnitTestsModule {
+export class OffChainCertificateForUnitTestsModule implements OnModuleInit {
+    async onModuleInit(): Promise<any> {
+        await validateConfiguration();
+    }
+
     public static register(onChainModule = OnChainCertificateForUnitTestsModule) {
         return {
             module: OffChainCertificateForUnitTestsModule,
