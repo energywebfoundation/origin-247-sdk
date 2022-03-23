@@ -93,8 +93,4 @@ const inMemoryServiceProvider = {
     exports: [inMemoryServiceProvider],
     imports: [CqrsModule]
 })
-export class OnChainCertificateForUnitTestsModule implements OnModuleInit {
-    async onModuleInit(): Promise<any> {
-        await validateConfiguration();
-    }
-}
+export class OnChainCertificateForUnitTestsModule {}

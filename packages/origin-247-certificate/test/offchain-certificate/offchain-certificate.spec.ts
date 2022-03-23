@@ -1,4 +1,4 @@
-import { Injectable, Module, OnModuleInit } from '@nestjs/common';
+import { Injectable, Module } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
     BlockchainSynchronizeService,
@@ -14,7 +14,6 @@ import { CertificateEventType } from '../../src/offchain-certificate/events/Cert
 import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
 import { CERTIFICATE_EVENT_REPOSITORY } from '../../src/offchain-certificate/repositories/repository.keys';
 import { CertificateForUnitTestsService } from '../../src/onchain-certificate/onchain-certificateForUnitTests.service';
-import { validateConfiguration } from '../../src/config/configuration';
 
 describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
     let app: TestingModule;
@@ -482,11 +481,7 @@ const getFailingModuleForUnitTests = (failingOn: 'issue' | 'claim' | 'transfer',
         ],
         exports: [ONCHAIN_CERTIFICATE_SERVICE_TOKEN]
     })
-    class FailingOnChainModuleForUnitTests implements OnModuleInit {
-        async onModuleInit(): Promise<any> {
-            await validateConfiguration();
-        }
-    }
+    class FailingOnChainModuleForUnitTests {}
 
     return OffChainCertificateForUnitTestsModule.register(FailingOnChainModuleForUnitTests);
 };
@@ -506,11 +501,7 @@ const getNotAlignedIdsModuleForUnitTests = () => {
         ],
         exports: [ONCHAIN_CERTIFICATE_SERVICE_TOKEN]
     })
-    class FailingOnChainModuleForUnitTests implements OnModuleInit {
-        async onModuleInit(): Promise<any> {
-            await validateConfiguration();
-        }
-    }
+    class FailingOnChainModuleForUnitTests {}
 
     return OffChainCertificateForUnitTestsModule.register(FailingOnChainModuleForUnitTests);
 };

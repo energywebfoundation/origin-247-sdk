@@ -102,11 +102,7 @@ export class OffChainCertificateModule implements OnModuleInit {
 }
 
 @Module({})
-export class OffChainCertificateForUnitTestsModule implements OnModuleInit {
-    async onModuleInit(): Promise<any> {
-        await validateConfiguration();
-    }
-
+export class OffChainCertificateForUnitTestsModule {
     public static register(onChainModule = OnChainCertificateForUnitTestsModule) {
         return {
             module: OffChainCertificateForUnitTestsModule,
