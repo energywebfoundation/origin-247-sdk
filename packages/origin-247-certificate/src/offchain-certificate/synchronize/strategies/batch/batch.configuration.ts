@@ -15,8 +15,6 @@ export class BatchConfigurationService {
 
     getBatchSizes(): BatchConfiguration {
         return {
-            // These variable and default values are properly handled by ConfigModule,
-            // but version 1.0.2 of `@nestjs/config` doesn't allow to infer the type as `number`
             issueBatchSize: this.certificateConfigService.get('ISSUE_BATCH_SIZE'),
             claimBatchSize: this.certificateConfigService.get('CLAIM_BATCH_SIZE'),
             transferBatchSize: this.certificateConfigService.get('TRANSFER_BATCH_SIZE')
