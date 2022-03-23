@@ -27,8 +27,8 @@ export class BatchConfigurationServiceForUnitTests {
     getBatchSizes(): BatchConfiguration {
         return {
             issueBatchSize: 10,
-            claimBatchSize: 25,
-            transferBatchSize: 100
+            claimBatchSize: 20,
+            transferBatchSize: 20
         };
     }
 }
