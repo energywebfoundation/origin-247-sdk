@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@2.1.0...@energyweb/origin-247-transfer@3.0.0) (2022-03-23)
+
+
+### Bug Fixes
+
+* tests ([11e0370](https://github.com/energywebfoundation/origin-247-sdk/commit/11e03705509bcb080e837015abdc031a5f496153))
+
+
+### Features
+
+* Use `issuer` package directly. Drop `issuer-api` package ([7c293e1](https://github.com/energywebfoundation/origin-247-sdk/commit/7c293e111e08de781d45b196a1adbcc8166c0af4))
+
+
+### BREAKING CHANGES
+
+* `energyValue` field is now required in transfer and claim commands.
+Previously when calling `transfer` or `claim` methods in `OffChainCertificateService`
+you could skip passing `energyValue` field to commands.
+Right now those calls will fail with ValidationError - you will have to
+explicitly pass `energyValue` you want to use to make it work.
+Contracts (and blockchain properties) should not be deployed using seed anymore.
+For deploying contracts on blockchain on application startup refer to README.
+
+
+
+
+
 # [2.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-transfer@2.0.5...@energyweb/origin-247-transfer@2.1.0) (2022-02-10)
 
 

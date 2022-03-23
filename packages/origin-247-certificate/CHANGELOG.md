@@ -3,6 +3,53 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.4.0...@energyweb/origin-247-certificate@4.0.0) (2022-03-23)
+
+
+### Bug Fixes
+
+* add and copy issuer from properties ([7edd037](https://github.com/energywebfoundation/origin-247-sdk/commit/7edd037947980667b1824f1f64cc49286c19bcaf))
+* add batchConfigServiceForUnitTests ([93ebfdc](https://github.com/energywebfoundation/origin-247-sdk/commit/93ebfdc3aff451b13eecdf81ea263c3acdaef067))
+* add IGetAllCertificatesOptions export ([fec4078](https://github.com/energywebfoundation/origin-247-sdk/commit/fec4078b2738027fc3e15cc27561c51505c6244c))
+* also return query from deployContracts ([93817f8](https://github.com/energywebfoundation/origin-247-sdk/commit/93817f8a4907a13267589d28262ab9e8b0de3a3f))
+* Change default batch sizes ([#90](https://github.com/energywebfoundation/origin-247-sdk/issues/90)) ([8cab085](https://github.com/energywebfoundation/origin-247-sdk/commit/8cab085f17f6b15a6ab2984600a767b158547484))
+* change let to const ([e7cfb34](https://github.com/energywebfoundation/origin-247-sdk/commit/e7cfb34f4e92222ddb58e59093116638c4fb9955))
+* Decrease default batch sizes ([#91](https://github.com/energywebfoundation/origin-247-sdk/issues/91)) ([580cbb5](https://github.com/energywebfoundation/origin-247-sdk/commit/580cbb57b2efd9f5bca7302055b9dc661953fb39))
+* default batch size values ([210bdbb](https://github.com/energywebfoundation/origin-247-sdk/commit/210bdbb85d8aa81fbcfa8c2a7063d2af704f836e))
+* fix copying old registry ([018ff8c](https://github.com/energywebfoundation/origin-247-sdk/commit/018ff8ca234d126f2f20c0899d45471286751da2))
+* fix test setup ([60f6e5b](https://github.com/energywebfoundation/origin-247-sdk/commit/60f6e5b63b58773958950fc221438d8c9f31f06f))
+* migration name ([a599b32](https://github.com/energywebfoundation/origin-247-sdk/commit/a599b32e11d3fadd1eaba1db2e3d5b38f8679cb2))
+* module providers and exports ([0fbacdb](https://github.com/energywebfoundation/origin-247-sdk/commit/0fbacdb34414a13de7da6f7c0668b561676ac2a5))
+* remove unused variable ([5810d31](https://github.com/energywebfoundation/origin-247-sdk/commit/5810d31bfd24a6019dddee07e0d46a32ca4ce3a4))
+* repo, module, cr fixes ([f43cf4f](https://github.com/energywebfoundation/origin-247-sdk/commit/f43cf4fb603fef41903b90216a41f0ba5b08fbc8))
+* typos, snippets ([342ab03](https://github.com/energywebfoundation/origin-247-sdk/commit/342ab0338d7b0073aeff773dd1a9fbb70a126982))
+* update blockchainProperties methods ([44f6957](https://github.com/energywebfoundation/origin-247-sdk/commit/44f6957d61038da70953171e60f37c09ab2dd98b))
+
+
+### Features
+
+* add batch-configuration-service ([2d90158](https://github.com/energywebfoundation/origin-247-sdk/commit/2d90158e1c2748dd5a68a8256af80ef8e4215fd7))
+* add blockchainProperties ([f6761a3](https://github.com/energywebfoundation/origin-247-sdk/commit/f6761a3da7e96a6923e968ae6e6221a38e9054b1))
+* add deployContracts ([a99e90c](https://github.com/energywebfoundation/origin-247-sdk/commit/a99e90c8c1ad57caa8bcf60d9e5c147a7d045312))
+* add deploymentProperties ([22097b7](https://github.com/energywebfoundation/origin-247-sdk/commit/22097b7689e4519b26bd367b428f685df02732ea))
+* add get method ([09714d0](https://github.com/energywebfoundation/origin-247-sdk/commit/09714d0fd3ae02645f1435d5af09477390b0d2bc))
+* Use `issuer` package directly. Drop `issuer-api` package ([7c293e1](https://github.com/energywebfoundation/origin-247-sdk/commit/7c293e111e08de781d45b196a1adbcc8166c0af4))
+
+
+### BREAKING CHANGES
+
+* `energyValue` field is now required in transfer and claim commands.
+Previously when calling `transfer` or `claim` methods in `OffChainCertificateService`
+you could skip passing `energyValue` field to commands.
+Right now those calls will fail with ValidationError - you will have to
+explicitly pass `energyValue` you want to use to make it work.
+Contracts (and blockchain properties) should not be deployed using seed anymore.
+For deploying contracts on blockchain on application startup refer to README.
+
+
+
+
+
 # [3.4.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.3.1...@energyweb/origin-247-certificate@3.4.0) (2022-02-10)
 
 
