@@ -1,5 +1,5 @@
-import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
+import { CertificateConfigService } from '../../../../config/certificate-config.service';
 
 export interface BatchConfiguration {
     issueBatchSize: number;
@@ -11,17 +11,15 @@ export const BATCH_CONFIGURATION_TOKEN = Symbol.for('BATCH_CONFIGURATION_TOKEN')
 
 @Injectable()
 export class BatchConfigurationService {
-    constructor(private configService: ConfigService) {}
+    constructor(private certificateConfigService: CertificateConfigService) {}
 
     getBatchSizes(): BatchConfiguration {
-        const issueSize = this.configService.get('ISSUE_BATCH_SIZE');
-        const claimSize = this.configService.get('CLAIM_BATCH_SIZE');
-        const transferSize = this.configService.get('TRANSFER_BATCH_SIZE');
-
         return {
-            issueBatchSize: issueSize ? parseInt(issueSize) : 10,
-            claimBatchSize: claimSize ? parseInt(claimSize) : 25,
-            transferBatchSize: transferSize ? parseInt(transferSize) : 100
+            // These variable and default values are properly handled by ConfigModule,
+            // but version 1.0.2 of `@nestjs/config` doesn't allow to infer the type as `number`
+            issueBatchSize: this.certificateConfigService.get('ISSUE_BATCH_SIZE'),
+            claimBatchSize: this.certificateConfigService.get('CLAIM_BATCH_SIZE'),
+            transferBatchSize: this.certificateConfigService.get('TRANSFER_BATCH_SIZE')
         };
     }
 }

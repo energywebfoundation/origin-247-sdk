@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnApplicationShutdown, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { providers } from 'ethers';
 import { CertificateUtils, IBlockchainProperties } from '@energyweb/issuer';
 import { ConfigService } from '@nestjs/config';

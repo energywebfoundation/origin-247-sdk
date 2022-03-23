@@ -1,5 +1,5 @@
 import { ConnectionOptions } from 'typeorm';
-import getConfiguration from './src/offchain-certificate/config/configuration';
+import { getConfiguration } from './src/config/configuration';
 
 const getDBConnectionOptions = (): ConnectionOptions => {
     const configuration = getConfiguration();

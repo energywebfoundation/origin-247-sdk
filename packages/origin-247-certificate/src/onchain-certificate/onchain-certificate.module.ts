@@ -6,9 +6,6 @@ import { CertificateForUnitTestsService } from './onchain-certificateForUnitTest
 import { OnChainCertificateService } from './onchain-certificate.service';
 import { BlockchainActionsProcessor, blockchainQueueName } from './blockchain-actions.processor';
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from './types';
-import getConfiguration from '../offchain-certificate/config/configuration';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Configuration } from '../offchain-certificate/config/config.interface';
 import { BlockchainPropertiesService } from './blockchain-properties.service';
 import { OnChainCertificateFacade } from './onChainCertificateFacade';
 import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
@@ -27,6 +24,8 @@ import { CertificateReadModelInMemoryRepository } from '../offchain-certificate/
 import { CertificateReadModelPostgresRepository } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
 import { CertificateReadModelEntity } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
 import { OnChainWatcher } from './listeners/on-chain-certificates.listener';
+import { CertificateConfigModule } from '../config/certificate-config.module';
+import { CertificateConfigService } from '../config/certificate-config.service';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -61,15 +60,12 @@ const realCertificateProvider = {
     ],
     exports: [realCertificateProvider, OnChainCertificateFacade],
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            load: [getConfiguration]
-        }),
+        CertificateConfigModule,
         CqrsModule,
         BullModule.registerQueueAsync({
             name: blockchainQueueName,
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService<Configuration>) => ({
+            inject: [CertificateConfigService],
+            useFactory: (configService: CertificateConfigService) => ({
                 settings: {
                     lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
                 }

@@ -40,8 +40,7 @@ import { ENTITY_MANAGER, InMemoryEntityManager } from './utils/entity-manager';
 import { EntityManager } from 'typeorm';
 import { BlockchainSynchronizeQueuedService } from './synchronize/blockchain-synchronize-queued.service';
 import { BlockchainSynchronizeSyncService } from './synchronize/blockchain-synchronize-sync.service';
-import { ConfigModule } from '@nestjs/config';
-import getConfiguration from './config/configuration';
+import { CertificateConfigModule } from '../config/certificate-config.module';
 
 @Module({
     providers: [
@@ -94,10 +93,7 @@ import getConfiguration from './config/configuration';
         BullModule.registerQueue({
             name: SYNCHRONIZE_QUEUE_NAME
         }),
-        ConfigModule.forRoot({
-            load: [getConfiguration]
-            // isGlobal: true
-        })
+        CertificateConfigModule
     ]
 })
 export class OffChainCertificateModule {}

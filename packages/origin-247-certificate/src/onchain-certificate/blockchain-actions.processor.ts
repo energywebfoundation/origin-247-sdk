@@ -2,9 +2,8 @@ import { Process, Processor } from '@nestjs/bull';
 import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { BlockchainAction } from './types';
-import { ConfigService } from '@nestjs/config';
-import { Configuration } from '../offchain-certificate/config/config.interface';
 import { CertificateOperationsService } from './certificate-operations/certificate-operations.service';
+import { CertificateConfigService } from '../config/certificate-config.service';
 
 export const blockchainQueueName = 'blockchain-actions';
 
@@ -13,7 +12,7 @@ export class BlockchainActionsProcessor {
     private readonly logger = new Logger(BlockchainActionsProcessor.name);
 
     constructor(
-        private readonly configService: ConfigService<Configuration>,
+        private readonly certificateConfigService: CertificateConfigService,
         private readonly certificateOperationsFacade: CertificateOperationsService
     ) {}
 
@@ -27,7 +26,7 @@ export class BlockchainActionsProcessor {
              * Therefore we need to give some time to process everything.
              */
             await new Promise((resolve) =>
-                setTimeout(resolve, this.configService.get('CERTIFICATE_QUEUE_DELAY'))
+                setTimeout(resolve, this.certificateConfigService.get('CERTIFICATE_QUEUE_DELAY'))
             );
 
             return result;
