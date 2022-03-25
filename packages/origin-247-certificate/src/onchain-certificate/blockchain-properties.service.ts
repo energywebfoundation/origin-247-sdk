@@ -40,11 +40,7 @@ export class BlockchainPropertiesService {
     }
 
     async get(): Promise<BlockchainProperties> {
-        await waitForState(
-            async () => await this.isDeployed(),
-            'Blockchain properties were not deployed',
-            { interval: 5_000, maxTries: 24 }
-        );
+        await this.waitForPropertiesToBeDeployed();
 
         const { registry, issuer } = await this.deploymentPropsRepo.get();
 
@@ -57,11 +53,7 @@ export class BlockchainPropertiesService {
     }
 
     async getWrapped(): Promise<IBlockchainProperties> {
-        await waitForState(
-            async () => await this.isDeployed(),
-            'Blockchain properties were not deployed',
-            { interval: 5_000, maxTries: 24 }
-        );
+        await this.waitForPropertiesToBeDeployed();
 
         const { registry, issuer } = await this.deploymentPropsRepo.get();
 
@@ -118,4 +110,16 @@ export class BlockchainPropertiesService {
 
     private assure0x = (privateKey: string) =>
         privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
+
+    private async waitForPropertiesToBeDeployed() {
+        try {
+            await waitForState(
+                async () => await this.isDeployed(),
+                'Blockchain properties were not deployed',
+                { interval: 5_000, maxTries: 24 }
+            );
+        } catch (e) {
+            throw Error(e);
+        }
+    }
 }
