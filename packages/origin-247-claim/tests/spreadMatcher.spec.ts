@@ -48,24 +48,10 @@ describe('spreadMatcher', () => {
             });
 
             // leftover consumptions
-            expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[0][1]).toEqual({
-                id: 'consumerB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[0]).toHaveLength(0);
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
 
         it('2 consumers within same group - should distribute evenly between same priority consumers, regardless of consumptions', () => {
@@ -117,20 +103,9 @@ describe('spreadMatcher', () => {
                 id: 'consumerA',
                 volume: 50
             });
-            expect(result.leftoverEntities[0][1]).toEqual({
-                id: 'consumerB',
-                volume: 0
-            });
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
 
         it('2 consumers within same group - should distribute one more to first consumer when generations are indivisible equally', () => {
@@ -179,23 +154,12 @@ describe('spreadMatcher', () => {
 
             // leftover consumptions
             expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[0][1]).toEqual({
                 id: 'consumerB',
                 volume: 1
             });
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
 
         it('3 consumers within same group - should distribute evenly between same priority consumers', () => {
@@ -270,14 +234,7 @@ describe('spreadMatcher', () => {
             });
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
 
         it('3 consumers within same group - should distribute last indivisible generation (1) to first consumer', () => {
@@ -352,14 +309,7 @@ describe('spreadMatcher', () => {
             });
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
 
         it('3 consumers within same group - should distribute last indivisible generation (2) from different generators to first consumer', () => {
@@ -439,14 +389,7 @@ describe('spreadMatcher', () => {
             });
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
 
         it('2 consumers within different groups - should satisfy higher priority group first', () => {
@@ -497,24 +440,12 @@ describe('spreadMatcher', () => {
 
             // leftover consumptions
             expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
-
-            expect(result.leftoverEntities[0][1]).toEqual({
                 id: 'consumerB',
                 volume: 50
             });
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
 
         it('2 consumer priority groups, 2 consumer each - should satisfy higher priority group first', () => {
@@ -591,33 +522,17 @@ describe('spreadMatcher', () => {
 
             // leftover consumptions
             expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
-
-            expect(result.leftoverEntities[0][1]).toEqual({
-                id: 'consumerB',
-                volume: 0
-            });
-            expect(result.leftoverEntities[0][2]).toEqual({
                 id: 'consumerC',
                 volume: 50
             });
 
-            expect(result.leftoverEntities[0][3]).toEqual({
+            expect(result.leftoverEntities[0][1]).toEqual({
                 id: 'consumerD',
                 volume: 50
             });
 
             // excess generations
-            expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
-                id: 'generatorB',
-                volume: 0
-            });
+            expect(result.leftoverEntities[1]).toHaveLength(0);
         });
         // consumer priority end
     });
@@ -653,17 +568,10 @@ describe('spreadMatcher', () => {
             });
 
             // leftover consumptions
-            expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
+            expect(result.leftoverEntities[0]).toHaveLength(0);
 
             // excess generations
             expect(result.leftoverEntities[1][0]).toEqual({
-                id: 'generatorA',
-                volume: 0
-            });
-            expect(result.leftoverEntities[1][1]).toEqual({
                 id: 'generatorB',
                 volume: 100
             });
@@ -735,10 +643,7 @@ describe('spreadMatcher', () => {
             });
 
             // leftover consumptions
-            expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
+            expect(result.leftoverEntities[0]).toHaveLength(0);
 
             // excess generations
             expect(result.leftoverEntities[1][0]).toEqual({
@@ -791,10 +696,7 @@ describe('spreadMatcher', () => {
             });
 
             // leftover consumptions
-            expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
+            expect(result.leftoverEntities[0]).toHaveLength(0);
 
             // excess generations
             expect(result.leftoverEntities[1][0]).toEqual({
@@ -847,10 +749,7 @@ describe('spreadMatcher', () => {
             });
 
             // leftover consumptions
-            expect(result.leftoverEntities[0][0]).toEqual({
-                id: 'consumerA',
-                volume: 0
-            });
+            expect(result.leftoverEntities[0]).toHaveLength(0);
 
             // excess generations
             expect(result.leftoverEntities[1][0]).toEqual({
