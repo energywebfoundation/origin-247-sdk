@@ -112,14 +112,10 @@ export class BlockchainPropertiesService {
         privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`;
 
     private async waitForPropertiesToBeDeployed() {
-        try {
-            await waitForState(
-                async () => await this.isDeployed(),
-                'Blockchain properties were not deployed',
-                { interval: 5_000, maxTries: 24 }
-            );
-        } catch (e) {
-            throw Error(e);
-        }
+        await waitForState(
+            async () => await this.isDeployed(),
+            'Blockchain properties were not deployed',
+            { interval: 5_000, maxTries: 24 }
+        );
     }
 }
