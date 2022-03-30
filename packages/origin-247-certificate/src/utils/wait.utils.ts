@@ -15,7 +15,7 @@ export const waitForState = async (
         const checkInterval = setInterval(async () => {
             if (currentTries > maxTries) {
                 clearInterval(checkInterval);
-                reject(errorMessage);
+                reject(new Error(errorMessage));
             }
 
             const hasRequestedState = await requestedStateChecker();
