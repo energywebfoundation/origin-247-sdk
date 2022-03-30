@@ -4,7 +4,7 @@ import { CertificateUtils, IBlockchainProperties } from '@energyweb/issuer';
 
 import { BlockchainPropertiesService } from '../blockchain-properties.service';
 import { TransactionPollService } from '../certificate-operations/transaction-poll.service';
-import { getConfiguration } from '../../config/configuration';
+import { getConfiguration } from '../config/configuration';
 
 @Injectable()
 export class OnChainWatcher implements OnModuleInit {

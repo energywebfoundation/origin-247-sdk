@@ -40,7 +40,7 @@ import { ENTITY_MANAGER, InMemoryEntityManager } from './utils/entity-manager';
 import { EntityManager } from 'typeorm';
 import { BlockchainSynchronizeQueuedService } from './synchronize/blockchain-synchronize-queued.service';
 import { BlockchainSynchronizeSyncService } from './synchronize/blockchain-synchronize-sync.service';
-import { validateConfiguration } from '../config/configuration';
+import { validateConfiguration } from './config/configuration';
 
 @Module({
     providers: [

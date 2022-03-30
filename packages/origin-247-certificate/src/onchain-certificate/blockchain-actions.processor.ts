@@ -3,7 +3,7 @@ import { Logger } from '@nestjs/common';
 import { Job } from 'bull';
 import { BlockchainAction } from './types';
 import { CertificateOperationsService } from './certificate-operations/certificate-operations.service';
-import { getConfiguration } from '../config/configuration';
+import { getConfiguration } from './config/configuration';
 
 export const blockchainQueueName = 'blockchain-actions';
 

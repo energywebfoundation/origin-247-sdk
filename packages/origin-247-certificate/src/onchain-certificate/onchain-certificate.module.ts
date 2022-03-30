@@ -24,7 +24,7 @@ import { CertificateReadModelInMemoryRepository } from '../offchain-certificate/
 import { CertificateReadModelPostgresRepository } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
 import { CertificateReadModelEntity } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
 import { OnChainWatcher } from './listeners/on-chain-certificates.listener';
-import { getConfiguration, validateConfiguration } from '../config/configuration';
+import { getConfiguration, validateConfiguration } from './config/configuration';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,

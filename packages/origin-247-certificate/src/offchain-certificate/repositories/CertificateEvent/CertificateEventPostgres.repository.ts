@@ -10,7 +10,7 @@ import {
     ICertificateEvent
 } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
-import { getConfiguration } from '../../../config/configuration';
+import { getConfiguration } from '../../config/configuration';
 
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {

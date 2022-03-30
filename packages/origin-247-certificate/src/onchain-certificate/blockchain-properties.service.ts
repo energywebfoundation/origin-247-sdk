@@ -4,7 +4,7 @@ import { DeploymentPropertiesRepository } from './repositories/deploymentPropert
 import { providers, Signer, Wallet } from 'ethers';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { waitForState } from '../utils/wait.utils';
-import { getConfiguration } from '../config/configuration';
+import { getConfiguration } from './config/configuration';
 
 export interface BlockchainProperties {
     rpcNode: string;
