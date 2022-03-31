@@ -1,4 +1,4 @@
-import { CertificateUtils, Contracts } from '@energyweb/issuer';
+import { CertificateUtils } from '@energyweb/issuer';
 import { getConnectionToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Logger } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
@@ -26,10 +26,8 @@ import {
 } from '../src/offchain-certificate/repositories/repository.keys';
 import { CertificateEventService } from '../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.service';
 import { Connection } from 'typeorm';
-import getConfiguration from '../src/offchain-certificate/config/configuration';
+import { getConfiguration } from '../src/config/configuration';
 import { BlockchainPropertiesService } from '../src/onchain-certificate/blockchain-properties.service';
-import { ConfigService } from '@nestjs/config';
-import { DeploymentPropertiesRepository } from '../src/onchain-certificate/repositories/deploymentProperties/deploymentProperties.repository';
 
 const testLogger = new Logger('e2e');
 

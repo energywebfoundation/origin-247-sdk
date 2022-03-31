@@ -1,5 +1,5 @@
-import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
+import { getConfiguration } from '../../../config/configuration';
 
 export interface BatchConfiguration {
     issueBatchSize: number;
@@ -11,17 +11,11 @@ export const BATCH_CONFIGURATION_TOKEN = Symbol.for('BATCH_CONFIGURATION_TOKEN')
 
 @Injectable()
 export class BatchConfigurationService {
-    constructor(private configService: ConfigService) {}
-
     getBatchSizes(): BatchConfiguration {
-        const issueSize = this.configService.get('ISSUE_BATCH_SIZE');
-        const claimSize = this.configService.get('CLAIM_BATCH_SIZE');
-        const transferSize = this.configService.get('TRANSFER_BATCH_SIZE');
-
         return {
-            issueBatchSize: issueSize ? parseInt(issueSize) : 10,
-            claimBatchSize: claimSize ? parseInt(claimSize) : 20,
-            transferBatchSize: transferSize ? parseInt(transferSize) : 20
+            issueBatchSize: getConfiguration().ISSUE_BATCH_SIZE,
+            claimBatchSize: getConfiguration().CLAIM_BATCH_SIZE,
+            transferBatchSize: getConfiguration().TRANSFER_BATCH_SIZE
         };
     }
 }

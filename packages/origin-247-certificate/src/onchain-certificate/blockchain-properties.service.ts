@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { Contracts, IBlockchainProperties } from '@energyweb/issuer';
-import { ConfigService } from '@nestjs/config';
 import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
 import { providers, Signer, Wallet } from 'ethers';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { waitForState } from '../utils/wait.utils';
+import { getConfiguration } from './config/configuration';
 
 export interface BlockchainProperties {
     rpcNode: string;
@@ -19,20 +19,9 @@ export class BlockchainPropertiesService {
     private readonly primaryRPC: string;
     private readonly issuerPrivateKey: string;
 
-    constructor(
-        private configService: ConfigService<{ WEB3: string; ISSUER_PRIVATE_KEY: string }>,
-        private deploymentPropsRepo: DeploymentPropertiesRepository
-    ) {
-        const [primaryRPC, fallbackRPC] = this.configService.get('WEB3').split(';');
-        const issuerPrivateKey = this.configService.get('ISSUER_PRIVATE_KEY');
-
-        if (!primaryRPC) {
-            throw new Error('No WEB3 environment variable set');
-        }
-
-        if (!issuerPrivateKey) {
-            throw new Error('No ISSUER_PRIVATE_KEY environment variable set');
-        }
+    constructor(private deploymentPropsRepo: DeploymentPropertiesRepository) {
+        const { primaryRPC, fallbackRPC } = getConfiguration().WEB3;
+        const issuerPrivateKey = getConfiguration().ISSUER_PRIVATE_KEY;
 
         this.primaryRPC = primaryRPC;
         this.issuerPrivateKey = issuerPrivateKey;

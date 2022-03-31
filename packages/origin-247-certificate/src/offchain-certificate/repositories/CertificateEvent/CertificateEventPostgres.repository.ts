@@ -10,8 +10,7 @@ import {
     ICertificateEvent
 } from '../../events/Certificate.events';
 import { CertificateSynchronizationAttemptEntity } from './CertificateSynchronizationAttempt.entity';
-import { ConfigService } from '@nestjs/config';
-import { Configuration } from '../../config/config.interface';
+import { getConfiguration } from '../../config/configuration';
 
 @Injectable()
 export class CertificateEventPostgresRepository implements CertificateEventRepository {
@@ -21,12 +20,9 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
         @InjectRepository(CertificateEventEntity)
         private repository: Repository<CertificateEventEntity>,
         @InjectRepository(CertificateSynchronizationAttemptEntity)
-        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>,
-        configService: ConfigService<Configuration>
+        private synchronizationAttemptRepository: Repository<CertificateSynchronizationAttemptEntity>
     ) {
-        this.maxSynchronizationAttemptsForEvent = configService.get(
-            'MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT'
-        )!;
+        this.maxSynchronizationAttemptsForEvent = getConfiguration().MAX_SYNCHRONIZATION_ATTEMPTS_FOR_EVENT;
     }
 
     public async getAll(): Promise<CertificateEventEntity[]> {

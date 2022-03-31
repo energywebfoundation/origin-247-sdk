@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { BullModule } from '@nestjs/bull';
 import { TransactionPollService } from './certificate-operations/transaction-poll.service';
@@ -6,9 +6,6 @@ import { CertificateForUnitTestsService } from './onchain-certificateForUnitTest
 import { OnChainCertificateService } from './onchain-certificate.service';
 import { BlockchainActionsProcessor, blockchainQueueName } from './blockchain-actions.processor';
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from './types';
-import getConfiguration from '../offchain-certificate/config/configuration';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Configuration } from '../offchain-certificate/config/config.interface';
 import { BlockchainPropertiesService } from './blockchain-properties.service';
 import { OnChainCertificateFacade } from './onChainCertificateFacade';
 import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
@@ -27,6 +24,7 @@ import { CertificateReadModelInMemoryRepository } from '../offchain-certificate/
 import { CertificateReadModelPostgresRepository } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModelPostgres.repository';
 import { CertificateReadModelEntity } from '../offchain-certificate/repositories/CertificateReadModel/CertificateReadModel.entity';
 import { OnChainWatcher } from './listeners/on-chain-certificates.listener';
+import { getConfiguration, validateConfiguration } from './config/configuration';
 
 const realCertificateProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
@@ -61,24 +59,23 @@ const realCertificateProvider = {
     ],
     exports: [realCertificateProvider, OnChainCertificateFacade],
     imports: [
-        ConfigModule.forRoot({
-            isGlobal: true,
-            load: [getConfiguration]
-        }),
         CqrsModule,
         BullModule.registerQueueAsync({
             name: blockchainQueueName,
-            inject: [ConfigService],
-            useFactory: (configService: ConfigService<Configuration>) => ({
+            useFactory: () => ({
                 settings: {
-                    lockDuration: configService.get('CERTIFICATE_QUEUE_LOCK_DURATION')
+                    lockDuration: getConfiguration().CERTIFICATE_QUEUE_LOCK_DURATION
                 }
             })
         }),
         TypeOrmModule.forFeature([DeploymentPropertiesEntity, CertificateReadModelEntity])
     ]
 })
-export class OnChainCertificateModule {}
+export class OnChainCertificateModule implements OnModuleInit {
+    async onModuleInit(): Promise<any> {
+        await validateConfiguration();
+    }
+}
 
 const inMemoryServiceProvider = {
     provide: ONCHAIN_CERTIFICATE_SERVICE_TOKEN,
