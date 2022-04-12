@@ -1,12 +1,19 @@
+<p align="center">
+  <a href="https://www.energyweb.org" target="blank"><img src="./energyweb.png" width="120" alt="Energy Web Foundation" /></a>
+</p>
+
 # Origin 24/7 SDK - Claim module
+
+## Description
 
 `origin-247-claim` module is responsible for matching generations with consumptions, and claiming certificates on the blockchain.
 It also stores matching results.
 
 ## Installation
 
-0. Install `@energyweb/origin-247-claim` and [origin-247-certificate](https://github.com/energywebfoundation/origin-247-sdk/tree/master/packages/origin-247-certificate)
-1. Import `ClaimModule` into your application:
+1. Setup [origin-247-certificate](https://github.com/energywebfoundation/origin-247-sdk/tree/master/packages/origin-247-certificate) `OffChainCertificateModule`
+2. Install `@energyweb/origin-247-claim`
+3. Import `ClaimModule` into your application:
 
 ```ts
 import { ClaimModule } from '@energyweb/origin-247-claim';
@@ -17,7 +24,7 @@ import { ClaimModule } from '@energyweb/origin-247-claim';
 export class SomeModule {}
 ```
 
-2. Add `entities` to `TypeORM.forRoot` entities:
+4. Add `entities` to `TypeORM.forRoot` entities:
 
 ```ts
 import { entities as ClaimEntitites } from '@energyweb/origin-247-claim';
@@ -30,7 +37,7 @@ TypeORM.forRoot({
 })
 ```
 
-3. Run migrations on startup:
+5. Run migrations on startup:
 
 ```json
 // package.json
@@ -43,7 +50,7 @@ TypeORM.forRoot({
 
 ## Usage
 
-1. Import module (as in installation step)
+1. Import `ClaimModule` module
 2. Inject `ClaimFacade` into your service, and use it to perform matching and get matching results.
 
 ### Claiming example
@@ -80,6 +87,8 @@ await this.claimFacade.claim({
 });
 ```
 
+## Notes
+
 ### Claiming algorithm
 
 Any algorithm can be used as an input to `.claim` function, as long as it meets [interface](./src/interfaces.ts).
@@ -95,7 +104,38 @@ By default we expose some algorithms ready to be used
 Using `.findMatches`, `.findLeftoverConsumption`, `.findExcessGeneration` you can query for any devices and timeframes, and receive raw data,
 that later on can be aggregated. Metadata field is explained above.
 
-## Testing applications with ClaimModule
+### Testing applications with ClaimModule
 
 `ClaimForUnitTestsModule` is exported, that uses `CertificateForUnitTestsModule` (`247-sdk`) and in-memory repositories to simplify testing,
 so no configuration for `CertificateModule` is necessary (like blockchain or redis configuration), and no database setup.
+
+## Questions and Support
+
+For questions and support please use Energy Web's [Discord channel](https://discord.com/channels/706103009205288990/843970822254362664)
+
+Or reach out to our contributing team members
+
+-   TeamMember: email address@energyweb.org
+
+## EW-DOS
+
+The Energy Web Decentralized Operating System is a blockchain-based, multi-layer digital infrastructure.
+
+The purpose of EW-DOS is to develop and deploy an open and decentralized digital operating system for the energy sector in support of a low-carbon, customer-centric energy future.
+
+We develop blockchain technology, full-stack applications and middleware packages that facilitate participation of Distributed Energy Resources on the grid and create open market places for transparent and efficient renewable energy trading.
+
+-   To learn about more about the EW-DOS tech stack, see our [documentation](https://app.gitbook.com/@energy-web-foundation/s/energy-web/).
+
+-   For an overview of the energy-sector challenges our use cases address, go [here](https://app.gitbook.com/@energy-web-foundation/s/energy-web/our-mission).
+
+For a deep-dive into the motivation and methodology behind our technical solutions, we encourage you to read our White Papers:
+
+-   [Energy Web White Paper on Vision and Purpose](https://www.energyweb.org/reports/EWDOS-Vision-Purpose/)
+-   [Energy Web White Paper on Technology Detail](https://www.energyweb.org/wp-content/uploads/2020/06/EnergyWeb-EWDOS-PART2-TechnologyDetail-202006-vFinal.pdf)
+
+## Connect with Energy Web
+
+-   [Twitter](https://twitter.com/energywebx)
+-   [Discord](https://discord.com/channels/706103009205288990/843970822254362664)
+-   [Telegram](https://t.me/energyweb)
