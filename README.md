@@ -36,7 +36,7 @@ Or reach out to our contributing team members
 
 -   TeamMember: email address@energyweb.org
 
-# EW-DOS
+## EW-DOS
 
 The Energy Web Decentralized Operating System is a blockchain-based, multi-layer digital infrastructure.
 
