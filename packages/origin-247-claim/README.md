@@ -9,6 +9,11 @@
 `origin-247-claim` module is responsible for matching generations with consumptions, and claiming certificates on the blockchain.
 It also stores matching results.
 
+## Requirements
+
+-   Nest.js application (`origin-247-claim` is Nest.js module)
+-   TypeORM configured
+
 ## Installation
 
 1. Setup [origin-247-certificate](https://github.com/energywebfoundation/origin-247-sdk/tree/master/packages/origin-247-certificate) `OffChainCertificateModule`

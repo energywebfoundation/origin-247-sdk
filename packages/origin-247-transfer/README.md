@@ -1,4 +1,10 @@
+<p align="center">
+  <a href="https://www.energyweb.org" target="blank"><img src="./energyweb.png" width="120" alt="Energy Web Foundation" /></a>
+</p>
+
 # Origin 24/7 SDK - Transfer module
+
+## Description
 
 Transfer module is responsible for accepting input (the generation event),
 issuing certificate for such generation, and then calling series of validators to verify if the certificate issuance is valid to be transferred to the buyer.
@@ -13,11 +19,28 @@ For example:
 6. Application informs `origin-247-transfer` that trade is valid.
 7. `origin-247-transfer` transfers certificate from seller to buyer.
 
+## Requirements
+
+-   Nest.js application (`origin-247-transfer` is Nest.js module)
+-   TypeORM configured
+
 ## Installation
 
 1. Setup [certificate module](../origin-247-certificate) - this module is used by `transfer` module.
 2. Install `@energyweb/origin-247-transfer`
-3. Import transfer module to the root of your application:
+3. Add `EnergyTransferRequestEntity` to your `TypeORM.forRoot` entities.
+4. Run migrations on startup:
+
+    ```json
+    // package.json
+    {
+        "scripts": {
+            "typeorm:run:transfer": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/origin-247-transfer/dist/js/ormconfig.js"
+        }
+    }
+    ```
+
+5. Import transfer module to the root of your application:
 
 ```ts
 import { TransferModule } from '@energyweb/origin-247-transfer';
@@ -43,6 +66,7 @@ All required files are exported from `@energyweb/origin-247-transfer`;
 1. Send event to CQRS event bus:
 
 ```ts
+@Injectable()
 class MyService {
     constructor(private eventBus: EventBus) {}
 
@@ -63,7 +87,7 @@ class MyService {
 }
 ```
 
-2. Implement query handler for retrieving transfer sites `IGetTransferSitesQueryHandler`:
+2. Implement query handler for retrieving transfer sites `IGetTransferSitesQueryHandler` (remember, it has to be added to some module's providers):
 
 ```ts
 @QueryHandler(GetTransferSitesQuery)
@@ -143,16 +167,20 @@ TransferModule.register({
 });
 ```
 
-5. Add `EnergyTransferRequestEntity` to `TypeORM.forRoot` entities.
-6. Add `typeorm:run:transfer` to package.json, and run it which runs module migrations:
+5. Add `typeorm:run:transfer` to package.json, and run it which runs module migrations:
 
 ```
 "typeorm:run:transfer": "node_modules/typeorm/cli.js migration:run --config node_modules/@energyweb/origin-247-transfer/dist/js/ormconfig.js",
 ```
 
-7. Call `GenerationReadingStoredEvent` created in step 1. that triggers whole transfer process. You may also want to consult test `setup` files in this repository, that although complex, may give a hint in case of any problems.
+6. Call `GenerationReadingStoredEvent` created in step 1. that triggers whole transfer process. You may also want to consult test `setup` files in this repository, that although complex, may give a hint in case of any problems.
 
-## Notes
+## Additional resources
+
+### Testing applications with TransferModule
+
+`TransferModuleForUnitTest` is exported, that uses `CertificateForUnitTestsModule` (`247-sdk`) and in-memory repositories to simplify testing,
+so no configuration for `CertificateModule` is necessary (like blockchain or redis configuration), and no database setup.
 
 ### Caching
 
@@ -161,3 +189,34 @@ By default it uses in-memory cache, but for production use it is best to actuall
 
 To use Redis as cache storage for this module, configure `REDIS_URL` variable, and install `"cache-manager-ioredis": "2.1.0"` as dependency in your application.
 If those two things are present Redis will be used automatically as storage.
+
+## Questions and Support
+
+For questions and support please use Energy Web's [Discord channel](https://discord.com/channels/706103009205288990/843970822254362664)
+
+Or reach out to our contributing team members
+
+-   TeamMember: email address@energyweb.org
+
+## EW-DOS
+
+The Energy Web Decentralized Operating System is a blockchain-based, multi-layer digital infrastructure.
+
+The purpose of EW-DOS is to develop and deploy an open and decentralized digital operating system for the energy sector in support of a low-carbon, customer-centric energy future.
+
+We develop blockchain technology, full-stack applications and middleware packages that facilitate participation of Distributed Energy Resources on the grid and create open market places for transparent and efficient renewable energy trading.
+
+-   To learn about more about the EW-DOS tech stack, see our [documentation](https://app.gitbook.com/@energy-web-foundation/s/energy-web/).
+
+-   For an overview of the energy-sector challenges our use cases address, go [here](https://app.gitbook.com/@energy-web-foundation/s/energy-web/our-mission).
+
+For a deep-dive into the motivation and methodology behind our technical solutions, we encourage you to read our White Papers:
+
+-   [Energy Web White Paper on Vision and Purpose](https://www.energyweb.org/reports/EWDOS-Vision-Purpose/)
+-   [Energy Web White Paper on Technology Detail](https://www.energyweb.org/wp-content/uploads/2020/06/EnergyWeb-EWDOS-PART2-TechnologyDetail-202006-vFinal.pdf)
+
+## Connect with Energy Web
+
+-   [Twitter](https://twitter.com/energywebx)
+-   [Discord](https://discord.com/channels/706103009205288990/843970822254362664)
+-   [Telegram](https://t.me/energyweb)

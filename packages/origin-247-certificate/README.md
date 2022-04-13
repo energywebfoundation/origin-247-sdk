@@ -143,10 +143,6 @@ It has two fields: `internalCertificateId: number` and `blockchainCertificateId:
 
 Off-chain implementation performs few retries if _persisting_ events on blockchain fails (e.g. due to network problems)
 
-### Testing modules that import OffChainCertificateModule
-
-Just as with onchain module, you can import `OffChainCertificateForUnitTestsModule`.
-
 ## Additional resources
 
 ### Unit tests
