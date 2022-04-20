@@ -194,9 +194,7 @@ If those two things are present Redis will be used automatically as storage.
 
 For questions and support please use Energy Web's [Discord channel](https://discord.com/channels/706103009205288990/843970822254362664)
 
-Or reach out to our contributing team members
-
--   TeamMember: email address@energyweb.org
+Or reach out to us via email: 247enquiries@energyweb.org
 
 ## EW-DOS
 
