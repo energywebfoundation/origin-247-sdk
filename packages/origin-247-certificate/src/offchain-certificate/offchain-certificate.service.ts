@@ -217,8 +217,7 @@ export class OffChainCertificateService<T = null> {
             return;
         }
         await validateBatchClaimCommands(commands);
-        await this.validateBatchClaim(commands);
-        await this.handleBatch(commands);
+        await this.handleBatch(commands, (commands) => this.validateBatchClaim(commands));
     }
 
     public async batchTransfer(commands: ITransferCommand[]): Promise<void> {
@@ -227,14 +226,18 @@ export class OffChainCertificateService<T = null> {
         }
 
         await validateBatchTransferCommands(commands);
-        await this.validateBatchTransfer(commands);
-        await this.handleBatch(commands);
+        await this.handleBatch(commands, (commands) => this.validateBatchTransfer(commands));
     }
 
-    private async handleBatch(commands: (IClaimCommand | ITransferCommand)[]) {
+    private async handleBatch<CommandType extends IClaimCommand | ITransferCommand>(
+        commands: CommandType[],
+        commandValidator: (commands: CommandType[]) => Promise<void>
+    ) {
         const savedCommands = await this.certCommandRepo.saveMany(
             commands.map((command) => ({ payload: command }))
         );
+
+        await commandValidator(commands);
         const events = commands.map((command) => createEventFromCommand(command));
 
         const eventsByCertificate = groupByInternalCertificateId(events);

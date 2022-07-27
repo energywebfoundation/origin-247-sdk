@@ -12,8 +12,16 @@ import {
 } from '../../src';
 import { CertificateEventType } from '../../src/offchain-certificate/events/Certificate.events';
 import { CertificateEventRepository } from '../../src/offchain-certificate/repositories/CertificateEvent/CertificateEvent.repository';
-import { CERTIFICATE_EVENT_REPOSITORY } from '../../src/offchain-certificate/repositories/repository.keys';
+import {
+    CERTIFICATE_COMMAND_REPOSITORY,
+    CERTIFICATE_EVENT_REPOSITORY
+} from '../../src/offchain-certificate/repositories/repository.keys';
 import { CertificateForUnitTestsService } from '../../src/onchain-certificate/onchain-certificateForUnitTests.service';
+import { CertificateErrors } from '../../src/offchain-certificate/errors';
+import BatchError = CertificateErrors.BatchError;
+import { CertificateCommandRepository } from '../../src/offchain-certificate/repositories/CertificateCommand/CertificateCommand.repository';
+import { isEqual } from 'lodash';
+import { ethers } from 'ethers';
 
 describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
     let app: TestingModule;
@@ -21,6 +29,7 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
     let synchronizeService: BlockchainSynchronizeService;
     let onChainCertificateService: OnChainCertificateService;
     let certificateEventRepository: CertificateEventRepository;
+    let certificateCommandRepository: CertificateCommandRepository;
 
     describe('Working OnChain module', () => {
         beforeEach(async () => {
@@ -32,6 +41,7 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
             synchronizeService = await app.resolve(BlockchainSynchronizeService);
             onChainCertificateService = await app.resolve(ONCHAIN_CERTIFICATE_SERVICE_TOKEN);
             certificateEventRepository = await app.resolve(CERTIFICATE_EVENT_REPOSITORY);
+            certificateCommandRepository = await app.resolve(CERTIFICATE_COMMAND_REPOSITORY);
 
             await app.init();
         });
@@ -63,6 +73,53 @@ describe('OffchainCertificateService + BlockchainSynchronizeService', () => {
             const events = await certificateEventRepository.getAll();
 
             expect(events).toHaveLength(6);
+        });
+
+        it('should issue certificate and then save transfer commands even when they are not further accepted by aggregate', async () => {
+            const [certificateId] = await offChainCertificateService.batchIssue([issueCommand]);
+            const expectedOriginalError = new Error(
+                `Transfer for: ${certificateId} failed. Address: ${transferAddress} has not enough balance.`
+            );
+            const expectedBatchError = new BatchError(expectedOriginalError);
+            const invalidTransferCommandPayload = {
+                certificateId,
+                ...transferCommand,
+                fromAddress: transferAddress,
+                toAddress: issueAddress
+            };
+
+            await expect(() =>
+                offChainCertificateService.batchTransfer([invalidTransferCommandPayload])
+            ).rejects.toEqual(expectedBatchError);
+
+            const commands = await certificateCommandRepository.getAll();
+            const savedTransferCommand = commands.find((c) =>
+                isEqual(invalidTransferCommandPayload, c.payload)
+            );
+            expect(savedTransferCommand).toBeDefined();
+        });
+
+        it('should issue certificate and then save claim commands even when they are not further accepted by aggregate', async () => {
+            const [certificateId] = await offChainCertificateService.batchIssue([issueCommand]);
+            const expectedOriginalError = new Error(
+                `Claim for internalCertificateId: ${certificateId} failed. Transfer is for zero address(0x0).`
+            );
+            const expectedBatchError = new BatchError(expectedOriginalError);
+            const invalidClaimCommandPayload = {
+                certificateId,
+                ...claimCommand,
+                forAddress: ethers.constants.AddressZero
+            };
+
+            await expect(() =>
+                offChainCertificateService.batchClaim([invalidClaimCommandPayload])
+            ).rejects.toEqual(expectedBatchError);
+
+            const commands = await certificateCommandRepository.getAll();
+            const savedClaimCommand = commands.find((c) =>
+                isEqual(invalidClaimCommandPayload, c.payload)
+            );
+            expect(savedClaimCommand).toBeDefined();
         });
 
         it('should batch issue, batch transfer, and batch claim certificates, and then synchronize it', async () => {
