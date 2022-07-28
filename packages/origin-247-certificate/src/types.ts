@@ -46,9 +46,3 @@ export interface IBatchClaimCommand {
 export interface IBatchTransferCommand {
     transfers: ITransferCommand[];
 }
-
-export interface IVolumeDistribution {
-    publicVolume: string;
-    privateVolume: string;
-    claimedVolume: string;
-}

@@ -23,7 +23,6 @@ class TransferCommandDto implements ITransferCommand {
     @IsNumber()
     @Min(0)
     certificateId: number;
-    off;
 
     @IsEthereumAddress()
     fromAddress: string;
