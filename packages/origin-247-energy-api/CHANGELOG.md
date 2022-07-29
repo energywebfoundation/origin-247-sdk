@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@1.0.2...@energyweb/origin-247-energy-api@1.1.0) (2022-07-29)
+
+
+### Features
+
+* Add config for certificate module ([#96](https://github.com/energywebfoundation/origin-247-sdk/issues/96)) ([d6d4f68](https://github.com/energywebfoundation/origin-247-sdk/commit/d6d4f6849a78f205a731fdfe52c12ba4c483052a))
+
+
+
+
+
 ## [1.0.2](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-energy-api@1.0.1...@energyweb/origin-247-energy-api@1.0.2) (2022-03-23)
 
 **Note:** Version bump only for package @energyweb/origin-247-energy-api

@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.1.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@4.0.0...@energyweb/origin-247-certificate@4.1.0) (2022-07-29)
+
+
+### Bug Fixes
+
+* Plain string was thrown when waiting for blockchain properties t… ([#97](https://github.com/energywebfoundation/origin-247-sdk/issues/97)) ([c1e215e](https://github.com/energywebfoundation/origin-247-sdk/commit/c1e215e68166080c3519185529923916846828bb))
+
+
+### Features
+
+* Add config for certificate module ([#96](https://github.com/energywebfoundation/origin-247-sdk/issues/96)) ([d6d4f68](https://github.com/energywebfoundation/origin-247-sdk/commit/d6d4f6849a78f205a731fdfe52c12ba4c483052a))
+* save commands even if they're rejected by aggregate ([#102](https://github.com/energywebfoundation/origin-247-sdk/issues/102)) ([2511a46](https://github.com/energywebfoundation/origin-247-sdk/commit/2511a463ddbe7f6d6f256d27b71c107eeb8014e3))
+
+
+
+
+
 # [4.0.0](https://github.com/energywebfoundation/origin-247-sdk/compare/@energyweb/origin-247-certificate@3.4.0...@energyweb/origin-247-certificate@4.0.0) (2022-03-23)
 
 
