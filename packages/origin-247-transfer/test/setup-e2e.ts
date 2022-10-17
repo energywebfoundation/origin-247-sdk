@@ -25,7 +25,7 @@ import {
     Command1Handler,
     Command2Handler,
     Command3Handler,
-    SitesQueryHandler,
+    MockSitesQueryHandler,
     SymmetricValidationCommand
 } from './setup-e2e-dependencies';
 
@@ -46,7 +46,7 @@ export const user2Wallet = {
     privateKey: '0x9d4b1fbf6a730b6399ada447b0cf19a25ed91f819d7c860d0aa0de779badc8c2'
 };
 
-export const bootstrapTestInstance = async () => {
+export const bootstrapTestInstance = async (SitesQueryHandler = MockSitesQueryHandler) => {
     const QueueingModule = () => {
         return BullModule.forRoot({
             redis: process.env.REDIS_URL ?? { host: 'localhost', port: 6379 }
@@ -116,9 +116,9 @@ export const bootstrapTestInstance = async () => {
     app.enableCors();
 
     const eventBus = await app.resolve<EventBus>(EventBus);
-    const repository = await app.resolve<EnergyTransferRequestRepository>(
+    const repository = (await app.resolve<EnergyTransferRequestRepository>(
         ENERGY_TRANSFER_REQUEST_REPOSITORY
-    );
+    )) as EnergyTransferRequestRepository;
 
     await databaseService.query('TRUNCATE energy_transfer_request_v2 RESTART IDENTITY CASCADE;');
 
@@ -127,12 +127,12 @@ export const bootstrapTestInstance = async () => {
         certificateService,
         app,
         repository,
-        startProcess: () =>
+        startProcess: (generatorId = 'a1') =>
             eventBus.publish(
                 new GenerationReadingStoredEvent({
                     energyValue: '60',
                     fromTime: new Date(),
-                    generatorId: 'a1',
+                    generatorId,
                     metadata: { field: 'test' },
                     toTime: new Date(),
                     transferDate: new Date()

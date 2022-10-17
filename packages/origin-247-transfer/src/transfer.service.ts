@@ -38,8 +38,8 @@ export class TransferService {
         try {
             await this.certificateService.batchTransfer(
                 etrs.map((etr) => ({
-                    fromAddress: etrs[0].sites.sellerAddress,
-                    toAddress: etrs[0].sites.buyerAddress,
+                    fromAddress: etr.sites.sellerAddress,
+                    toAddress: etr.sites.buyerAddress,
                     certificateId: etr.certificateId!, // verified by `transferStarted` state
                     energyValue: etr.volume
                 }))

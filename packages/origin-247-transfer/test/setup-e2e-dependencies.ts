@@ -9,7 +9,7 @@ import {
 } from '../src';
 
 @QueryHandler(GetTransferSitesQuery)
-export class SitesQueryHandler implements IGetTransferSitesQueryHandler {
+export class MockSitesQueryHandler implements IGetTransferSitesQueryHandler {
     async execute(query: GetTransferSitesQuery) {
         return {
             buyerAddress: '0xeF99b2A55E6D070bA2D12f79b368148BF7d6Fc10',
