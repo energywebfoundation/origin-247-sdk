@@ -6,6 +6,11 @@ import { getProviderWithFallback } from '@energyweb/utils-general';
 import { waitForState } from '../utils/wait.utils';
 import { getConfiguration } from './config/configuration';
 
+type DeployParameters = {
+    gasLimit?: number,
+    gasPrice?: number
+}
+
 export interface BlockchainProperties {
     rpcNode: string;
     fallbackRpcNode: string | null;
@@ -60,7 +65,7 @@ export class BlockchainPropertiesService {
         };
     }
 
-    async deploy(): Promise<void> {
+    async deploy(deployParameters?: DeployParameters): Promise<void> {
         if (await this.deploymentPropsRepo.propertiesExist()) {
             return;
         }
@@ -69,11 +74,12 @@ export class BlockchainPropertiesService {
             new providers.JsonRpcProvider(this.primaryRPC)
         ]);
 
-        const registry = await Contracts.migrateRegistry(provider, this.issuerPrivateKey);
+        const registry = await Contracts.migrateRegistry(provider, this.issuerPrivateKey, deployParameters);
         const issuer = await Contracts.migrateIssuer(
             provider,
             this.issuerPrivateKey,
-            registry.address
+            registry.address,
+            deployParameters
         );
 
         await this.deploymentPropsRepo.save({ registry: registry.address, issuer: issuer.address });

@@ -2,18 +2,23 @@ import { Contracts } from '@energyweb/issuer';
 import { providers } from 'ethers';
 import { DeploymentProperties } from './types';
 
+type DeployParameters = {
+    gasLimit?: number,
+    gasPrice?: number
+}
 export interface DeploymentPropertiesWithQuery extends DeploymentProperties {
     insertQuery: string;
 }
 
 export async function deployContracts(
     web3: string,
-    issuerPrivateKey: string
+    issuerPrivateKey: string,
+    deployParameters?: DeployParameters
 ): Promise<DeploymentPropertiesWithQuery> {
     const provider = new providers.FallbackProvider([new providers.JsonRpcProvider(web3)]);
 
-    const registry = await Contracts.migrateRegistry(provider, issuerPrivateKey);
-    const issuer = await Contracts.migrateIssuer(provider, issuerPrivateKey, registry.address);
+    const registry = await Contracts.migrateRegistry(provider, issuerPrivateKey, deployParameters);
+    const issuer = await Contracts.migrateIssuer(provider, issuerPrivateKey, registry.address, deployParameters);
 
     return {
         registry: registry.address,
