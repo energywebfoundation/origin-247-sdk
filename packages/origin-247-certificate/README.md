@@ -147,7 +147,7 @@ Off-chain implementation performs few retries if _persisting_ events on blockcha
 
 ### Unit tests
 
-If you want to unit test module, that imports `OnChainCertificateModule` or `OffChainCertificateModule`, you can import `OnChainCertificateModule` or `OffChainCertificateModule` instead.
+If you want to unit test module, that imports `OnChainCertificateModule` or `OffChainCertificateModule`, you can import `OnChainCertificateForUnitTestsModule` or `OffChainCertificateForUnitTestsModule` instead.
 They abstract away all dependencies (database, Redis, and others). These modules are not bullet-proof, but should be sufficient for testing most paths.
 
 ### Metadata
