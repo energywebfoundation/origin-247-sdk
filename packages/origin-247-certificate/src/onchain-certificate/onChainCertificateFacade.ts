@@ -1,11 +1,6 @@
-import { IBlockchainProperties } from '@energyweb/issuer';
+import { IBlockchainProperties, DeployParameters } from '@energyweb/issuer';
 import { Injectable } from '@nestjs/common';
 import { BlockchainProperties, BlockchainPropertiesService } from './blockchain-properties.service';
-
-type DeployParameters = {
-    gasLimit?: number,
-    gasPrice?: number
-}
 
 @Injectable()
 export class OnChainCertificateFacade {

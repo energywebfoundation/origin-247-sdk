@@ -1,11 +1,7 @@
-import { Contracts } from '@energyweb/issuer';
+import { Contracts, DeployParameters } from '@energyweb/issuer';
 import { providers } from 'ethers';
 import { DeploymentProperties } from './types';
 
-type DeployParameters = {
-    gasLimit?: number,
-    gasPrice?: number
-}
 export interface DeploymentPropertiesWithQuery extends DeploymentProperties {
     insertQuery: string;
 }

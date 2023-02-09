@@ -1,15 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Contracts, IBlockchainProperties } from '@energyweb/issuer';
+import { Contracts, IBlockchainProperties, DeployParameters } from '@energyweb/issuer';
 import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
 import { providers, Signer, Wallet } from 'ethers';
 import { getProviderWithFallback } from '@energyweb/utils-general';
 import { waitForState } from '../utils/wait.utils';
 import { getConfiguration } from './config/configuration';
-
-type DeployParameters = {
-    gasLimit?: number,
-    gasPrice?: number
-}
 
 export interface BlockchainProperties {
     rpcNode: string;
