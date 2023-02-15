@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Contracts, IBlockchainProperties } from '@energyweb/issuer';
+import { Contracts, IBlockchainProperties, DeployParameters } from '@energyweb/issuer';
 import { DeploymentPropertiesRepository } from './repositories/deploymentProperties/deploymentProperties.repository';
 import { providers, Signer, Wallet } from 'ethers';
 import { getProviderWithFallback } from '@energyweb/utils-general';
@@ -60,7 +60,7 @@ export class BlockchainPropertiesService {
         };
     }
 
-    async deploy(): Promise<void> {
+    async deploy(deployParameters?: DeployParameters): Promise<void> {
         if (await this.deploymentPropsRepo.propertiesExist()) {
             return;
         }
@@ -69,11 +69,12 @@ export class BlockchainPropertiesService {
             new providers.JsonRpcProvider(this.primaryRPC)
         ]);
 
-        const registry = await Contracts.migrateRegistry(provider, this.issuerPrivateKey);
+        const registry = await Contracts.migrateRegistry(provider, this.issuerPrivateKey, deployParameters);
         const issuer = await Contracts.migrateIssuer(
             provider,
             this.issuerPrivateKey,
-            registry.address
+            registry.address,
+            deployParameters
         );
 
         await this.deploymentPropsRepo.save({ registry: registry.address, issuer: issuer.address });
