@@ -183,6 +183,10 @@ export class CertificateEventPostgresRepository implements CertificateEventRepos
     }
 
     public async getBlockchainIdMap(internalCertIds: number[]): Promise<Record<number, number>> {
+        if (internalCertIds.length === 0) {
+            return [];
+        }
+
         const events = ((await this.repository.find({
             where: {
                 type: CertificateEventType.IssuancePersisted,
