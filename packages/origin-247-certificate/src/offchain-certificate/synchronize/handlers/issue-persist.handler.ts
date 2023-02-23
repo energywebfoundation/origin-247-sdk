@@ -51,7 +51,7 @@ export class IssuePersistHandler {
         } catch (e) {
             const promises = events.map(async (event) => {
                 await this.offchainCertificateService.persistError(event.internalCertificateId, {
-                    errorMessage: `${e.error}`,
+                    errorMessage: `${e.message}`,
                     internalCertificateId: event.internalCertificateId,
                     type: CertificateEventType.IssuancePersisted,
                     persistedEventId: event.id
