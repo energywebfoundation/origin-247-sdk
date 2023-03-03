@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { InjectQueue } from '@nestjs/bull';
 import { Job, Queue } from 'bull';
@@ -22,6 +22,8 @@ const jobOptions = {
 
 @Injectable()
 export class OnChainCertificateService<T = null> {
+    private logger = new Logger(OnChainCertificateService.name);
+
     constructor(
         private readonly queryBus: QueryBus,
         @InjectQueue(blockchainQueueName)
@@ -34,6 +36,8 @@ export class OnChainCertificateService<T = null> {
             fromTime: Math.round(params.fromTime.getTime() / 1000),
             toTime: Math.round(params.toTime.getTime() / 1000)
         } as IIssueCommand<T>;
+
+        this.logger.debug(`Adding certificate to issue to queue`);
 
         const job = await this.blockchainActionsQueue.add(
             {
@@ -53,6 +57,8 @@ export class OnChainCertificateService<T = null> {
     }
 
     public async claimWithTxHash(command: IClaimCommand): Promise<ClaimActionResult> {
+        this.logger.debug(`Adding certificate to claim to queue`);
+
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -69,6 +75,8 @@ export class OnChainCertificateService<T = null> {
     }
 
     public async transferWithTxHash(command: ITransferCommand): Promise<TransferActionResult> {
+        this.logger.debug(`Adding certificate to transfer to queue`);
+
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: command,
@@ -96,6 +104,8 @@ export class OnChainCertificateService<T = null> {
                 } as IIssueCommand<T>)
         );
 
+        this.logger.debug(`Adding ${originalCertificates.length} certificates to issue to queue`);
+
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: {
@@ -120,6 +130,8 @@ export class OnChainCertificateService<T = null> {
     }
 
     public async batchClaimWithTxHash(command: IClaimCommand[]): Promise<BatchClaimActionResult> {
+        this.logger.debug(`Adding ${command.length} claim commands to queue`);
+
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: {
@@ -144,6 +156,8 @@ export class OnChainCertificateService<T = null> {
     public async batchTransferWithTxHash(
         command: ITransferCommand[]
     ): Promise<BatchTransferActionResult> {
+        this.logger.debug(`Adding ${command.length} transfer commands to queue`);
+
         const job = await this.blockchainActionsQueue.add(
             {
                 payload: {
