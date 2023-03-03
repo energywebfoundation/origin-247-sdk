@@ -1,9 +1,8 @@
 import { ONCHAIN_CERTIFICATE_SERVICE_TOKEN } from '../../../onchain-certificate/types';
 import { OnChainCertificateService } from '../../../onchain-certificate/onchain-certificate.service';
 import { CertificateEventType, CertificateIssuedEvent } from '../../events/Certificate.events';
-import { CertificateEventEntity } from '../../repositories/CertificateEvent/CertificateEvent.entity';
 import { OffChainCertificateService } from '../../offchain-certificate.service';
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { chunk } from 'lodash';
 import {
     BATCH_CONFIGURATION_TOKEN,
@@ -12,6 +11,8 @@ import {
 
 @Injectable()
 export class IssuePersistHandler {
+    private logger = new Logger(IssuePersistHandler.name);
+
     constructor(
         @Inject(ONCHAIN_CERTIFICATE_SERVICE_TOKEN)
         private readonly certificateService: OnChainCertificateService<unknown>,
@@ -24,6 +25,8 @@ export class IssuePersistHandler {
         events: CertificateIssuedEvent[]
     ): Promise<{ failedCertificateIds: number[] }> {
         try {
+            this.logger.debug(`Sending ${events.length} issuance events to issue`);
+
             const {
                 certificateIds,
                 transactionHash

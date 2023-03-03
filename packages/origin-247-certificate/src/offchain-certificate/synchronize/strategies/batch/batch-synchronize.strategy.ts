@@ -27,6 +27,8 @@ export class BatchSynchronizeStrategy implements SynchronizeStrategy {
     ) {}
 
     async synchronize(events: ICertificateEvent[]): Promise<void> {
+        this.logger.debug(`Received ${events.length} to synchronize`);
+
         const failedCertificateIds: number[] = [];
         const hasCertificateFailed = (certificateId: number) =>
             failedCertificateIds.includes(certificateId);

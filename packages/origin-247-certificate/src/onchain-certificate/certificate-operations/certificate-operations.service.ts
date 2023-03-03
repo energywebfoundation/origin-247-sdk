@@ -41,6 +41,8 @@ export class CertificateOperationsService {
         | TransferActionResult
         | ClaimActionResult
     > {
+        this.logger.debug(`Processing ${data.type} job`);
+
         switch (data.type) {
             case BlockchainActionType.Issuance:
                 return await this.issue(data.payload);
