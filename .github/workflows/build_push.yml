@@ -1,0 +1,105 @@
+name: Build and publish a Docker image
+
+on:
+  push:
+    branches: ['master']
+    paths-ignore:
+      - docs/**
+      - README.md
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+
+  configure:
+    name: Configure variables
+    runs-on: ubuntu-latest
+    outputs:
+      ENVIRONMENT: ${{ steps.configure.outputs.ENVIRONMENT }}
+      PRERELEASE: ${{ steps.configure.outputs.PRERELEASE }}
+      IMAGE_TAG: ${{ steps.configure.outputs.IMAGE_TAG }}
+      TAG_DRY_RUN: ${{ steps.configure.outputs.TAG_DRY_RUN }}
+      PUSH_DOCKER: ${{ steps.configure.outputs.PUSH_DOCKER }}
+    steps:
+      - uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          access_token: ${{ github.token }}
+      - id: configure
+        run: |
+              echo "Running on branch ${{ github.ref }}"
+              if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+                echo "ENVIRONMENT=dev" >> $GITHUB_OUTPUT
+                echo "PRERELEASE=true" >> $GITHUB_OUTPUT
+                echo "IMAGE_TAG=$(uuidgen)" >> $GITHUB_OUTPUT
+                echo "TAG_DRY_RUN=true" >> $GITHUB_OUTPUT
+                echo "PUSH_DOCKER=false" >> $GITHUB_OUTPUT
+              elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+                echo "ENVIRONMENT=prod" >> $GITHUB_OUTPUT
+                echo "PRERELEASE=false" >> $GITHUB_OUTPUT
+                echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
+                echo "TAG_DRY_RUN=false" >> $GITHUB_OUTPUT
+                echo "PUSH_DOCKER=true" >> $GITHUB_OUTPUT
+              else
+                echo "Branch not configured"
+                exit 1
+              fi
+
+  build-and-push-image:
+    name: Build and push Docker image
+    runs-on: ubuntu-latest
+    needs: [configure]
+    environment:
+      name: ${{ needs.configure.outputs.ENVIRONMENT }}
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # This step outputs Docker labels and Docker tag associated with github.ref (branch name in this scenario)
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v4.3.0
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+
+      # When running on develop branch we want to tag Docker images with unique id and branch name only.
+      # When running on main or release we're adding sem ver and latest (for release) tags too.
+      - name: Setup Docker tags
+        id: tags
+        run: |
+              if [ "${{ github.ref }}" = "refs/heads/develop" ]; then
+                echo "TAGS=${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{  needs.configure.outputs.IMAGE_TAG  }}" >> $GITHUB_OUTPUT
+              else
+                echo "TAGS=${{ steps.meta.outputs.tags }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{  needs.configure.outputs.IMAGE_TAG  }},${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{  needs.tag-release.outputs.tag  }}" >> $GITHUB_OUTPUT
+                echo "MATCHING_TAGS=ghcr.io/energywebfoundation/matching-demo:latest" >> $GITHUB_OUTPUT
+              fi
+
+      # Duplicate this and configure for multiple images
+      - name: Build and push matching-demo Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: ${{  needs.configure.outputs.PUSH_DOCKER  }}
+          platforms: linux/amd64,linux/arm64
+          tags: ${{ steps.tags.outputs.MATCHING_TAGS }}
+          labels: ${{ steps.meta.outputs.labels }}
+          file: ./matching.demo.Dockerfile
+          
