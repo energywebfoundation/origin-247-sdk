@@ -35,7 +35,7 @@ jobs:
                 echo "IMAGE_TAG=$(uuidgen)" >> $GITHUB_OUTPUT
                 echo "TAG_DRY_RUN=true" >> $GITHUB_OUTPUT
                 echo "PUSH_DOCKER=false" >> $GITHUB_OUTPUT
-              elif [ "${{ github.ref }}" = "refs/heads/main" ]; then
+              elif [ "${{ github.ref }}" = "refs/heads/master" ]; then
                 echo "ENVIRONMENT=prod" >> $GITHUB_OUTPUT
                 echo "PRERELEASE=false" >> $GITHUB_OUTPUT
                 echo "IMAGE_TAG=latest" >> $GITHUB_OUTPUT
@@ -81,7 +81,7 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
 
       # When running on develop branch we want to tag Docker images with unique id and branch name only.
-      # When running on main or release we're adding sem ver and latest (for release) tags too.
+      # When running on master or release we're adding sem ver and latest (for release) tags too.
       - name: Setup Docker tags
         id: tags
         run: |
